@@ -80,6 +80,34 @@ void RandomDataset::generateBernoulliColumn(const float &prob) {
 	}
 }
 
+void RandomDataset::generateNormalColumn(const float &mean, const float &stddev){
+	// Initializing the random generator
+	std::random_device rd; 
+	std::mt19937 gen(rd());
+	std::normal_distribution<float> d(mean, stddev);
+
+	// Creating normal distributed random numbers, and storing them in normal_values
+	std::vector<float> normal_values;
+	for(size_t i = 0; i < this->rows; i++) {
+		normal_values.emplace_back( d(gen) );
+	}
+
+	// Converting the binom_values vector into Tensor
+	auto resultTensor = torch::from_blob(std::data(normal_values), {(int)normal_values.size(), 1});
+
+	// Checking if the dataset is empty 
+	if (this->dataset.numel() == 0)
+	{
+		// If it is, then the resultTensor will be the first column of the dataset
+		this->dataset = resultTensor.detach().clone();
+	}
+	else
+	{
+		// Else, append the newly generated column to the dataset
+		this->dataset = torch::cat({this->dataset, resultTensor}, 1);
+	}
+}
+
 void RandomDataset::prettyPrint() const {
 	std::cout << this->dataset << "\n";
 }

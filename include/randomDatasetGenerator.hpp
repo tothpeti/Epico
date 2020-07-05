@@ -30,6 +30,14 @@ class RandomDataset {
       @param: prob  -> probability of true
     */
     void generateBernoulliColumn(const float &prob);
+
+    /*
+      This function generates a Normal distributed column
+      @param: mean    -> distribution mean
+      @param: stddev  -> standard deviation
+    */
+    void generateNormalColumn(const float &mean, const float &stddev);
+
     void prettyPrint() const;
 };
 

@@ -11,6 +11,8 @@ int main() {
 	rd.generateBinomialColumn(5, 0.7);
 	std::cout << "or?" << "\n";
 	rd.generateBernoulliColumn(0.6);
+	std::cout << "hoh?" << "\n";
+	rd.generateNormalColumn(3.0, 4.0);
 	rd.prettyPrint();
 	return 0;
 }

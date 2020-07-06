@@ -73,6 +73,38 @@ torch::Tensor RandomDataset::generateNormalColumn(const float &mean, const float
 	return torch::from_blob(std::data(normalValues), {(int)normalValues.size(), 1});
 }
 
+torch::Tensor RandomDataset::generateUniformDiscreteColumn(const int &a, const int &b) {
+	// Initializing the random generator
+	std::random_device rd; 
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> d(a, b);
+
+	// Creating uniformly distributed random numbers, and storing them in uniformIntValues 
+	std::vector<float> uniformDiscreteValues(this->rows);
+
+	auto generateElems = [&gen, &d, i = 0]() mutable { ++i; return d(gen); };
+	std::generate(begin(uniformDiscreteValues), end(uniformDiscreteValues), generateElems);
+
+	// Converting the binom_values vector into Tensor and returning it	
+	return torch::from_blob(std::data(uniformDiscreteValues), {(int)uniformDiscreteValues.size(), 1});
+}
+
+torch::Tensor RandomDataset::generateUniformRealColumn(const int &a, const int &b) {
+	// Initializing the random generator
+	std::random_device rd; 
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<> d(a, b);
+
+	// Creating uniformly distributed random numbers, and storing them in uniformRealValues 
+	std::vector<float> uniformRealValues(this->rows);
+
+	auto generateElems = [&gen, &d, i = 0]() mutable { ++i; return d(gen); };
+	std::generate(begin(uniformRealValues), end(uniformRealValues), generateElems);
+
+	// Converting the binom_values vector into Tensor and returning it	
+	return torch::from_blob(std::data(uniformRealValues), {(int)uniformRealValues.size(), 1});
+}
+
 void RandomDataset::prettyPrint() const {
 	std::cout << this->dataset << "\n";
 }

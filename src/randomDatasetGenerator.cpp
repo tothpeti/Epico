@@ -24,7 +24,7 @@ RandomDataset::RandomDataset(const RandomDataset &&rd)
 RandomDataset::~RandomDataset(){
 }
 
-void RandomDataset::generateBinomialColumn(const size_t &numTrials, const float &prob){
+torch::Tensor RandomDataset::generateBinomialColumn(const size_t &numTrials, const float &prob){
 	// Initializing the random generator
 	std::random_device rd; 
 	std::mt19937 gen(rd());
@@ -36,23 +36,11 @@ void RandomDataset::generateBinomialColumn(const size_t &numTrials, const float 
 		binom_values.emplace_back( d(gen) );
 	}
 
-	// Converting the binom_values vector into Tensor
-	auto resultTensor = torch::from_blob(std::data(binom_values), {(int)binom_values.size(), 1});
-
-	// Checking if the dataset is empty 
-	if (this->dataset.numel() == 0)
-	{
-		// If it is, then the resultTensor will be the first column of the dataset
-		this->dataset = resultTensor.detach().clone();
-	}
-	else
-	{
-		// Else, append the newly generated column to the dataset
-		this->dataset = torch::cat({this->dataset, resultTensor}, 1);
-	}
+	// Converting the binom_values vector into Tensor and returning it
+	return torch::from_blob(std::data(binom_values), {(int)binom_values.size(), 1});
 }
 
-void RandomDataset::generateBernoulliColumn(const float &prob) {
+torch::Tensor RandomDataset::generateBernoulliColumn(const float &prob) {
 	// Initializing the random generator
 	std::random_device rd; 
 	std::mt19937 gen(rd());
@@ -64,23 +52,11 @@ void RandomDataset::generateBernoulliColumn(const float &prob) {
 		bern_values.emplace_back( d(gen) );
 	}
 
-	// Converting the binom_values vector into Tensor
-	auto resultTensor = torch::from_blob(std::data(bern_values), {(int)bern_values.size(), 1});
-
-	// Checking if the dataset is empty 
-	if (this->dataset.numel() == 0)
-	{
-		// If it is, then the resultTensor will be the first column of the dataset
-		this->dataset = resultTensor.detach().clone();
-	}
-	else
-	{
-		// Else, append the newly generated column to the dataset
-		this->dataset = torch::cat({this->dataset, resultTensor}, 1);
-	}
+	// Converting the binom_values vector into Tensor and returning it
+	return torch::from_blob(std::data(bern_values), {(int)bern_values.size(), 1});
 }
 
-void RandomDataset::generateNormalColumn(const float &mean, const float &stddev){
+torch::Tensor RandomDataset::generateNormalColumn(const float &mean, const float &stddev){
 	// Initializing the random generator
 	std::random_device rd; 
 	std::mt19937 gen(rd());
@@ -92,20 +68,8 @@ void RandomDataset::generateNormalColumn(const float &mean, const float &stddev)
 		normal_values.emplace_back( d(gen) );
 	}
 
-	// Converting the binom_values vector into Tensor
-	auto resultTensor = torch::from_blob(std::data(normal_values), {(int)normal_values.size(), 1});
-
-	// Checking if the dataset is empty 
-	if (this->dataset.numel() == 0)
-	{
-		// If it is, then the resultTensor will be the first column of the dataset
-		this->dataset = resultTensor.detach().clone();
-	}
-	else
-	{
-		// Else, append the newly generated column to the dataset
-		this->dataset = torch::cat({this->dataset, resultTensor}, 1);
-	}
+	// Converting the binom_values vector into Tensor and returning it	
+	return torch::from_blob(std::data(normal_values), {(int)normal_values.size(), 1});
 }
 
 void RandomDataset::prettyPrint() const {

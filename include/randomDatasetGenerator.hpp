@@ -5,7 +5,7 @@
 #include <ATen/ATen.h>
 
 /*
-  This class is used for creating a random dataset via different distributions.
+  This class is used for creating a random dataset via different kinds of distributions.
 */
 class RandomDataset {
   private:

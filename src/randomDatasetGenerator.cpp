@@ -24,35 +24,46 @@ RandomDataset::RandomDataset(const RandomDataset &&rd)
 RandomDataset::~RandomDataset(){
 }
 
-torch::Tensor RandomDataset::generateBinomialColumn(const size_t &numTrials, const float &prob){
+void RandomDataset::generateBinomialColumn(const size_t &numTrials, const float &prob){
 	std::binomial_distribution<> d(numTrials, prob);
-	return RandomDataset::generateRandomValuesHelper(d);
+	//return RandomDataset::generateRandomValuesHelper(d);
+	auto tens = RandomDataset::generateRandomValuesHelper(d);
+	appendToDataset(tens);
 }
 
-torch::Tensor RandomDataset::generateBernoulliColumn(const float &prob) {
+void  RandomDataset::generateBernoulliColumn(const float &prob) {
 	std::bernoulli_distribution d(prob);
-	return RandomDataset::generateRandomValuesHelper(d);
+	//return RandomDataset::generateRandomValuesHelper(d);
+	auto tens = RandomDataset::generateRandomValuesHelper(d);
+	appendToDataset(tens);
 }
 
-torch::Tensor RandomDataset::generateNormalColumn(const float &mean, const float &stddev){
+void RandomDataset::generateNormalColumn(const float &mean, const float &stddev){
 	std::normal_distribution<double> d(mean, stddev);
-	return RandomDataset::generateRandomValuesHelper(d);
+	//return RandomDataset::generateRandomValuesHelper(d);
+	auto tens = RandomDataset::generateRandomValuesHelper(d);
+	appendToDataset(tens);
 }
 
-torch::Tensor RandomDataset::generateUniformDiscreteColumn(const int &a, const int &b) {
+void RandomDataset::generateUniformDiscreteColumn(const int &a, const int &b) {
 	std::uniform_int_distribution<> d(a, b);
-	return RandomDataset::generateRandomValuesHelper(d);
+	//return RandomDataset::generateRandomValuesHelper(d);
+	auto tens = RandomDataset::generateRandomValuesHelper(d);
+	appendToDataset(tens);
 }
 
-torch::Tensor RandomDataset::generateUniformRealColumn(const float &a, const float &b) {
+void RandomDataset::generateUniformRealColumn(const float &a, const float &b) {
 	std::uniform_real_distribution<double> d(a, b);
-	return RandomDataset::generateRandomValuesHelper(d);
+	//return RandomDataset::generateRandomValuesHelper(d);
+	auto tens = RandomDataset::generateRandomValuesHelper(d);
+	appendToDataset(tens);
 }
 
-torch::Tensor RandomDataset::generateGammaColumn(const float &alpha, const float &beta) {
+void RandomDataset::generateGammaColumn(const float &alpha, const float &beta) {
 	std::gamma_distribution<double> d(alpha, beta);
-	return RandomDataset::generateRandomValuesHelper(d);
-	//appendToDataset(tens);
+	//return RandomDataset::generateRandomValuesHelper(d);
+	auto tens = RandomDataset::generateRandomValuesHelper(d);
+	appendToDataset(tens);
 }
 
 void RandomDataset::prettyPrint() const {

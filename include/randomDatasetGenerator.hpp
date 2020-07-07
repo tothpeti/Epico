@@ -32,13 +32,33 @@ class RandomDataset {
 	    auto generateElems = [&gen, &dist, i = 0]() mutable { ++i; return dist(gen); };
 	    std::generate(begin(distValues), end(distValues), generateElems);
 
-
 	    // Converting the distValues vector into Tensor and returning it	
       auto opts = torch::TensorOptions().dtype(torch::kFloat64);
       torch::Tensor tens = torch::from_blob(distValues.data(), {(int)this->rows, 1}, opts);
 
 	    return tens;
     };
+
+    /*
+      This function lets you concatenate a column to the dataset
+      
+      @param: col -> torch::Tensor type column
+      @return: -
+    */
+    template<typename T>
+    void appendToDataset(const T &col) {
+      // Checking if dataset is empty
+      if(this->dataset.numel() == 0) 
+      {
+        // If it is, then the "col" parameter will be the first column 
+        this->dataset = col.clone().detach();
+      }
+      else 
+      {
+        // If it is NOT, then append "col" to the existing dataset
+        this->dataset = torch::cat({this->dataset, col}, 1);
+      }
+    }
 
   public:
     RandomDataset() = delete;
@@ -48,23 +68,23 @@ class RandomDataset {
     ~RandomDataset();
 
     /*
-      Produces random non-negative integer values, distributed 
-      according to discrete probability function... into a column.
+      Produces random non-negative integer values into a column, distributed 
+      according to discrete probability function.
 
       @param: numTrials -> values between 0 and numTrials
       @param: prob      -> probability of success of each trial
       @return: -
     */
-    torch::Tensor generateBinomialColumn(const size_t &numTrials, const float &prob);
+    void generateBinomialColumn(const size_t &numTrials, const float &prob);
 
     /*
-      Produces random boolean values, 
-      according to the discrete probability function... into a column.
+      Produces random boolean values into a column, 
+      according to the discrete probability function.
 
       @param: prob  -> probability of true
       @return: -
     */
-    torch::Tensor generateBernoulliColumn(const float &prob);
+    void generateBernoulliColumn(const float &prob);
 
     /*
       Generates random numbers according to the Normal
@@ -74,7 +94,7 @@ class RandomDataset {
       @param: stddev  -> standard deviation
       @return: -
     */
-    torch::Tensor generateNormalColumn(const float &mean, const float &stddev);
+    void generateNormalColumn(const float &mean, const float &stddev);
 
 
     /*
@@ -86,18 +106,18 @@ class RandomDataset {
       @param: b  -> range TO
       @return: -
     */
-    torch::Tensor generateUniformDiscreteColumn(const int &a, const int &b);
+    void generateUniformDiscreteColumn(const int &a, const int &b);
 
     /*
-      Produces random floating-point values into a column, uniformly distributed 
-      on the interval [a, b), that is, distributed 
+      Produces random floating-point values into a column, 
+      uniformly distributed on the interval [a, b), that is, distributed 
       according to the probability density function.
 
       @param: a  -> range FROM (inclusive)
       @param: b  -> range TO (exclusive)
       @return: -
     */
-    torch::Tensor generateUniformRealColumn(const float &a, const float &b);
+    void generateUniformRealColumn(const float &a, const float &b);
 
 
     /*
@@ -108,7 +128,7 @@ class RandomDataset {
       @param: beta  -> beta is known as the scale parameter
       @return: - 
     */
-    torch::Tensor generateGammaColumn(const float &alpha, const float &beta);
+    void generateGammaColumn(const float &alpha, const float &beta);
 
     /*
       This function lets you write the content of the dataset
@@ -151,6 +171,11 @@ class RandomDataset {
         // If it is not, then append every parameters to the existing dataset
         this->dataset = torch::cat({this->dataset, first, args...}, 1);
       }
+    }
+
+    template<typename T>
+    torch::Tensor unwrap(T t) {
+      return t;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const RandomDataset &rd);

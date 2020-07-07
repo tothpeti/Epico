@@ -2,15 +2,16 @@
 #define RANDOMDATASETGENERATOR_H_INCLUDED
 
 #include "torch/torch.h"
-#include <ATen/ATen.h>
 #include <random>
+
+
 /*
   This class is used for creating a random dataset via different kinds of distributions.
 */
 class RandomDataset {
   private:
     const size_t rows;
-    torch::Tensor dataset = torch::Tensor(); 
+    torch::Tensor dataset; 
 
     /*
       This template helper function is used for generating random values by a 
@@ -20,25 +21,23 @@ class RandomDataset {
       @return: torch::Tensor type column with the generated random values
     */
     template<typename T>
-    torch::Tensor generateRandomValuesHelper(T &dist, std::string &ty) {
+    torch::Tensor generateRandomValuesHelper(T &dist) {
     	// Initializing the random generator
 	    std::random_device rd; 
 	    std::mt19937 gen(rd());
       //std::default_random_engine gen;
 
 	    // Creating X type of distributed random numbers, and storing them in distValues 
-	    std::vector<float> distValues(this->rows);
-      std::cout << ty << "\n";
+	    std::vector<double> distValues(this->rows);
 	    auto generateElems = [&gen, &dist, i = 0]() mutable { ++i; return dist(gen); };
 	    std::generate(begin(distValues), end(distValues), generateElems);
 
-      std::for_each(begin(distValues), end(distValues),
-        [](const float &val) {std::cout << val << " ";}
-      );
-      std::cout << "\n";
+
 	    // Converting the distValues vector into Tensor and returning it	
-      // std::data
-	    return torch::from_blob(distValues.data(), {(int)distValues.size(), 1});
+      auto opts = torch::TensorOptions().dtype(torch::kFloat64);
+      torch::Tensor tens = torch::from_blob(distValues.data(), {(int)this->rows, 1}, opts);
+
+	    return tens;
     };
 
   public:
@@ -54,7 +53,7 @@ class RandomDataset {
 
       @param: numTrials -> values between 0 and numTrials
       @param: prob      -> probability of success of each trial
-      @return: torch::Tensor type column
+      @return: -
     */
     torch::Tensor generateBinomialColumn(const size_t &numTrials, const float &prob);
 
@@ -63,7 +62,7 @@ class RandomDataset {
       according to the discrete probability function... into a column.
 
       @param: prob  -> probability of true
-      @return: torch::Tensor type column
+      @return: -
     */
     torch::Tensor generateBernoulliColumn(const float &prob);
 
@@ -73,7 +72,7 @@ class RandomDataset {
 
       @param: mean    -> distribution mean
       @param: stddev  -> standard deviation
-      @return: torch::Tensor type column
+      @return: -
     */
     torch::Tensor generateNormalColumn(const float &mean, const float &stddev);
 
@@ -85,7 +84,7 @@ class RandomDataset {
 
       @param: a  -> range FROM 
       @param: b  -> range TO
-      @return: torch::Tensor type column
+      @return: -
     */
     torch::Tensor generateUniformDiscreteColumn(const int &a, const int &b);
 
@@ -96,7 +95,7 @@ class RandomDataset {
 
       @param: a  -> range FROM (inclusive)
       @param: b  -> range TO (exclusive)
-      @return: torch::Tensor type column
+      @return: -
     */
     torch::Tensor generateUniformRealColumn(const float &a, const float &b);
 
@@ -107,15 +106,25 @@ class RandomDataset {
 
       @param: alpha -> alpha is known as the shape parameter
       @param: beta  -> beta is known as the scale parameter
-      @return: torch::Tensor type column
+      @return: - 
     */
     torch::Tensor generateGammaColumn(const float &alpha, const float &beta);
 
+    /*
+      This function lets you write the content of the dataset
+      into a CSV file.
+
+      @param: -
+      @return: -
+    */
+    void writeCSV();
+    
     void prettyPrint() const;
 
-    /*
+
+   /*
       This function lets you concatenate columns in place.
-      @param: first -> torch::Tensor type container
+      @param: first -> torch::Tensor type column 
       @param: args  -> unknown numbers of torch::Tensor type containers
 
       Example:
@@ -126,21 +135,26 @@ class RandomDataset {
 		      rd.generateBernoulliColumn(0.6)
 	      );
     */
-    template<typename T, typename... Args>
-    void concatenateColumns(T &&first, Args&&... args){
-	    // Checking if the dataset is empty 
-	    if (this->dataset.numel() == 0)
-	    {
-		    // If it is, then the resultTensor will be the first column of the dataset
-		    this->dataset = first.detach().clone();
-		    this->dataset = torch::cat({this->dataset, args...}, 1);
-	    }
-	    else
-	    {
-		    // Else, append the newly generated column to the dataset
-		    this->dataset = torch::cat({this->dataset, first, args...}, 1);
-	    }
-    };
+    template<typename T, typename ...Args> 
+    void concatenateColumns(const T &first, const Args&& ...args) {
+      
+      // Checking if the dataset is empty
+      if(this->dataset.numel() == 0) 
+      {
+        // If it is, then the "first" parameter will be the first column 
+        // and then we append the others to it 
+        this->dataset = first.clone().detach();
+        this->dataset = torch::cat({this->dataset, args...}, 1);
+      }
+      else 
+      {
+        // If it is not, then append every parameters to the existing dataset
+        this->dataset = torch::cat({this->dataset, first, args...}, 1);
+      }
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const RandomDataset &rd);
+
 };
 
 

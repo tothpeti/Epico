@@ -11,6 +11,7 @@
 class RandomDataset {
   private:
     const size_t rows;
+    std::vector<std::string> labels;
     torch::Tensor dataset; 
 
     /*
@@ -18,25 +19,26 @@ class RandomDataset {
       given distribution.
 
       @param: dist -> arbitrary type of distribution
+      @param: weight -> tells how likely the column will affect the outcome
+
       @return: torch::Tensor type column with the generated random values
     */
     template<typename T>
-    torch::Tensor generateRandomValuesHelper(T &dist) {
+    torch::Tensor generateRandomValuesHelper(T &dist, const double &weight=1.0) {
     	// Initializing the random generator
 	    std::random_device rd; 
 	    std::mt19937 gen(rd());
-      //std::default_random_engine gen;
 
 	    // Creating X type of distributed random numbers, and storing them in distValues 
 	    std::vector<double> distValues(this->rows);
-	    auto generateElems = [&gen, &dist, i = 0]() mutable { ++i; return dist(gen); };
+
+	    auto generateElems = [&gen, &dist, &weight, i = 0]() mutable { ++i; return (dist(gen) * weight); };
 	    std::generate(begin(distValues), end(distValues), generateElems);
 
 	    // Converting the distValues vector into Tensor and returning it	
       auto opts = torch::TensorOptions().dtype(torch::kFloat64);
-      torch::Tensor tens = torch::from_blob(distValues.data(), {(int)this->rows, 1}, opts);
-
-	    return tens;
+      
+      return torch::from_blob(distValues.data(), {(int)this->rows, 1}, opts);
     };
 
     /*
@@ -60,6 +62,8 @@ class RandomDataset {
       }
     }
 
+    void appendLabel(std::string &base);
+
   public:
     RandomDataset() = delete;
     explicit RandomDataset(size_t r);
@@ -73,18 +77,20 @@ class RandomDataset {
 
       @param: numTrials -> values between 0 and numTrials
       @param: prob      -> probability of success of each trial
+      @param: weight -> tells how likely the column will affect the outcome
       @return: -
     */
-    void generateBinomialColumn(const size_t &numTrials, const float &prob);
+    void generateBinomialColumn(const size_t &numTrials, const double &prob, const double &weight = 1.0);
 
     /*
       Produces random boolean values into a column, 
       according to the discrete probability function.
 
       @param: prob  -> probability of true
+      @param: weight -> tells how likely the column will affect the outcome
       @return: -
     */
-    void generateBernoulliColumn(const float &prob);
+    void generateBernoulliColumn(const double &prob, const double &weight = 1.0);
 
     /*
       Generates random numbers according to the Normal
@@ -92,9 +98,10 @@ class RandomDataset {
 
       @param: mean    -> distribution mean
       @param: stddev  -> standard deviation
+      @param: weight -> tells how likely the column will affect the outcome
       @return: -
     */
-    void generateNormalColumn(const float &mean, const float &stddev);
+    void generateNormalColumn(const double &mean, const double &stddev, const double &weight = 1.0);
 
 
     /*
@@ -104,9 +111,10 @@ class RandomDataset {
 
       @param: a  -> range FROM 
       @param: b  -> range TO
+      @param: weight -> tells how likely the column will affect the outcome
       @return: -
     */
-    void generateUniformDiscreteColumn(const int &a, const int &b);
+    void generateUniformDiscreteColumn(const int &a, const int &b, const double &weight = 1.0);
 
     /*
       Produces random floating-point values into a column, 
@@ -115,9 +123,10 @@ class RandomDataset {
 
       @param: a  -> range FROM (inclusive)
       @param: b  -> range TO (exclusive)
+      @param: weight -> tells how likely the column will affect the outcome
       @return: -
     */
-    void generateUniformRealColumn(const float &a, const float &b);
+    void generateUniformRealColumn(const double &a, const double &b, const double &weight = 1.0);
 
 
     /*
@@ -126,9 +135,13 @@ class RandomDataset {
 
       @param: alpha -> alpha is known as the shape parameter
       @param: beta  -> beta is known as the scale parameter
+      @param: weight -> tells how likely the column will affect the outcome
       @return: - 
     */
-    void generateGammaColumn(const float &alpha, const float &beta);
+    void generateGammaColumn(const double &alpha, const double &beta, const double &weight = 1.0);
+
+
+    void generateBinaryTargetColumn();
 
     /*
       This function lets you write the content of the dataset

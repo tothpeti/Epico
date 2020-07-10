@@ -100,8 +100,8 @@ void RandomDataset::generateBinaryTargetColumn() {
 	std::vector<double> probOutcome;
 	probOutcome.reserve(this->rows);
 
-	// Get iterators for the dataset 
-	auto dataset_accessor = this->dataset.accessor<double, 2>();
+	// Get iterators for the features 
+	auto dataset_accessor = this->features.accessor<double, 2>();
 
 	// Calculating the row-by-row outcome's probability with inverseLogit
 	for(int i = 0; i < dataset_accessor.size(0); i++) {
@@ -126,13 +126,22 @@ void RandomDataset::generateBinaryTargetColumn() {
 
 	// Converting the distValues vector into Tensor and returning it	
   auto opts = torch::TensorOptions().dtype(torch::kFloat64);
-  auto targetTens = torch::from_blob(binaryOutcome.data(), {(int)this->rows, 1}, opts);
+  auto targetTens = torch::from_blob(binaryOutcome.data(), {static_cast<int>(this->rows), 1}, opts);
 
 	appendToDataset(targetTens);
 
 	// Creating label for the column
 	appendLabel( std::string(1, 'y'));
 
+}
+
+
+RandomDataset::TrainTestDataset RandomDataset::trainTestSplit(const double &trainSplit, const double &testSplit) {
+	// Calculating the new datasets sizes
+	size_t trainSize = this->rows * trainSplit;
+	size_t testSize = this->rows * testSplit;
+
+	return {};
 }
 
 
@@ -145,7 +154,7 @@ void RandomDataset::appendLabel(std::string &base) {
 	} else {
 
 		// Else, append the column number to the input string --> x
-		base.append( std::to_string(this->dataset.sizes()[1]));
+		base.append( std::to_string(this->features.sizes()[1]));
 		this->labels.emplace_back(base);
 	}
 }
@@ -158,13 +167,13 @@ void RandomDataset::prettyPrint() const {
 		std::cout << "   " <<label << std::setfill(' ') << std::setw(6);
 	}	
 	std::cout << "\n";
-	std::cout << this->dataset << std::endl;
+	std::cout << this->features << std::endl;
 }
 
 std::ostream& operator<<(std::ostream &os, const RandomDataset &rd) {
 	os.precision(3);
 	os.fixed;
-	os << rd.dataset;
+	os << rd.features;
 	return os;
 }
 
@@ -173,7 +182,7 @@ void RandomDataset::writeCSV() {
 	std::ofstream myfile;
 	myfile.open("example.csv");
 	
-	auto dataset_accessor = this->dataset.accessor<double, 2>();
+	auto dataset_accessor = this->features.accessor<double, 2>();
 
 	for(int i = 0; i < dataset_accessor.size(0); i++) {
 		for(int j = 0; j < dataset_accessor.size(1); j++) {

@@ -6,14 +6,16 @@
 
 
 /*
-  This class is used for creating a random dataset via different kinds of distributions.
+  This class is used for creating a random features via different kinds of distributions.
 */
 class RandomDataset {
   private:
     const size_t rows;
     std::vector<std::string> labels;
-    torch::Tensor dataset; 
+    torch::Tensor features; 
+    torch::Tensor target;
     std::mt19937 generator;
+
     /*
       This template helper function is used for generating random values by a 
       given distribution.
@@ -38,27 +40,27 @@ class RandomDataset {
 	    // Converting the distValues vector into Tensor and returning it	
       auto opts = torch::TensorOptions().dtype(torch::kFloat64);
       
-      return torch::from_blob(distValues.data(), {(int)this->rows, 1}, opts);
+      return torch::from_blob(distValues.data(), {static_cast<int>(this->rows), 1}, opts);
     };
 
     /*
-      This function lets you concatenate a column to the dataset
+      This function lets you concatenate a column to the features
       
       @param: col -> torch::Tensor type column
       @return: -
     */
     template<typename T>
     void appendToDataset(const T &col) {
-      // Checking if dataset is empty
-      if(this->dataset.numel() == 0) 
+      // Checking if features is empty
+      if(this->features.numel() == 0) 
       {
         // If it is, then the "col" parameter will be the first column 
-        this->dataset = col.clone().detach();
+        this->features = col.clone().detach();
       }
       else 
       {
-        // If it is NOT, then append "col" to the existing dataset
-        this->dataset = torch::cat({this->dataset, col}, 1);
+        // If it is NOT, then append "col" to the existing features
+        this->features = torch::cat({this->features, col}, 1);
       }
     }
 
@@ -70,6 +72,28 @@ class RandomDataset {
     RandomDataset(const RandomDataset &rd);
     RandomDataset(const RandomDataset &&rd);
     ~RandomDataset();
+
+    /*
+      This struct is used for storing training and test datasets and 
+      then returning via trainTestSplit function.
+    */
+    struct TrainTestDataset{
+      torch::Tensor X_train;
+      torch::Tensor y_train;
+      torch::Tensor X_test;
+      torch::Tensor y_test;
+    };
+
+    /*
+      This function produces the training and test datasets which will be used for 
+      training the ML model.
+
+      @param: trainSplit -> indicates how many % of the features will be used as TRAINING featurek
+      @param: testSplit -> indicates how many % of the features will be used as TEST featurek
+      @return: X_train, y_train, X_test, y_test bundled in TrainTestDataset struct
+    */
+    TrainTestDataset trainTestSplit(const double &trainSplit = 0.6, const double &testSplit = 0.4);
+
 
     /*
       Produces random non-negative integer values into a column, distributed 
@@ -144,7 +168,7 @@ class RandomDataset {
     void generateBinaryTargetColumn();
 
     /*
-      This function lets you write the content of the dataset
+      This function lets you write the content of the features
       into a CSV file.
 
       @param: -
@@ -154,42 +178,6 @@ class RandomDataset {
     
     void prettyPrint() const;
 
-
-   /*
-      This function lets you concatenate columns in place.
-      @param: first -> torch::Tensor type column 
-      @param: args  -> unknown numbers of torch::Tensor type containers
-
-      Example:
-        RandomDataset rd = RandomDataset(rows=7);
-    	  rd.concatenateColumns(
-		      rd.generateBinomialColumn(15, 0.4),
-		      rd.generateNormalColumn(2.5, 4.5),
-		      rd.generateBernoulliColumn(0.6)
-	      );
-    */
-    template<typename T, typename ...Args> 
-    void concatenateColumns(const T &first, const Args&& ...args) {
-      
-      // Checking if the dataset is empty
-      if(this->dataset.numel() == 0) 
-      {
-        // If it is, then the "first" parameter will be the first column 
-        // and then we append the others to it 
-        this->dataset = first.clone().detach();
-        this->dataset = torch::cat({this->dataset, args...}, 1);
-      }
-      else 
-      {
-        // If it is not, then append every parameters to the existing dataset
-        this->dataset = torch::cat({this->dataset, first, args...}, 1);
-      }
-    }
-
-    template<typename T>
-    torch::Tensor unwrap(T t) {
-      return t;
-    }
 
     friend std::ostream& operator<<(std::ostream& os, const RandomDataset &rd);
 

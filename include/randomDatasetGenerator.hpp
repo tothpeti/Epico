@@ -13,7 +13,7 @@ class RandomDataset {
     const size_t rows;
     std::vector<std::string> labels;
     torch::Tensor dataset; 
-
+    std::mt19937 generator;
     /*
       This template helper function is used for generating random values by a 
       given distribution.
@@ -26,13 +26,13 @@ class RandomDataset {
     template<typename T>
     torch::Tensor generateRandomValuesHelper(T &dist, const double &weight=1.0) {
     	// Initializing the random generator
-	    std::random_device rd; 
-	    std::mt19937 gen(rd());
+	    //std::random_device rd; 
+	    //std::mt19937 gen(rd());
 
 	    // Creating X type of distributed random numbers, and storing them in distValues 
 	    std::vector<double> distValues(this->rows);
 
-	    auto generateElems = [&gen, &dist, &weight, i = 0]() mutable { ++i; return (dist(gen) * weight); };
+	    auto generateElems = [this, &dist, &weight, i = 0]() mutable { ++i; return (dist(this->generator) * weight); };
 	    std::generate(begin(distValues), end(distValues), generateElems);
 
 	    // Converting the distValues vector into Tensor and returning it	

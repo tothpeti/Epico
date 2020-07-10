@@ -9,7 +9,7 @@
 
 
 RandomDataset::RandomDataset(size_t r)
-	: rows(r) 
+	: rows(r), generator((std::random_device())())  // it's like generator(rd()) syntax but it's inplace
 {
 }
 
@@ -112,16 +112,16 @@ void RandomDataset::generateBinaryTargetColumn() {
 		probOutcome.emplace_back( inverseLogit(probSum) );
 	}
 
-	// Calculating the binary outcomes
-	std::random_device rd;
-	std::mt19937 gen(rd());
+	//std::random_device rd;
+	//std::mt19937 gen(rd());
 
+	// Calculating the binary outcomes
 	std::vector<double> binaryOutcome;
 	binaryOutcome.reserve(probOutcome.size());
 
 	for(const auto &val: probOutcome) {
 		std::binomial_distribution<> dist(1, val);
-		binaryOutcome.emplace_back( dist(gen) );
+		binaryOutcome.emplace_back( dist(this->generator) );
 	}
 
 	// Converting the distValues vector into Tensor and returning it	

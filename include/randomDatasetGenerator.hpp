@@ -64,7 +64,7 @@ class RandomDataset {
       }
     }
 
-    void appendLabel(std::string &base);
+    void appendLabel(std::string &&base);
 
   public:
     RandomDataset() = delete;

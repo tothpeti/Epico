@@ -50,7 +50,7 @@ class RandomDataset {
       @return: -
     */
     template<typename T>
-    void appendToDataset(const T &col) {
+    void appendToFeatures(const T &col) {
       // Checking if features is empty
       if(this->features.numel() == 0) 
       {

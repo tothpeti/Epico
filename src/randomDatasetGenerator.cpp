@@ -8,7 +8,7 @@
 #include "torch/torch.h"
 
 
-RandomDataset::RandomDataset(size_t r)
+RandomDataset::RandomDataset(const size_t& r)
 	: rows(r), generator((std::random_device())())  // it's like generator(rd()) syntax but it's inplace
 {
 }
@@ -24,10 +24,36 @@ RandomDataset::RandomDataset(const RandomDataset &&rd)
 	: rows(rd.rows)
 {
 }
-	
 
-RandomDataset::~RandomDataset()
+
+void RandomDataset::testPrint() const {
+	std::cout << "TEST \n";
+	std::cout << std::fixed << std::setprecision(4);
+	std::cout << this->features[0].reshape({1, this->features.size(1)}) << "\n";
+	std::cout << this->target[1] << "\n";
+	std::cout << "SIZE TARGET " << this->target.size(0) << "\n";
+}
+
+
+const torch::Tensor& RandomDataset::getFeatures() const {
+	return this->features;
+}
+
+
+const torch::Tensor& RandomDataset::getTarget() const {
+	return this->target;
+}
+
+
+torch::data::Example<> RandomDataset::get(size_t index)
 {
+	return { this->features[index], this->target[index]};
+}
+
+
+torch::optional<size_t> RandomDataset::size() const
+{
+	return this->features.size(0);
 }
 
 
@@ -112,7 +138,7 @@ void RandomDataset::generateBinaryTargetColumn() {
 	probOutcome.reserve(this->rows);
 
 	// Get iterators for the features 
-	auto features_accessor = this->features.accessor<double, 2>();
+	const auto features_accessor = this->features.accessor<double, 2>();
 
 	// Calculating the row-by-row outcome's probability with inverseLogit
 	for(int i = 0; i < features_accessor.size(0); i++) {
@@ -133,8 +159,8 @@ void RandomDataset::generateBinaryTargetColumn() {
 	}
 
 	// Converting the distValues vector into Tensor and returning it	
-  auto opts = torch::TensorOptions().dtype(torch::kFloat64);
-  auto targetTens = torch::from_blob(binaryOutcome.data(), {static_cast<int>(this->rows), 1}, opts);
+	const auto opts = torch::TensorOptions().dtype(torch::kFloat64);
+	const auto targetTens = torch::from_blob(binaryOutcome.data(), {static_cast<int>(this->rows), 1}, opts);
 
 	this->target = targetTens.clone().detach();
 
@@ -145,14 +171,14 @@ void RandomDataset::generateBinaryTargetColumn() {
 
 RandomDataset::TrainTestDataset RandomDataset::trainTestSplit(const double &trainSplit, const double &testSplit) {
 	// Calculating the new datasets sizes
-	size_t trainSize = this->rows * trainSplit;
-	size_t testSize = this->rows * testSplit;
+	const size_t trainSize = this->rows * trainSplit;
+	const size_t testSize = this->rows * testSplit;
 
 	return {};
 }
 
 
-void RandomDataset::appendLabel(std::string &base) {
+void RandomDataset::appendLabel(std::string &&base) {
 	// If the input string is TARGET --> y  
 	if(base.compare("y") == 0) {
 
@@ -172,7 +198,7 @@ void RandomDataset::prettyPrint() const {
 	std::cout << "\n";
 
 	// Concatenate together the features and target columns
-	auto dataset = torch::cat({this->features, this->target}, 1);
+	const auto dataset = torch::cat({this->features, this->target}, 1);
 
 	// Printing out the labels
 	for(const auto &label: this->labels) {
@@ -184,6 +210,7 @@ void RandomDataset::prettyPrint() const {
 	std::cout << dataset;	
 	std::cout << "\n";
 }
+
 
 std::ostream& operator<<(std::ostream &os, const RandomDataset &rd) {
 	os.precision(3);
@@ -197,7 +224,7 @@ void RandomDataset::writeCSV() {
 	std::ofstream myfile;
 	myfile.open("example.csv");
 	
-	auto features_accessor = this->features.accessor<double, 2>();
+	const auto features_accessor = this->features.accessor<double, 2>();
 
 	for(int i = 0; i < features_accessor.size(0); i++) {
 		for(int j = 0; j < features_accessor.size(1); j++) {

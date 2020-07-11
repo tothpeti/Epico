@@ -3,12 +3,13 @@
 
 #include "torch/torch.h"
 #include <random>
-
+#include <vector>
+#include <string>
 
 /*
   This class is used for creating a random features via different kinds of distributions.
 */
-class RandomDataset {
+class RandomDataset : public torch::data::datasets::Dataset<RandomDataset>{
   private:
     const size_t rows;
     std::vector<std::string> labels;
@@ -68,10 +69,66 @@ class RandomDataset {
 
   public:
     RandomDataset() = delete;
-    explicit RandomDataset(size_t r);
+    explicit RandomDataset(const size_t& r);
     RandomDataset(const RandomDataset &rd);
     RandomDataset(const RandomDataset &&rd);
-    ~RandomDataset();
+    ~RandomDataset() = default;
+   
+    void testPrint() const;
+
+    struct Binomial {
+      const size_t numTrials;
+      const double prob;
+      double weight = 1.0;
+    };
+
+    struct Bernoulli {
+      const double prob;
+      double weight = 1.0;
+    };
+
+    struct Normal {
+      const double mean;
+      const double stddev;
+      double weight = 1.0;
+    };
+
+    struct Gamma {
+      const double alpha; 
+      const double beta;
+      double weight = 1.0;
+    };
+
+    struct UniformDiscrete {
+      const int a;
+      const int b;
+      double weight = 1.0;
+    };
+
+    struct UniformReal {
+      const double a;
+      const double b; 
+      double weight = 1.0;
+    };
+    /*
+        Returns the 'Example' at the given 'index'.
+    */
+    torch::data::Example<> get(size_t index) override;
+
+    /*
+        Returns the size of the dataset.
+    */
+    torch::optional<size_t> size() const override;
+
+    /*
+      Return all features stacked into a single tensor
+    */
+    const torch::Tensor& getFeatures() const;
+
+    /*
+      Return all target stacked into a single tensor
+    */
+    const torch::Tensor& getTarget() const;
 
     /*
       This struct is used for storing training and test datasets and 

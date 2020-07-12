@@ -81,7 +81,7 @@ class RandomDataset : public torch::data::Dataset<RandomDataset>{
       This enum used for identifying the different distribution types 
       when creating a column and also when parsing it.
     */
-    enum DistributionTypes {
+    enum class DistributionTypes {
       Binomial,
       Bernoulli,
       Normal,

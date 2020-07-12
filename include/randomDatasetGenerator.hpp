@@ -9,13 +9,14 @@
 /*
   This class is used for creating a random features via different kinds of distributions.
 */
-class RandomDataset : public torch::data::datasets::Dataset<RandomDataset>{
+class RandomDataset : public torch::data::Dataset<RandomDataset>{
   private:
     const size_t rows;
     std::vector<std::string> labels;
     torch::Tensor features; 
     torch::Tensor target;
     std::mt19937 generator;
+
 
     /*
       This template helper function is used for generating random values by a 
@@ -65,51 +66,32 @@ class RandomDataset : public torch::data::datasets::Dataset<RandomDataset>{
       }
     }
 
+    /*
+      This function appends column "header" to the data table headers
+
+      @param: base -> colum name
+      @return: -
+    */
     void appendLabel(std::string &&base);
 
+
   public:
-    RandomDataset() = delete;
-    explicit RandomDataset(const size_t& r);
-    RandomDataset(const RandomDataset &rd);
-    RandomDataset(const RandomDataset &&rd);
+    /*
+      This struct is for storing important informations about the 
+      column which would like to append to the dataset
+    */
+    struct ColumnDataType {
+      const std::string name;
+      const std::unordered_map<std::string, double> parameters;
+    };
+    
+    RandomDataset() = delete;    
+    explicit RandomDataset(const size_t& r, const std::vector<RandomDataset::ColumnDataType> &vec, 
+                           bool binaryTarget = true);
     ~RandomDataset() = default;
    
     void testPrint() const;
 
-    struct Binomial {
-      const size_t numTrials;
-      const double prob;
-      double weight = 1.0;
-    };
-
-    struct Bernoulli {
-      const double prob;
-      double weight = 1.0;
-    };
-
-    struct Normal {
-      const double mean;
-      const double stddev;
-      double weight = 1.0;
-    };
-
-    struct Gamma {
-      const double alpha; 
-      const double beta;
-      double weight = 1.0;
-    };
-
-    struct UniformDiscrete {
-      const int a;
-      const int b;
-      double weight = 1.0;
-    };
-
-    struct UniformReal {
-      const double a;
-      const double b; 
-      double weight = 1.0;
-    };
     /*
         Returns the 'Example' at the given 'index'.
     */
@@ -190,24 +172,24 @@ class RandomDataset : public torch::data::datasets::Dataset<RandomDataset>{
       on the closed interval [a, b], that is, distributed according 
       to the discrete probability function.
 
-      @param: a  -> range FROM 
-      @param: b  -> range TO
+      @param: from  -> range FROM 
+      @param: to  -> range TO
       @param: weight -> tells how likely the column will affect the outcome
       @return: -
     */
-    void generateUniformDiscreteColumn(const int &a, const int &b, const double &weight = 1.0);
+    void generateUniformDiscreteColumn(const int &from, const int &to, const double &weight = 1.0);
 
     /*
       Produces random floating-point values into a column, 
       uniformly distributed on the interval [a, b), that is, distributed 
       according to the probability density function.
 
-      @param: a  -> range FROM (inclusive)
-      @param: b  -> range TO (exclusive)
+      @param: from  -> range FROM (inclusive)
+      @param: to  -> range TO (exclusive)
       @param: weight -> tells how likely the column will affect the outcome
       @return: -
     */
-    void generateUniformRealColumn(const double &a, const double &b, const double &weight = 1.0);
+    void generateUniformRealColumn(const double &from, const double &to, const double &weight = 1.0);
 
 
     /*
@@ -221,8 +203,18 @@ class RandomDataset : public torch::data::datasets::Dataset<RandomDataset>{
     */
     void generateGammaColumn(const double &alpha, const double &beta, const double &weight = 1.0);
 
-
+    /*
+      With this function, can create the TARGET column, which contains values between 0 and 1
+    */
     void generateBinaryTargetColumn();
+
+    /*
+      This function helps parsing the input vector parameter of the RandomDataset constructor.
+      
+      @param: vec -> it contains various types of columns
+      @return: -
+    */
+    void parseInputColumnData(const std::vector<ColumnDataType> &vec);
 
     /*
       This function lets you write the content of the features

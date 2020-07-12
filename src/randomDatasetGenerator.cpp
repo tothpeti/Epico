@@ -5,15 +5,19 @@
 #include <string>
 
 #include "randomDatasetGenerator.hpp"
-#include "torch/torch.h"
 
-
-RandomDataset::RandomDataset(const size_t& r)
+RandomDataset::RandomDataset(const size_t& r, const std::vector<RandomDataset::ColumnDataType> &vec, bool binaryTarget)
 	: rows(r), generator((std::random_device())())  // it's like generator(rd()) syntax but it's inplace
 {
+	parseInputColumnData(vec);
+
+	if(binaryTarget)
+	{
+		generateBinaryTargetColumn();
+	}
 }
 
-
+/*
 RandomDataset::RandomDataset(const RandomDataset &rd)
 	: RandomDataset{rd.rows}
 {
@@ -24,7 +28,7 @@ RandomDataset::RandomDataset(const RandomDataset &&rd)
 	: rows(rd.rows)
 {
 }
-
+*/
 
 void RandomDataset::testPrint() const {
 	std::cout << "TEST \n";
@@ -93,8 +97,8 @@ void RandomDataset::generateNormalColumn(const double &mean, const double &stdde
 }
 
 
-void RandomDataset::generateUniformDiscreteColumn(const int &a, const int &b, const double &weight) {
-	std::uniform_int_distribution<> d(a, b);
+void RandomDataset::generateUniformDiscreteColumn(const int &from, const int &to, const double &weight) {
+	std::uniform_int_distribution<> d(from, to);
 
 	// Creating Tensor column filled with distributed values
 	auto tens = RandomDataset::generateRandomValuesHelper(d, weight);
@@ -105,8 +109,8 @@ void RandomDataset::generateUniformDiscreteColumn(const int &a, const int &b, co
 }
 
 
-void RandomDataset::generateUniformRealColumn(const double &a, const double &b, const double &weight) {
-	std::uniform_real_distribution<double> d(a, b);
+void RandomDataset::generateUniformRealColumn(const double &from, const double &to, const double &weight) {
+	std::uniform_real_distribution<double> d(from, to);
 	
 	// Creating Tensor column filled with distributed values
 	auto tens = RandomDataset::generateRandomValuesHelper(d, weight);
@@ -233,4 +237,46 @@ void RandomDataset::writeCSV() {
 		myfile << "\n";
 	}
 	myfile.close();
+}
+
+
+void RandomDataset::parseInputColumnData(const std::vector<ColumnDataType> &vec) {
+	for(const auto &col: vec) {
+
+		if(col.name.compare("binomial") == 0) 
+		{
+			generateBinomialColumn(col.parameters.at("numtrials"),
+														 col.parameters.at("prob"),
+														 col.parameters.at("weight"));
+		}
+		else if(col.name.compare("bernoulli") == 0) 
+		{
+			generateBernoulliColumn(col.parameters.at("prob"),
+															col.parameters.at("weight"));
+		} 
+		else if(col.name.compare("normal") == 0) 
+		{
+			generateNormalColumn(col.parameters.at("mean"),
+													 col.parameters.at("stddev"),
+													 col.parameters.at("weight"));
+		}
+		else if(col.name.compare("uniformdiscrete") == 0)
+		{
+			generateUniformDiscreteColumn(col.parameters.at("from"),
+																		col.parameters.at("to"),
+																		col.parameters.at("weight"));
+		}
+		else if(col.name.compare("uniformreal") == 0)
+		{
+			generateUniformRealColumn(col.parameters.at("from"),
+																col.parameters.at("to"),
+																col.parameters.at("weight"));
+		}
+		else if(col.name.compare("gamma") == 0) 
+		{
+			generateGammaColumn(col.parameters.at("alpha"),
+													col.parameters.at("beta"),
+													col.parameters.at("weight"));
+		} 
+	}
 }

@@ -242,41 +242,42 @@ void RandomDataset::writeCSV() {
 
 void RandomDataset::parseInputColumnData(const std::vector<ColumnDataType> &vec) {
 	for(const auto &col: vec) {
-
-		if(col.name.compare("binomial") == 0) 
+		switch (col.type)
 		{
-			generateBinomialColumn(col.parameters.at("numtrials"),
+			case RandomDataset::DistributionTypes::Binomial: 
+				generateBinomialColumn(col.parameters.at("numtrials"),
 														 col.parameters.at("prob"),
-														 col.parameters.at("weight"));
-		}
-		else if(col.name.compare("bernoulli") == 0) 
-		{
-			generateBernoulliColumn(col.parameters.at("prob"),
+														 col.parameters.at("weight"));			
+				break;
+
+			case RandomDataset::DistributionTypes::Bernoulli:
+				generateBernoulliColumn(col.parameters.at("prob"),
 															col.parameters.at("weight"));
-		} 
-		else if(col.name.compare("normal") == 0) 
-		{
-			generateNormalColumn(col.parameters.at("mean"),
+				break;
+
+			case RandomDataset::DistributionTypes::Normal:
+				generateNormalColumn(col.parameters.at("mean"),
 													 col.parameters.at("stddev"),
 													 col.parameters.at("weight"));
-		}
-		else if(col.name.compare("uniformdiscrete") == 0)
-		{
-			generateUniformDiscreteColumn(col.parameters.at("from"),
+				break;
+			
+			case RandomDataset::DistributionTypes::UniformDiscrete:
+				generateUniformDiscreteColumn(col.parameters.at("from"),
 																		col.parameters.at("to"),
-																		col.parameters.at("weight"));
-		}
-		else if(col.name.compare("uniformreal") == 0)
-		{
-			generateUniformRealColumn(col.parameters.at("from"),
+																		col.parameters.at("weight"));	
+				break;
+
+			case RandomDataset::DistributionTypes::UniformReal:
+				generateUniformRealColumn(col.parameters.at("from"),
 																col.parameters.at("to"),
 																col.parameters.at("weight"));
-		}
-		else if(col.name.compare("gamma") == 0) 
-		{
-			generateGammaColumn(col.parameters.at("alpha"),
+				break;
+		
+			case RandomDataset::DistributionTypes::Gamma:
+				generateGammaColumn(col.parameters.at("alpha"),
 													col.parameters.at("beta"),
 													col.parameters.at("weight"));
-		} 
+				break;
+		}
 	}
 }

@@ -76,12 +76,26 @@ class RandomDataset : public torch::data::Dataset<RandomDataset>{
 
 
   public:
+
+    /*
+      This enum used for identifying the different distribution types 
+      when creating a column and also when parsing it.
+    */
+    enum DistributionTypes {
+      Binomial,
+      Bernoulli,
+      Normal,
+      UniformDiscrete,
+      UniformReal,
+      Gamma
+    };
+
     /*
       This struct is for storing important informations about the 
       column which would like to append to the dataset
     */
     struct ColumnDataType {
-      const std::string name;
+      const DistributionTypes type;
       const std::unordered_map<std::string, double> parameters;
     };
     

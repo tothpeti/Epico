@@ -5,11 +5,11 @@
 int main() {
 
 	RandomDataset::ColumnDataType bern{
-		"bernoulli", 											//name
-		{{"prob", 0.5}, {"weight", 0.75}} //parameters
+		RandomDataset::DistributionTypes::Bernoulli,		//type
+		{{"prob", 0.5}, {"weight", 0.75}} 							//parameters
 	};	
 	RandomDataset::ColumnDataType bern2{
-		"bernoulli",
+		RandomDataset::DistributionTypes::Bernoulli,
 		{{"prob", 0.5}, {"weight", 1.25}}
 	};
 	std::vector<RandomDataset::ColumnDataType> cols;

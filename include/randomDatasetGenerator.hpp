@@ -36,7 +36,7 @@ class RandomDataset : public torch::data::Dataset<RandomDataset>{
 	    // Creating X type of distributed random numbers, and storing them in distValues 
 	    std::vector<double> distValues(this->rows);
 
-	    auto generateElems = [this, &dist, &weight, i = 0]() mutable { ++i; return (dist(this->generator) * weight); };
+	    auto generateElems = [this, &dist, &weight](){ return (dist(this->generator) * weight); };
 	    std::generate(begin(distValues), end(distValues), generateElems);
 
 	    // Converting the distValues vector into Tensor and returning it	

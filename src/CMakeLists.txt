@@ -2,12 +2,12 @@
 # show up in IDEs unless they are listed in add_library.
 
 set(HEADER_LIST 
-  "${epico-app_SOURCE_DIR}/include/randomDatasetGenerator.hpp"
+  "${epico-app_SOURCE_DIR}/include/RandomDatasetGenerator.hpp"
+  "${epico-app_SOURCE_DIR}/include/LogisticRegression.hpp"
 )
 
 # Make an automatic library - will be static or dynamic based on user setting
-add_library(library 
-  randomDatasetGenerator.cpp
+add_library(library RandomDatasetGenerator.cpp 
   ${HEADER_LIST}
 )
 

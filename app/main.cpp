@@ -1,4 +1,5 @@
 #include "randomDatasetGenerator.hpp"
+#include "logisticRegression.hpp"
 #include "torch/torch.h"
 
 
@@ -6,9 +7,10 @@ int main() {
 	/*
 		Hyperparameters
 	*/
-	const int inputSize = 10; // number of rows
+	const int numberOfRows = 15;
+	const int numberOfFeatures = 2; // number of feature columns 
 	const int batchSize = 5;
-	const int numberOfClasses = 2; // binary
+	const int numberOfClasses = 1; // binary
 	const size_t numberOfEpochs = 5;
 	const double learningRate = 0.001;
 
@@ -27,7 +29,7 @@ int main() {
 	cols.push_back(bern);
 	cols.push_back(bern2);
 
-	auto rd = RandomDataset(inputSize, cols, true).map(torch::data::transforms::Stack<>());
+	auto rd = RandomDataset(numberOfRows, cols, true).map(torch::data::transforms::Stack<>());
 
 	auto numberOfTrainSamples = rd.size().value();
 
@@ -36,65 +38,63 @@ int main() {
 	);
 
 	// Logistic regression model
-
-	torch::nn::Linear model(inputSize, numberOfClasses);
-
+	std::cout << "Initializing model\n";
+	//torch::nn::Linear model(inputSize, numberOfClasses);
+	LogisticRegression model(numberOfFeatures);
 	// Loss and optimizer
-	torch::optim::SGD optimizer(model->parameters(), torch::optim::SGDOptions(learningRate));
+	torch::optim::Adam optimizer(model->parameters(), torch::optim::AdamOptions(learningRate));
 
 	// Set floating point output precision
 	std::cout << std::fixed << std::setprecision(4);
 
 	std::cout << "Training...\n";
 
-	// Train the model
+	//for(const auto &pair: model->named_parameters()) {
+	//	std::cout << pair.key() << ": " << pair.value() << "\n";
+	//}
 
+	// Train the model
+	model->train();
 	for(size_t epoch = 0; epoch != numberOfEpochs; epoch++){
 
 		// Initializing running metrics
 		double runningLoss = 0.0;
 		size_t numberOfCorrect = 0;
-	
-		for(auto& batch: *data_loader){
-		 	auto data = batch.data.view({batchSize, -1});
-		 	auto target = batch.target;
 
-			std::cout << "after splitting values\n" << target << "\n";
+		for(auto& batch: *data_loader){
+			optimizer.zero_grad();
+
+		 	//auto data = batch.data.view({-1, 1});
+		 	auto data = batch.data.toType(torch::kFloat32);
+		 	auto target = batch.target.toType(torch::kFloat32);
+			
+
 		 	// Forward pass
 		 	auto output = model->forward(data);
-
-			std::cout << "after forward pass - here?\n";
+			
 
 		 	// Calculate loss
 		 	auto loss = torch::nn::functional::binary_cross_entropy(output, target);
 
-			std::cout << "after calc loss-here?\n";
-			
 		 	// Update running loss
 		 	runningLoss += loss.item<double>() * data.size(0);
-
-			std::cout << "after update running lo - here?\n";
 
 		 	// Calculate prediction
 		 	auto prediction = output.argmax(1);
 
 		 	// Update number of correctly classified samples
-	 	 	numberOfCorrect += prediction.eq(target).sum().item<int>();
-
-			std::cout << "here?\n";
+	 	 	numberOfCorrect += prediction.eq(target).sum().item<int64_t>();
 
 			// Backward pass and optimize
-			optimizer.zero_grad();
 			loss.backward();
 			optimizer.step();
-			std::cout << "end-here?\n";
 		}
 
 		auto sampleMeanLoss = runningLoss / numberOfTrainSamples;
 		auto accuracy = static_cast<double>(numberOfCorrect) / numberOfTrainSamples;
 
 		std::cout << "Epoch [" << (epoch + 1) << "/" << numberOfEpochs << "], Trainset - Loss: "
-            << sampleMeanLoss << ", Accuracy: " << accuracy << '\n';	
+   	         << sampleMeanLoss << ", Accuracy: " << accuracy << '\n';	
 	}
 	
   std::cout << "Training finished!\n\n";

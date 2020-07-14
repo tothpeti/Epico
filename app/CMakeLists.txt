@@ -1,4 +1,4 @@
-add_executable(epico-app main.cpp)
+add_executable(epico-app Main.cpp)
 
 target_link_libraries(epico-app PRIVATE library)
 

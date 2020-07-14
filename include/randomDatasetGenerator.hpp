@@ -1,5 +1,4 @@
-#if !defined(RANDOMDATASETGENERATOR_H_INCLUDED)
-#define RANDOMDATASETGENERATOR_H_INCLUDED
+#pragma once
 
 #include "torch/torch.h"
 #include <random>
@@ -246,5 +245,3 @@ class RandomDataset : public torch::data::Dataset<RandomDataset>{
 
 };
 
-
-#endif // RANDOMDATASETGENERATOR_H_INCLUDED

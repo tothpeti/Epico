@@ -3,10 +3,14 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <cmath>
 
 #include "randomDatasetGenerator.hpp"
 
-RandomDataset::RandomDataset(const size_t& r, const std::vector<RandomDataset::ColumnDataType> &vec, bool binaryTarget)
+RandomDatasetGenerator::RandomDatasetGenerator(
+		const size_t& r, 
+		const std::vector<RandomDatasetGenerator::ColumnDataType> &vec, 
+		bool binaryTarget)
 	: rows(r), generator((std::random_device())())  // it's like generator(rd()) syntax but it's inplace
 {
 	parseInputColumnData(vec);
@@ -15,22 +19,23 @@ RandomDataset::RandomDataset(const size_t& r, const std::vector<RandomDataset::C
 	{
 		generateBinaryTargetColumn();
 	}
+
 }
 
 /*
-RandomDataset::RandomDataset(const RandomDataset &rd)
-	: RandomDataset{rd.rows}
+RandomDatasetGenerator::RandomDatasetGenerator(const RandomDatasetGenerator &rd)
+	: RandomDatasetGenerator{rd.rows}
 {
 }
 
 
-RandomDataset::RandomDataset(const RandomDataset &&rd)
+RandomDatasetGenerator::RandomDatasetGenerator(const RandomDatasetGenerator &&rd)
 	: rows(rd.rows)
 {
 }
 */
 
-void RandomDataset::testPrint() const {
+void RandomDatasetGenerator::testPrint() const {
 	std::cout << "TEST \n";
 	std::cout << std::fixed << std::setprecision(4);
 	std::cout << this->features[0].reshape({1, this->features.size(1)}) << "\n";
@@ -39,33 +44,21 @@ void RandomDataset::testPrint() const {
 }
 
 
-const torch::Tensor& RandomDataset::getFeatures() const {
+torch::Tensor RandomDatasetGenerator::getFeatures() const {
 	return this->features;
 }
 
 
-const torch::Tensor& RandomDataset::getTarget() const {
+torch::Tensor RandomDatasetGenerator::getTarget() const {
 	return this->target;
 }
 
 
-torch::data::Example<> RandomDataset::get(size_t index)
-{
-	return { this->features[index], this->target[index]};
-}
-
-
-torch::optional<size_t> RandomDataset::size() const
-{
-	return this->features.size(0);
-}
-
-
-void RandomDataset::generateBinomialColumn(const size_t &numTrials, const double &prob, const double &weight){
+void RandomDatasetGenerator::generateBinomialColumn(const size_t &numTrials, const double &prob, const double &weight){
 	std::binomial_distribution<> d(numTrials, prob);
 
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDataset::generateRandomValuesHelper(d, weight);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, weight);
 	appendToFeatures(tens);
 
 	// Creating label for the column
@@ -73,11 +66,11 @@ void RandomDataset::generateBinomialColumn(const size_t &numTrials, const double
 }
 
 
-void  RandomDataset::generateBernoulliColumn(const double &prob, const double &weight) {
+void  RandomDatasetGenerator::generateBernoulliColumn(const double &prob, const double &weight) {
 	std::bernoulli_distribution d(prob);
 
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDataset::generateRandomValuesHelper(d, weight);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, weight);
 	appendToFeatures(tens);
 
 	// Creating label for the column
@@ -85,11 +78,11 @@ void  RandomDataset::generateBernoulliColumn(const double &prob, const double &w
 }
 
 
-void RandomDataset::generateNormalColumn(const double &mean, const double &stddev, const double &weight){
+void RandomDatasetGenerator::generateNormalColumn(const double &mean, const double &stddev, const double &weight){
 	std::normal_distribution<double> d(mean, stddev);
 	
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDataset::generateRandomValuesHelper(d, weight);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, weight);
 	appendToFeatures(tens);
 
 	// Creating label for the column
@@ -97,11 +90,11 @@ void RandomDataset::generateNormalColumn(const double &mean, const double &stdde
 }
 
 
-void RandomDataset::generateUniformDiscreteColumn(const int &from, const int &to, const double &weight) {
+void RandomDatasetGenerator::generateUniformDiscreteColumn(const int &from, const int &to, const double &weight) {
 	std::uniform_int_distribution<> d(from, to);
 
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDataset::generateRandomValuesHelper(d, weight);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, weight);
 	appendToFeatures(tens);
 
 	// Creating label for the column
@@ -109,11 +102,11 @@ void RandomDataset::generateUniformDiscreteColumn(const int &from, const int &to
 }
 
 
-void RandomDataset::generateUniformRealColumn(const double &from, const double &to, const double &weight) {
+void RandomDatasetGenerator::generateUniformRealColumn(const double &from, const double &to, const double &weight) {
 	std::uniform_real_distribution<double> d(from, to);
 	
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDataset::generateRandomValuesHelper(d, weight);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, weight);
 	appendToFeatures(tens);
 
 	// Creating label for the column
@@ -121,11 +114,11 @@ void RandomDataset::generateUniformRealColumn(const double &from, const double &
 }
 
 
-void RandomDataset::generateGammaColumn(const double &alpha, const double &beta, const double &weight) {
+void RandomDatasetGenerator::generateGammaColumn(const double &alpha, const double &beta, const double &weight) {
 	std::gamma_distribution<double> d(alpha, beta);
 
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDataset::generateRandomValuesHelper(d, weight);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, weight);
 	appendToFeatures(tens);
 
 	// Creating label for the column
@@ -133,7 +126,7 @@ void RandomDataset::generateGammaColumn(const double &alpha, const double &beta,
 }
 
 
-void RandomDataset::generateBinaryTargetColumn() {
+void RandomDatasetGenerator::generateBinaryTargetColumn() {
 	auto inverseLogit = [](const double &p){
 		return (std::exp(p) / (1 + std::exp(p)));
 	};
@@ -173,16 +166,7 @@ void RandomDataset::generateBinaryTargetColumn() {
 }
 
 
-RandomDataset::TrainTestDataset RandomDataset::trainTestSplit(const double &trainSplit, const double &testSplit) {
-	// Calculating the new datasets sizes
-	const size_t trainSize = this->rows * trainSplit;
-	const size_t testSize = this->rows * testSplit;
-
-	return {};
-}
-
-
-void RandomDataset::appendLabel(std::string &&base) {
+void RandomDatasetGenerator::appendLabel(std::string &&base) {
 	// If the input string is TARGET --> y  
 	if(base.compare("y") == 0) {
 
@@ -197,7 +181,7 @@ void RandomDataset::appendLabel(std::string &&base) {
 }
 
 
-void RandomDataset::prettyPrint() const {
+void RandomDatasetGenerator::prettyPrint() const {
 	std::cout << std::fixed << std::setprecision(4);
 	std::cout << "\n";
 
@@ -216,7 +200,7 @@ void RandomDataset::prettyPrint() const {
 }
 
 
-std::ostream& operator<<(std::ostream &os, const RandomDataset &rd) {
+std::ostream& operator<<(std::ostream &os, const RandomDatasetGenerator &rd) {
 	os.precision(3);
 	os.fixed;
 	os << rd.features;
@@ -224,7 +208,7 @@ std::ostream& operator<<(std::ostream &os, const RandomDataset &rd) {
 }
 
 
-void RandomDataset::writeCSV() {
+void RandomDatasetGenerator::writeCSV() {
 	std::ofstream myfile;
 	myfile.open("example.csv");
 	
@@ -240,40 +224,40 @@ void RandomDataset::writeCSV() {
 }
 
 
-void RandomDataset::parseInputColumnData(const std::vector<ColumnDataType> &vec) {
+void RandomDatasetGenerator::parseInputColumnData(const std::vector<ColumnDataType> &vec) {
 	for(const auto &col: vec) {
 		switch (col.type)
 		{
-			case RandomDataset::DistributionTypes::Binomial: 
+			case RandomDatasetGenerator::DistributionTypes::Binomial: 
 				generateBinomialColumn(col.parameters.at("numtrials"),
 														 col.parameters.at("prob"),
 														 col.parameters.at("weight"));			
 				break;
 
-			case RandomDataset::DistributionTypes::Bernoulli:
+			case RandomDatasetGenerator::DistributionTypes::Bernoulli:
 				generateBernoulliColumn(col.parameters.at("prob"),
 															col.parameters.at("weight"));
 				break;
 
-			case RandomDataset::DistributionTypes::Normal:
+			case RandomDatasetGenerator::DistributionTypes::Normal:
 				generateNormalColumn(col.parameters.at("mean"),
 													 col.parameters.at("stddev"),
 													 col.parameters.at("weight"));
 				break;
 			
-			case RandomDataset::DistributionTypes::UniformDiscrete:
+			case RandomDatasetGenerator::DistributionTypes::UniformDiscrete:
 				generateUniformDiscreteColumn(col.parameters.at("from"),
 																		col.parameters.at("to"),
 																		col.parameters.at("weight"));	
 				break;
 
-			case RandomDataset::DistributionTypes::UniformReal:
+			case RandomDatasetGenerator::DistributionTypes::UniformReal:
 				generateUniformRealColumn(col.parameters.at("from"),
 																col.parameters.at("to"),
 																col.parameters.at("weight"));
 				break;
 		
-			case RandomDataset::DistributionTypes::Gamma:
+			case RandomDatasetGenerator::DistributionTypes::Gamma:
 				generateGammaColumn(col.parameters.at("alpha"),
 													col.parameters.at("beta"),
 													col.parameters.at("weight"));

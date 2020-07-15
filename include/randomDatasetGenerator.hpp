@@ -8,7 +8,7 @@
 /*
   This class is used for creating a random features via different kinds of distributions.
 */
-class RandomDataset : public torch::data::Dataset<RandomDataset>{
+class RandomDatasetGenerator {
   private:
     const size_t rows;
     std::vector<std::string> labels;
@@ -77,7 +77,7 @@ class RandomDataset : public torch::data::Dataset<RandomDataset>{
   public:
 
     /*
-      This enum used for identifying the different distribution types 
+      This enum class is used for identifying the different distribution types 
       when creating a column and also when parsing it.
     */
     enum class DistributionTypes {
@@ -98,54 +98,17 @@ class RandomDataset : public torch::data::Dataset<RandomDataset>{
       const std::unordered_map<std::string, double> parameters;
     };
     
-    RandomDataset() = delete;    
-    explicit RandomDataset(const size_t& r, const std::vector<RandomDataset::ColumnDataType> &vec, 
-                           bool binaryTarget = true);
-    ~RandomDataset() = default;
+    RandomDatasetGenerator() = delete;    
+
+    explicit RandomDatasetGenerator(const size_t& r, const std::vector<RandomDatasetGenerator::ColumnDataType> &vec, 
+                           bool binaryTarget);
+    ~RandomDatasetGenerator() = default;
    
     void testPrint() const;
 
-    /*
-        Returns the 'Example' at the given 'index'.
-    */
-    torch::data::Example<> get(size_t index) override;
+    torch::Tensor getFeatures() const;
 
-    /*
-        Returns the size of the dataset.
-    */
-    torch::optional<size_t> size() const override;
-
-    /*
-      Return all features stacked into a single tensor
-    */
-    const torch::Tensor& getFeatures() const;
-
-    /*
-      Return all target stacked into a single tensor
-    */
-    const torch::Tensor& getTarget() const;
-
-    /*
-      This struct is used for storing training and test datasets and 
-      then returning via trainTestSplit function.
-    */
-    struct TrainTestDataset{
-      torch::Tensor X_train;
-      torch::Tensor y_train;
-      torch::Tensor X_test;
-      torch::Tensor y_test;
-    };
-
-    /*
-      This function produces the training and test datasets which will be used for 
-      training the ML model.
-
-      @param: trainSplit -> indicates how many % of the features will be used as TRAINING featurek
-      @param: testSplit -> indicates how many % of the features will be used as TEST featurek
-      @return: X_train, y_train, X_test, y_test bundled in TrainTestDataset struct
-    */
-    TrainTestDataset trainTestSplit(const double &trainSplit = 0.6, const double &testSplit = 0.4);
-
+    torch::Tensor getTarget() const;
 
     /*
       Produces random non-negative integer values into a column, distributed 
@@ -222,7 +185,7 @@ class RandomDataset : public torch::data::Dataset<RandomDataset>{
     void generateBinaryTargetColumn();
 
     /*
-      This function helps parsing the input vector parameter of the RandomDataset constructor.
+      This function helps parsing the input vector parameter of the RandomDatasetGenerator constructor.
       
       @param: vec -> it contains various types of columns
       @return: -
@@ -241,7 +204,7 @@ class RandomDataset : public torch::data::Dataset<RandomDataset>{
     void prettyPrint() const;
 
 
-    friend std::ostream& operator<<(std::ostream& os, const RandomDataset &rd);
+    friend std::ostream& operator<<(std::ostream& os, const RandomDatasetGenerator &rd);
 
 };
 

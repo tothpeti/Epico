@@ -1,5 +1,6 @@
-#include "randomDatasetGenerator.hpp"
-#include "logisticRegression.hpp"
+#include "RandomDatasetGenerator.hpp"
+#include "RandomDataset.hpp"
+#include "LogisticRegression.hpp"
 #include "torch/torch.h"
 
 
@@ -17,25 +18,46 @@ int main() {
 	/*
 		Creating columns for RandomDataset
 	*/
-	RandomDataset::ColumnDataType bern{
-		RandomDataset::DistributionTypes::Bernoulli,		//type
+	RandomDatasetGenerator::ColumnDataType bern{
+		RandomDatasetGenerator::DistributionTypes::Bernoulli,		//type
 		{{"prob", 0.5}, {"weight", 0.75}} 							//parameters
 	};	
-	RandomDataset::ColumnDataType bern2{
-		RandomDataset::DistributionTypes::Bernoulli,
+	RandomDatasetGenerator::ColumnDataType bern2{
+		RandomDatasetGenerator::DistributionTypes::Bernoulli,
 		{{"prob", 0.5}, {"weight", 1.25}}
 	};
-	std::vector<RandomDataset::ColumnDataType> cols;
+	std::vector<RandomDatasetGenerator::ColumnDataType> cols;
 	cols.push_back(bern);
 	cols.push_back(bern2);
 
-	auto rd = RandomDataset(numberOfRows, cols, true).map(torch::data::transforms::Stack<>());
+	auto rdGenerator = RandomDatasetGenerator(
+		numberOfRows,
+		cols, 
+		true
+	);
+	
+	auto rd = RandomDataset(
+		rdGenerator.getFeatures(), 
+		rdGenerator.getTarget(), 
+		RandomDataset::Mode::kTrain, 
+		0.6
+	).map(torch::data::transforms::Stack<>());
 
 	auto numberOfTrainSamples = rd.size().value();
 
-	auto data_loader = torch::data::make_data_loader<torch::data::samplers::RandomSampler>(
-		std::move(rd), batchSize
+	auto trainingDataLoader = torch::data::make_data_loader(
+		std::move(rd), torch::data::DataLoaderOptions().batch_size(batchSize).workers(2)
 	);
+
+
+	for (torch::data::Example<>& batch : *trainingDataLoader) {
+  	std::cout << "Batch size: " << batch.data.size(0) << " | Labels: ";
+  	for (int64_t i = 0; i < batch.data.size(0); ++i) {
+    	std::cout << batch.target[i].item<int64_t>() << " ";
+  	}
+  	std::cout << std::endl;
+	}
+	std::cout << "OKI \n";
 
 	// Logistic regression model
 	std::cout << "Initializing model\n";
@@ -61,12 +83,12 @@ int main() {
 		double runningLoss = 0.0;
 		size_t numberOfCorrect = 0;
 
-		for(auto& batch: *data_loader){
+		for(auto& batch: *trainingDataLoader){
 			optimizer.zero_grad();
 
 		 	//auto data = batch.data.view({-1, 1});
-		 	auto data = batch.data.toType(torch::kFloat32);
-		 	auto target = batch.target.toType(torch::kFloat32);
+		 	auto data = batch.data.to(torch::kFloat32);
+		 	auto target = batch.target.to(torch::kFloat32);
 			
 
 		 	// Forward pass
@@ -131,5 +153,6 @@ int main() {
 
   std::cout << "Testset - Loss: " << test_sample_mean_loss << ", Accuracy: " << test_accuracy << '\n';
 	*/
+	
 	return 0;
 }

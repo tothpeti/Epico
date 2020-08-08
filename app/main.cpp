@@ -20,6 +20,11 @@ void writeCsv(const std::vector<double> &sensi, const std::vector<double> &speci
 	myfile.close();
 }
 
+template <typename T>
+void doing_something(T model) {
+    std::cout << "HEREEEE \n" << model->parameters() << "\n";
+}
+
 
 
 int main() {
@@ -39,7 +44,7 @@ int main() {
 	std::vector<double> f1scoreResults;
 	std::vector<double> accuracyResults;
 
-	for(size_t i = 0; i < 50; i++)
+	for(size_t i = 0; i < 2; i++)
 	{
 		std::cout << "****ROUND " << i << "****  \n";
 		/*
@@ -47,7 +52,7 @@ int main() {
 		*/
 		RandomDatasetGenerator::ColumnDataType bern{
 			RandomDatasetGenerator::DistributionTypes::Bernoulli,		//type
-			{{"prob", 0.5}, {"weight", 0.5}} 											  //parameters
+			{{"prob", 0.5}, {"weight", 0.5}} 		//parameters
 		};	
 		RandomDatasetGenerator::ColumnDataType bern2{
 			RandomDatasetGenerator::DistributionTypes::Bernoulli,
@@ -127,7 +132,7 @@ int main() {
 		for (torch::data::Example<>& batch : *trainingDataLoader) {
 			std::cout << "Batch size: " << batch.data.size(0) << " | Labels: ";
 			for (int64_t i = 0; i < batch.data.size(0); ++i) {
-				std::cout << batch.target[i].item<int64_t>() << " ";
+				std::cout << batch.m_target[i].item<int64_t>() << " ";
 			}
 			std::cout << std::endl;
 		}
@@ -142,6 +147,8 @@ int main() {
 
 		// Loss and optimizer
 		torch::optim::Adam optimizer(model->parameters(), torch::optim::AdamOptions(learningRate));
+
+		doing_something<LogisticRegression>(model);
 
 		// Set floating point output precision
 		std::cout << std::fixed << std::setprecision(4);
@@ -187,10 +194,10 @@ int main() {
 				runningLoss += loss.item<double>();
 
 				/*
-				auto tp = (target * round(output)).sum().to(torch::kFloat64);
-				auto tn = ((1 - target) * (1 - round(output))).sum().to(torch::kFloat64);
-				auto fp = ((1 - target) * round(output)).sum().to(torch::kFloat64);
-				auto fn = (target * (1 - round(output))).sum().to(torch::kFloat64);
+				auto tp = (m_target * round(output)).sum().to(torch::kFloat64);
+				auto tn = ((1 - m_target) * (1 - round(output))).sum().to(torch::kFloat64);
+				auto fp = ((1 - m_target) * round(output)).sum().to(torch::kFloat64);
+				auto fn = (m_target * (1 - round(output))).sum().to(torch::kFloat64);
 
 				auto precision = 0.0;
 				auto recall = 0.0;
@@ -214,7 +221,7 @@ int main() {
 			
 
 				// FOR ACCURACY
-				numberOfCorrect += round(output).view({-1, 1}).eq(target).sum().item<int>();
+				numberOfCorrect += round(output).view({-1, 1}).eq(m_target).sum().item<int>();
 			
 				sensitivities += recall;
 				specificities += specificity;
@@ -360,7 +367,7 @@ int main() {
 	for(const auto &elem: accuracyResults) std::cout<< elem << " ";
 		std::cout << "\n\n";
 
-	writeCsv(sensitivityResults, specificityResults, precisionResults, f1scoreResults, accuracyResults);
+	//writeCsv(sensitivityResults, specificityResults, precisionResults, f1scoreResults, accuracyResults);
 
 	return 0;
 }

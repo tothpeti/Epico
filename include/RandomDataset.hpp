@@ -4,8 +4,8 @@
 
 class RandomDataset : public torch::data::Dataset<RandomDataset> {
   private:
-    torch::Tensor features;
-    torch::Tensor target;
+    torch::Tensor m_features;
+    torch::Tensor m_target;
   public:    
     
     /*
@@ -15,8 +15,8 @@ class RandomDataset : public torch::data::Dataset<RandomDataset> {
     enum class Mode {kTrain, kTest};
 
 
-    explicit RandomDataset(const torch::Tensor &fs, const torch::Tensor &t,
-                          RandomDataset::Mode mode, const float splitSize);
+    explicit RandomDataset(torch::Tensor features, torch::Tensor target,
+                          RandomDataset::Mode mode, float split_size);
 
     ~RandomDataset() = default;
 
@@ -32,12 +32,12 @@ class RandomDataset : public torch::data::Dataset<RandomDataset> {
   torch::optional<size_t> size() const override;
 
   /*
-   Return all features stacked into a single tensor
+   Return all m_features stacked into a single tensor
   */
   const torch::Tensor& getFeatures() const;
 
   /*
-    Return all target stacked into a single tensor
+    Return all m_target stacked into a single tensor
   */
   const torch::Tensor& getTarget() const;
 };

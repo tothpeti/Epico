@@ -1,43 +1,47 @@
 #include "RandomDataset.hpp"
 
-RandomDataset::RandomDataset(const torch::Tensor &fs, const torch::Tensor &t, 
-    RandomDataset::Mode mode, const float splitSize)
-  : features(fs), target(t)
+#include <utility>
+
+RandomDataset::RandomDataset(torch::Tensor features, torch::Tensor target,
+    RandomDataset::Mode mode, float split_size)
+  : m_features(std::move(features)), m_target(std::move(target))
 {
 	if (mode == RandomDataset::Mode::kTrain) {
-		auto cutTill = round(this->features.size(0) * splitSize);
+		auto cut_till = std::round(m_features.size(0) * split_size);
 
-		this->features = this->features.index({ torch::indexing::Slice(0, cutTill) }).clone();
-		this->target = this->target.index({ torch::indexing::Slice(0, cutTill) }).clone();
+		// Get all the values from 0 to the cut_till row number
+		m_features = m_features.index({torch::indexing::Slice(0, cut_till) }).clone();
+		m_target = m_target.index({torch::indexing::Slice(0, cut_till) }).clone();
 
 	}
 	else 
 	{
-		auto currDatasetLength = this->features.size(0);
-		auto cutFrom = round(this->features.size(0) * (1 - splitSize));
+		auto current_dataset_length = m_features.size(0);
+		auto cut_from = std::round(m_features.size(0) * (1 - split_size));
 
-		this->features = this->features.index({ torch::indexing::Slice(cutFrom, currDatasetLength) }).clone();
-		this->target = this->target.index({ torch::indexing::Slice(cutFrom, currDatasetLength) }).clone();
+		// Get all the values from the cut_from row number
+		m_features = m_features.index({torch::indexing::Slice(cut_from, current_dataset_length) }).clone();
+		m_target = m_target.index({torch::indexing::Slice(cut_from, current_dataset_length) }).clone();
 	}
 }
 
 const torch::Tensor& RandomDataset::getFeatures() const {
-	return this->features;
+	return this->m_features;
 }
 
 
 const torch::Tensor& RandomDataset::getTarget() const {
-	return this->target;
+	return this->m_target;
 }
 
 
 torch::data::Example<> RandomDataset::get(size_t index)
 {
-	return { this->features[index], this->target[index]};
+	return {m_features[index], m_target[index]};
 }
 
 
 torch::optional<size_t> RandomDataset::size() const
 {
-	return this->features.size(0);
+	return m_features.size(0);
 }

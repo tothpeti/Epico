@@ -6,7 +6,7 @@
 #include <string>
 
 /*
-  This class is used for creating a random features via different kinds of distributions.
+  This class is used for creating a random m_features via different kinds of distributions.
 */
 class RandomDatasetGenerator {
   private:
@@ -45,14 +45,14 @@ class RandomDatasetGenerator {
     };
 
     /*
-      This function lets you concatenate a column to the features
+      This function lets you concatenate a column to the m_features
       
       @param: col -> torch::Tensor type column
       @return: -
     */
     template<typename T>
     void appendToFeatures(const T &col) {
-      // Checking if features is empty
+      // Checking if m_features is empty
       if(this->features.numel() == 0) 
       {
         // If it is, then the "col" parameter will be the first column 
@@ -60,7 +60,7 @@ class RandomDatasetGenerator {
       }
       else 
       {
-        // If it is NOT, then append "col" to the existing features
+        // If it is NOT, then append "col" to the existing m_features
         this->features = torch::cat({this->features, col}, 1);
       }
     }
@@ -193,7 +193,7 @@ class RandomDatasetGenerator {
     void parseInputColumnData(const std::vector<ColumnDataType> &vec);
 
     /*
-      This function lets you write the content of the features
+      This function lets you write the content of the m_features
       into a CSV file.
 
       @param: -

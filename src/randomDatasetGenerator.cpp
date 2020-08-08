@@ -5,7 +5,7 @@
 #include <string>
 #include <cmath>
 
-#include "randomDatasetGenerator.hpp"
+#include "RandomDatasetGenerator.hpp"
 
 RandomDatasetGenerator::RandomDatasetGenerator(
 		const size_t& r, 
@@ -22,18 +22,6 @@ RandomDatasetGenerator::RandomDatasetGenerator(
 
 }
 
-/*
-RandomDatasetGenerator::RandomDatasetGenerator(const RandomDatasetGenerator &rd)
-	: RandomDatasetGenerator{rd.rows}
-{
-}
-
-
-RandomDatasetGenerator::RandomDatasetGenerator(const RandomDatasetGenerator &&rd)
-	: rows(rd.rows)
-{
-}
-*/
 
 void RandomDatasetGenerator::testPrint() const {
 	std::cout << "TEST \n";
@@ -134,7 +122,7 @@ void RandomDatasetGenerator::generateBinaryTargetColumn() {
 	std::vector<double> probOutcome;
 	probOutcome.reserve(this->rows);
 
-	// Get iterators for the features 
+	// Get iterators for the m_features
 	const auto features_accessor = this->features.accessor<double, 2>();
 
 	// Calculating the row-by-row outcome's probability with inverseLogit
@@ -185,7 +173,7 @@ void RandomDatasetGenerator::prettyPrint() const {
 	std::cout << std::fixed << std::setprecision(4);
 	std::cout << "\n";
 
-	// Concatenate together the features and target columns
+	// Concatenate together the m_features and m_target columns
 	const auto dataset = torch::cat({this->features, this->target}, 1);
 
 	// Printing out the labels

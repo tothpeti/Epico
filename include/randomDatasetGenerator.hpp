@@ -34,7 +34,7 @@ private:
     torch::Tensor generateRandomValuesHelper(T &dist, double weight = 1.0) {
 
         // Creating X type of distributed random numbers, and storing them in distValues
-        std::vector<double> distValues(this->m_rows);
+        std::vector<double> distValues(m_rows);
 
         for (auto &elem : distValues) {
             elem = dist(m_generator) * weight;

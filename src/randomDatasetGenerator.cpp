@@ -1,21 +1,17 @@
-#include <iostream>
-#include <iomanip>
 #include <fstream>
 #include <sstream>
-#include <string>
-#include <cmath>
 
 #include "RandomDatasetGenerator.hpp"
 
 RandomDatasetGenerator::RandomDatasetGenerator(
 		const size_t& r, 
 		const std::vector<RandomDatasetGenerator::ColumnDataType> &vec, 
-		bool binaryTarget)
-	: rows(r), generator((std::random_device())())  // it's like generator(rd()) syntax but it's inplace
+		bool binary_target)
+	: m_rows(r), m_generator((std::random_device())())  // it's like m_generator(rd()) syntax but it's inplace
 {
 	parseInputColumnData(vec);
 
-	if(binaryTarget)
+	if(binary_target)
 	{
 		generateBinaryTargetColumn();
 	}
@@ -26,29 +22,30 @@ RandomDatasetGenerator::RandomDatasetGenerator(
 void RandomDatasetGenerator::testPrint() const {
 	std::cout << "TEST \n";
 	std::cout << std::fixed << std::setprecision(4);
-	std::cout << this->features[0].reshape({1, this->features.size(1)}) << "\n";
-	std::cout << this->target[1] << "\n";
-	std::cout << "SIZE TARGET " << this->target.size(0) << "\n";
+	std::cout << this->m_features[0].reshape({1, m_features.size(1)}) << "\n";
+	std::cout << this->m_target[1] << "\n";
+	std::cout << "SIZE TARGET " << this->m_target.size(0) << "\n";
 }
 
 
 torch::Tensor RandomDatasetGenerator::getFeatures() const {
-	return this->features;
+	return m_features;
 }
 
 
 torch::Tensor RandomDatasetGenerator::getTarget() const {
-	return this->target;
+	return m_target;
 }
 
 
-void RandomDatasetGenerator::generateBinomialColumn(const size_t &numTrials, const double &prob, const double &weight){
-	std::binomial_distribution<> d(numTrials, prob);
+void RandomDatasetGenerator::generateBinomialColumn(const size_t &num_trials, const double &prob, const double &weight){
+	std::binomial_distribution<> d(num_trials, prob);
 
 	// Creating Tensor column filled with distributed values
 	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, weight);
 	appendToFeatures(tens);
 
+	std::cout << tens << "\n";
 	// Creating label for the column
 	appendLabel(std::string(1, 'x'));
 }
@@ -115,23 +112,23 @@ void RandomDatasetGenerator::generateGammaColumn(const double &alpha, const doub
 
 
 void RandomDatasetGenerator::generateBinaryTargetColumn() {
-	auto inverseLogit = [](const double &p){
+	auto inverse_logit = [](const double &p){
 		return (std::exp(p) / (1 + std::exp(p)));
 	};
 
 	std::vector<double> probOutcome;
-	probOutcome.reserve(this->rows);
+	probOutcome.reserve(m_rows);
 
 	// Get iterators for the m_features
-	const auto features_accessor = this->features.accessor<double, 2>();
+	const auto features_accessor = m_features.accessor<double, 2>();
 
-	// Calculating the row-by-row outcome's probability with inverseLogit
+	// Calculating the row-by-row outcome's probability with inverse_logit
 	for(int i = 0; i < features_accessor.size(0); i++) {
 		double probSum = 0.0;
 		for(int j = 0; j < features_accessor.size(1); j++) {
 			probSum = probSum + features_accessor[i][j];
 		}
-		probOutcome.emplace_back( inverseLogit(probSum) );
+		probOutcome.emplace_back(inverse_logit(probSum) );
 	}
 
 	// Calculating the binary outcomes
@@ -139,15 +136,17 @@ void RandomDatasetGenerator::generateBinaryTargetColumn() {
 	binaryOutcome.reserve(probOutcome.size());
 
 	for(const auto &val: probOutcome) {
+	    // Generating 0 or 1 value with probability of val
 		std::binomial_distribution<> dist(1, val);
-		binaryOutcome.emplace_back( dist(this->generator) );
+		binaryOutcome.emplace_back( dist(m_generator) );
 	}
 
-	// Converting the distValues vector into Tensor and returning it	
+	// Converting the binaryOutcome vector into Tensor
 	const auto opts = torch::TensorOptions().dtype(torch::kFloat64);
-	const auto targetTens = torch::from_blob(binaryOutcome.data(), {static_cast<int>(this->rows), 1}, opts);
+	const auto targetTens = torch::from_blob(binaryOutcome.data(), {static_cast<int32_t>(m_rows), 1}, opts);
 
-	this->target = targetTens.clone().detach();
+	// Move the generated binary outcome tensor column to m_target
+	m_target = targetTens.clone().detach();
 
 	// Creating label for the column
 	appendLabel( std::string(1, 'y'));
@@ -156,15 +155,15 @@ void RandomDatasetGenerator::generateBinaryTargetColumn() {
 
 void RandomDatasetGenerator::appendLabel(std::string &&base) {
 	// If the input string is TARGET --> y  
-	if(base.compare("y") == 0) {
+	if(base == "y") {
 
 		// Then won't concatenate anything to it
-		this->labels.emplace_back(base);
+		this->m_labels.emplace_back(base);
 	} else {
 
 		// Else, append the column number to the input string --> x
-		base.append( std::to_string(this->features.sizes()[1]));
-		this->labels.emplace_back(base);
+		base.append( std::to_string(m_features.sizes()[1]));
+		this->m_labels.emplace_back(base);
 	}
 }
 
@@ -174,10 +173,10 @@ void RandomDatasetGenerator::prettyPrint() const {
 	std::cout << "\n";
 
 	// Concatenate together the m_features and m_target columns
-	const auto dataset = torch::cat({this->features, this->target}, 1);
+	const auto dataset = torch::cat({m_features, m_target}, 1);
 
-	// Printing out the labels
-	for(const auto &label: this->labels) {
+	// Printing out the m_labels
+	for(const auto &label: m_labels) {
 		std::cout << "   " <<label << std::setfill(' ') << std::setw(6);
 	}	
 	std::cout << "\n";
@@ -191,7 +190,7 @@ void RandomDatasetGenerator::prettyPrint() const {
 std::ostream& operator<<(std::ostream &os, const RandomDatasetGenerator &rd) {
 	os.precision(3);
 	os.fixed;
-	os << rd.features;
+	os << rd.m_features;
 	return os;
 }
 
@@ -200,7 +199,7 @@ void RandomDatasetGenerator::writeCSV() {
 	std::ofstream myfile;
 	myfile.open("example.csv");
 	
-	const auto features_accessor = this->features.accessor<double, 2>();
+	const auto features_accessor = m_features.accessor<double, 2>();
 
 	for(int i = 0; i < features_accessor.size(0); i++) {
 		for(int j = 0; j < features_accessor.size(1); j++) {
@@ -241,8 +240,8 @@ void RandomDatasetGenerator::parseInputColumnData(const std::vector<ColumnDataTy
 
 			case RandomDatasetGenerator::DistributionTypes::UniformReal:
 				generateUniformRealColumn(col.parameters.at("from"),
-																col.parameters.at("to"),
-																col.parameters.at("weight"));
+                                            col.parameters.at("to"),
+                                            col.parameters.at("weight"));
 				break;
 		
 			case RandomDatasetGenerator::DistributionTypes::Gamma:

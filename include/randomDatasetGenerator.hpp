@@ -1,20 +1,24 @@
 #pragma once
 
-#include "torch/torch.h"
 #include <random>
 #include <vector>
 #include <string>
+#include <cmath>
+#include <iostream>
+#include <iomanip>
+
+#include "torch/torch.h"
 
 /*
   This class is used for creating a random m_features via different kinds of distributions.
 */
 class RandomDatasetGenerator {
-  private:
-    const size_t rows;
-    std::vector<std::string> labels;
-    torch::Tensor features; 
-    torch::Tensor target;
-    std::mt19937 generator;
+private:
+    const size_t m_rows;
+    std::vector<std::string> m_labels;
+    torch::Tensor m_features;
+    torch::Tensor m_target;
+    std::mt19937 m_generator;
 
 
     /*
@@ -27,21 +31,22 @@ class RandomDatasetGenerator {
       @return: torch::Tensor type column with the generated random values
     */
     template<typename T>
-    torch::Tensor generateRandomValuesHelper(T &dist, const double &weight=1.0) {
-    	// Initializing the random generator
-	    //std::random_device rd; 
-	    //std::mt19937 gen(rd());
+    torch::Tensor generateRandomValuesHelper(T &dist, double weight = 1.0) {
 
-	    // Creating X type of distributed random numbers, and storing them in distValues 
-	    std::vector<double> distValues(this->rows);
+        // Creating X type of distributed random numbers, and storing them in distValues
+        std::vector<double> distValues(this->m_rows);
 
-	    auto generateElems = [this, &dist, &weight](){ return (dist(this->generator) * weight); };
-	    std::generate(begin(distValues), end(distValues), generateElems);
+        for (auto &elem : distValues) {
+            elem = dist(m_generator) * weight;
+        }
 
-	    // Converting the distValues vector into Tensor and returning it	
-      auto opts = torch::TensorOptions().dtype(torch::kFloat64);
-      
-      return torch::from_blob(distValues.data(), {static_cast<int>(this->rows), 1}, opts);
+        //auto generateElems = [this, &dist, &weight](){ return (dist(this->m_generator) * weight); };
+        //std::generate(begin(distValues), end(distValues), generateElems);
+
+        // Converting the distValues vector into Tensor and returning it
+        auto opts = torch::TensorOptions().dtype(torch::kFloat64);
+
+        return torch::from_blob(distValues.data(), {static_cast<int>(m_rows), 1}, opts);
     };
 
     /*
@@ -52,17 +57,14 @@ class RandomDatasetGenerator {
     */
     template<typename T>
     void appendToFeatures(const T &col) {
-      // Checking if m_features is empty
-      if(this->features.numel() == 0) 
-      {
-        // If it is, then the "col" parameter will be the first column 
-        this->features = col.clone().detach();
-      }
-      else 
-      {
-        // If it is NOT, then append "col" to the existing m_features
-        this->features = torch::cat({this->features, col}, 1);
-      }
+        // Checking if m_features is empty
+        if (m_features.numel() == 0) {
+            // If it is, then the "col" parameter will be the first column
+            m_features = col.clone().detach();
+        } else {
+            // If it is NOT, then append "col" to the existing m_features
+            m_features = torch::cat({m_features, col}, 1);
+        }
     }
 
     /*
@@ -74,19 +76,19 @@ class RandomDatasetGenerator {
     void appendLabel(std::string &&base);
 
 
-  public:
+public:
 
     /*
       This enum class is used for identifying the different distribution types 
       when creating a column and also when parsing it.
     */
     enum class DistributionTypes {
-      Binomial,
-      Bernoulli,
-      Normal,
-      UniformDiscrete,
-      UniformReal,
-      Gamma
+        Binomial,
+        Bernoulli,
+        Normal,
+        UniformDiscrete,
+        UniformReal,
+        Gamma
     };
 
     /*
@@ -94,16 +96,17 @@ class RandomDatasetGenerator {
       column which would like to append to the dataset
     */
     struct ColumnDataType {
-      const DistributionTypes type;
-      const std::unordered_map<std::string, double> parameters;
+        const DistributionTypes type;
+        const std::unordered_map<std::string, double> parameters;
     };
-    
-    RandomDatasetGenerator() = delete;    
 
-    explicit RandomDatasetGenerator(const size_t& r, const std::vector<RandomDatasetGenerator::ColumnDataType> &vec, 
-                           bool binaryTarget);
+    RandomDatasetGenerator() = delete;
+
+    explicit RandomDatasetGenerator(const size_t &r, const std::vector<RandomDatasetGenerator::ColumnDataType> &vec,
+                                    bool binary_target);
+
     ~RandomDatasetGenerator() = default;
-   
+
     void testPrint() const;
 
     torch::Tensor getFeatures() const;
@@ -114,12 +117,12 @@ class RandomDatasetGenerator {
       Produces random non-negative integer values into a column, distributed 
       according to discrete probability function.
 
-      @param: numTrials -> values between 0 and numTrials
+      @param: num_trials -> values between 0 and num_trials
       @param: prob      -> probability of success of each trial
       @param: weight -> tells how likely the column will affect the outcome
       @return: -
     */
-    void generateBinomialColumn(const size_t &numTrials, const double &prob, const double &weight = 1.0);
+    void generateBinomialColumn(const size_t &num_trials, const double &prob, const double &weight = 1.0);
 
     /*
       Produces random boolean values into a column, 
@@ -200,11 +203,11 @@ class RandomDatasetGenerator {
       @return: -
     */
     void writeCSV();
-    
+
     void prettyPrint() const;
 
 
-    friend std::ostream& operator<<(std::ostream& os, const RandomDatasetGenerator &rd);
+    friend std::ostream &operator<<(std::ostream &os, const RandomDatasetGenerator &rd);
 
 };
 

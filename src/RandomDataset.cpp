@@ -26,12 +26,12 @@ RandomDataset::RandomDataset(torch::Tensor features, torch::Tensor target,
 }
 
 const torch::Tensor& RandomDataset::getFeatures() const {
-	return this->m_features;
+	return m_features;
 }
 
 
 const torch::Tensor& RandomDataset::getTarget() const {
-	return this->m_target;
+	return m_target;
 }
 
 

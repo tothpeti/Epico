@@ -4,11 +4,10 @@
 set(HEADER_LIST 
   "${epico-app_SOURCE_DIR}/include/RandomDatasetGenerator.hpp"
   "${epico-app_SOURCE_DIR}/include/RandomDataset.hpp"
-  "${epico-app_SOURCE_DIR}/include/LogisticRegression.hpp"
-  "${epico-app_SOURCE_DIR}/include/Simulation.hpp")
+  "${epico-app_SOURCE_DIR}/include/LogisticRegression.hpp")
 
 # Make an automatic library - will be static or dynamic based on user setting
-add_library(library RandomDatasetGenerator.cpp RandomDataset.cpp Simulation.cpp
+add_library(library RandomDatasetGenerator.cpp RandomDataset.cpp
   ${HEADER_LIST}
 )
 

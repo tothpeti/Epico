@@ -92,7 +92,7 @@ public:
     };
 
     /*
-      This struct is for storing important informations about the 
+      This struct is for storing important information about the
       column which would like to append to the dataset
     */
     struct ColumnDataType {

@@ -15,7 +15,6 @@ RandomDatasetGenerator::RandomDatasetGenerator(
 	{
 		generateBinaryTargetColumn();
 	}
-
 }
 
 
@@ -45,7 +44,6 @@ void RandomDatasetGenerator::generateBinomialColumn(const size_t &num_trials, co
 	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, weight);
 	appendToFeatures(tens);
 
-	std::cout << tens << "\n";
 	// Creating label for the column
 	appendLabel(std::string(1, 'x'));
 }

@@ -8,8 +8,12 @@
 
 void write_csv(const std::vector<std::vector<double>> &result, const std::vector<double> &thresholds,
                const std::string &metric_name);
+
 std::vector<double> generate_threshold_values(double from, double to, double stride);
 
+void print_stored_metrics(const std::vector<double> &sens, const std::vector<double> &spec,
+                          const std::vector<double> &prec, const std::vector<double> &f1score,
+                          const std::vector<double> &acc);
 
 int main() {
     /*
@@ -148,7 +152,9 @@ int main() {
             // Set floating point output precision - USE IF WANT TO PRINT RESULTS!!
             //std::cout << std::fixed << std::setprecision(4);
 
-            // Train the model
+            /*
+             * Training the model
+             */
             model->train();
             for (size_t epoch = 0; epoch != number_of_epochs; epoch++) {
 
@@ -170,24 +176,30 @@ int main() {
                     // Update running loss
                     runningLoss += loss.item<double>();
 
-                    // Backward pass and optimize
+                    // Backward pass and updates
                     loss.backward();
                     optimizer.step();
                 }
                 //auto sampleMeanLoss = runningLoss / numberOfTrainSamples;
             }
 
-            // Test the model
+            /*
+             * Testing the trained model
+             */
             model->eval();
             torch::NoGradGuard no_grad;
 
             double running_loss = 0.0;
             double numberOfCorrect = 0.0;
-            double sensitivities = 0.0;
-            double specificities = 0.0;
-            double precisions = 0.0;
-            double f1scores = 0.0;
-
+            double sensitivity = 0.0;
+            double specificity = 0.0;
+            double precision = 0.0;
+            double f1score = 0.0;
+            double accuracy = 0.0;
+            double tp = 0.0;
+            double tn = 0.0;
+            double fp = 0.0;
+            double fn = 0.0;
             for (const auto &batch : *testingDataLoader) {
                 auto data = batch.data.to(torch::kFloat32);
                 auto target = batch.target.to(torch::kFloat32);
@@ -203,70 +215,54 @@ int main() {
                 auto custom_threshold = torch::tensor({threshold});
                 auto rounded_output = torch::where(output > custom_threshold, torch::tensor({1}), torch::tensor({0}));
 
-                // Calculate other metrics
-                auto tp = (target * rounded_output).sum().to(torch::kFloat64);
-                auto tn = ((1 - target) * (1 - rounded_output)).sum().to(torch::kFloat64);
-                auto fp = ((1 - target) * rounded_output).sum().to(torch::kFloat64);
-                auto fn = (target * (1 - rounded_output)).sum().to(torch::kFloat64);
+                // Calculate true positive, true negative, false positive, false positive (per batch)
+                auto tp_batch = torch::logical_and(target == 1 , rounded_output == 1).sum().to(torch::kFloat64);
+                auto tn_batch = torch::logical_and(target == 0, rounded_output == 0).sum().to(torch::kFloat64);
+                auto fp_batch = torch::logical_and(target == 0, rounded_output == 1).sum().to(torch::kFloat64);
+                auto fn_batch = torch::logical_and(target == 1, rounded_output == 0 ).sum().to(torch::kFloat64);
 
-                auto precision = 0.0;
-                auto recall = 0.0;
-
-                // Calculate precision and recall
-                if (tp.item<double>() > 0) {
-                    precision = (tp / (tp + fp)).to(torch::kFloat64).item<double>();
-                    recall = (tp / (tp + fn)).to(torch::kFloat64).item<double>(); // alias sensitivity
-                } else if (fp.item<double>() > 0) {
-                    precision = (tp / (tp + fp)).to(torch::kFloat64).item<double>();
-                } else if (fn.item<double>() > 0) {
-                    recall = (tp / (tp + fn)).to(torch::kFloat64).item<double>(); // alias sensitivity
-                }
-
-                auto f1_score = 0.0;
-                if (precision > 0 || recall > 0)
-                    f1_score = (2 * (precision * recall) / (precision + recall));
-
-                auto specificity = 0.0;
-                if (tn.item<double>() > 0 || fp.item<double>() > 0)
-                    specificity = (tn / (tn + fp)).to(torch::kFloat64).item<double>();
+                tp += tp_batch.item<double>();
+                tn += tn_batch.item<double>();
+                fp += fp_batch.item<double>();
+                fn += fn_batch.item<double>();
 
                 // For calculating Accuracy
                 numberOfCorrect += rounded_output.view({-1, 1}).eq(target).sum().item<int>();
-
-                sensitivities += recall;
-                specificities += specificity;
-                precisions += precision;
-                f1scores += f1_score;
             }
 
-            auto accuracy = (100 * numberOfCorrect) / numberOfTestSamples;
-            auto test_sample_mean_loss = running_loss / numberOfTestSamples;
+            /*
+             * Calculating other metrics
+             */
+            if (tp > 0) {
+                precision = (tp / (tp + fp));
+                sensitivity = (tp / (tp + fn));
+            } else if (fp > 0) {
+                precision = (tp / (tp + fp));
+            } else if (fn > 0) {
+                sensitivity = (tp / (tp + fn));
+            }
 
-            specificity_results.emplace_back(specificities);
-            sensitivity_results.emplace_back(sensitivities);
-            precision_results.emplace_back(precisions);
-            f1score_results.emplace_back(f1scores);
+            if (precision > 0 || sensitivity > 0)
+                f1score = (2 * (precision * sensitivity) / (precision + sensitivity));
+
+            if (tn > 0 || fp > 0)
+                specificity = (tn / (tn + fp));
+
+            accuracy = (100 * numberOfCorrect) / numberOfTestSamples;
+
+            //auto test_sample_mean_loss = running_loss / numberOfTestSamples;
+
+            specificity_results.emplace_back(specificity);
+            sensitivity_results.emplace_back(sensitivity);
+            precision_results.emplace_back(precision);
+            f1score_results.emplace_back(f1score);
             accuracy_results.emplace_back(accuracy);
 
             /*
-            std::cout << "-------------FINAL RESULTS-----------\n";
-            for (const auto &elem: sensitivity_results) std::cout << elem << " ";
-            std::cout << "\n";
-
-            for (const auto &elem: specificity_results) std::cout << elem << " ";
-            std::cout << "\n";
-
-            for (const auto &elem: precision_results) std::cout << elem << " ";
-            std::cout << "\n";
-
-            for (const auto &elem: f1score_results) std::cout << elem << " ";
-            std::cout << "\n";
-
-            for (const auto &elem: accuracy_results) std::cout << elem << " ";
-            std::cout << "\n\n";
+            print_stored_metrics(sensitivity_results, specificity_results, precision_results,
+                                 f1score_results, accuracy_results);
             */
         }
-
         // Storing results of the given threshold
         all_specificity_results.emplace_back(specificity_results);
         all_sensitivity_results.emplace_back(sensitivity_results);
@@ -276,11 +272,18 @@ int main() {
     }
 
     // Writing results into csv files .. for analyzing and later visualization
-    write_csv(all_specificity_results, thresholds, "specificity");
-    write_csv(all_sensitivity_results, thresholds, "sensitivity");
-    write_csv(all_precision_results, thresholds, "precision");
-    write_csv(all_f1score_results, thresholds, "f1score");
-    write_csv(all_accuracy_results, thresholds, "accuracy");
+    std::thread threads[5];
+    threads[0] = std::thread(write_csv, all_specificity_results, thresholds, "specificity");
+    threads[1] = std::thread(write_csv, all_sensitivity_results, thresholds, "sensitivity");
+    threads[2] = std::thread(write_csv, all_precision_results, thresholds, "precision");
+    threads[3] = std::thread(write_csv, all_f1score_results, thresholds, "f1score");
+    threads[4] = std::thread(write_csv, all_accuracy_results, thresholds, "accuracy");
+
+    for (auto &thread : threads)
+    {
+        thread.join();
+    }
+
 
     std::cout << "Finished simulation. Files are ready to analyze!\n";
     return 0;
@@ -310,17 +313,27 @@ void write_csv(const std::vector<std::vector<double>> &result, const std::vector
 
 
     // Creating the HEADER part of the csv file
-    for (const auto &threshold : thresholds) {
-        my_file << threshold << "_" << metric_name << ",";
+    for (size_t i = 0; i < thresholds.size(); i++)
+    {
+        my_file << thresholds[i] << "_" << metric_name;
+
+        // If the current index is not the last one, then we append a comma
+        if (i != thresholds.size()-1)
+            my_file << ",";
     }
+
     my_file << "\n";
 
     // Filling up all the rows with the generated results
     for (size_t i = 0; i < result[0].size(); i++)
     {
-        for (const auto &res: result)
+        for (size_t j = 0; j < result.size(); j++)
         {
-            my_file << res[i] << ",";
+            my_file << result[j][i];
+
+            // If the current index is not the last one, then we append a comma
+            if (j != result.size()-1)
+                my_file << ",";
         }
         my_file << "\n";
     }
@@ -328,19 +341,24 @@ void write_csv(const std::vector<std::vector<double>> &result, const std::vector
     my_file.close();
 }
 
-/*
-void writeCsv(const std::vector<double> &sensi, const std::vector<double> &speci,
-              const std::vector<double> &preci, const std::vector<double> &f1sc,
-              const std::vector<double> &accur) {
-    std::ofstream myfile;
-    myfile.open("example.csv");
+void print_stored_metrics(const std::vector<double> &sens, const std::vector<double> &spec,
+                          const std::vector<double> &prec, const std::vector<double> &f1score,
+                          const std::vector<double> &acc)
+{
 
-    myfile << "sensitivity,specificity,precision,f1,accuracy\n";
-    for (int i = 0; i < sensi.size(); i++) {
-        myfile << sensi[i] << "," << speci[i] << "," << preci[i] << ","
-               << f1sc[i] << "," << accur[i] << "\n";
-    }
+    std::cout << "-------------FINAL RESULTS-----------\n";
+    for (const auto &elem: sens) std::cout << elem << " ";
+    std::cout << "\n";
 
-    myfile.close();
+    for (const auto &elem: spec) std::cout << elem << " ";
+    std::cout << "\n";
+
+    for (const auto &elem: prec) std::cout << elem << " ";
+    std::cout << "\n";
+
+    for (const auto &elem: f1score) std::cout << elem << " ";
+    std::cout << "\n";
+
+    for (const auto &elem: acc) std::cout << elem << " ";
+    std::cout << "\n\n";
 }
-*/

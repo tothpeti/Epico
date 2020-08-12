@@ -35,16 +35,16 @@ int main() {
     std::vector<std::vector<double>> all_f1score_results;
     std::vector<std::vector<double>> all_accuracy_results;
 
-    all_sensitivity_results.reserve(thresholds.size());
-    all_specificity_results.reserve(thresholds.size());
-    all_precision_results.reserve(thresholds.size());
-    all_f1score_results.reserve(thresholds.size());
-    all_accuracy_results.reserve(thresholds.size());
+    all_sensitivity_results.reserve(simulation_rounds);
+    all_specificity_results.reserve(simulation_rounds);
+    all_precision_results.reserve(simulation_rounds);
+    all_f1score_results.reserve(simulation_rounds);
+    all_accuracy_results.reserve(simulation_rounds);
 
     /*
      *  SIMULATION
      */
-    for (const auto &threshold : thresholds) {
+    for (size_t i = 0; i < simulation_rounds; i++) {
 
         std::vector<double> sensitivity_results;
         std::vector<double> specificity_results;
@@ -53,139 +53,137 @@ int main() {
         std::vector<double> accuracy_results;
 
         // Reserve memories
-        sensitivity_results.reserve(simulation_rounds);
-        specificity_results.reserve(simulation_rounds);
-        precision_results.reserve(simulation_rounds);
-        f1score_results.reserve(simulation_rounds);
-        accuracy_results.reserve(simulation_rounds);
+        sensitivity_results.reserve(thresholds.size());
+        specificity_results.reserve(thresholds.size());
+        precision_results.reserve(thresholds.size());
+        f1score_results.reserve(thresholds.size());
+        accuracy_results.reserve(thresholds.size());
+
+        //Creating columns for RandomDataset
+        RandomDatasetGenerator::ColumnDataType bern{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,                //type
+                {{"prob", 0.5}, {"weight", 0.5}}        //parameters
+        };
+        RandomDatasetGenerator::ColumnDataType bern2{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,
+                {{"prob", 0.5}, {"weight", 0.75}}
+        };
+        RandomDatasetGenerator::ColumnDataType bern3{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,
+                {{"prob", 0.5}, {"weight", 1}}
+        };
+        RandomDatasetGenerator::ColumnDataType bern4{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,
+                {{"prob", 0.5}, {"weight", 1.25}}
+        };
+        RandomDatasetGenerator::ColumnDataType bern5{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,
+                {{"prob", 0.5}, {"weight", 1.5}}
+        };
+
+        RandomDatasetGenerator::ColumnDataType bern6{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,
+                {{"prob", 0.5}, {"weight", 1.75}}
+        };
+        RandomDatasetGenerator::ColumnDataType bern7{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,
+                {{"prob", 0.5}, {"weight", 2}}
+        };
+
+        RandomDatasetGenerator::ColumnDataType bern8{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,
+                {{"prob", 0.5}, {"weight", 1.5}}
+        };
+
+        RandomDatasetGenerator::ColumnDataType bern9{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,
+                {{"prob", 0.5}, {"weight", 2}}
+        };
+
+        RandomDatasetGenerator::ColumnDataType bern10{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,
+                {{"prob", 0.5}, {"weight", 3}}
+        };
+
+        std::vector<RandomDatasetGenerator::ColumnDataType> cols{
+                bern, bern2, bern3, bern4, bern5, bern6, bern7, bern, bern9, bern10
+        };
+
 
         /*
-         * SIMULATION START HERE
+         * Creating Training and Test Data Loaders
          */
-        for (size_t i = 0; i < simulation_rounds; i++) {
 
-            //Creating columns for RandomDataset
-            RandomDatasetGenerator::ColumnDataType bern{
-                    RandomDatasetGenerator::DistributionTypes::Bernoulli,                //type
-                    {{"prob", 0.5}, {"weight", 0.5}}        //parameters
-            };
-            RandomDatasetGenerator::ColumnDataType bern2{
-                    RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                    {{"prob", 0.5}, {"weight", 0.75}}
-            };
-            RandomDatasetGenerator::ColumnDataType bern3{
-                    RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                    {{"prob", 0.5}, {"weight", 1}}
-            };
-            RandomDatasetGenerator::ColumnDataType bern4{
-                    RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                    {{"prob", 0.5}, {"weight", 1.25}}
-            };
-            RandomDatasetGenerator::ColumnDataType bern5{
-                    RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                    {{"prob", 0.5}, {"weight", 1.5}}
-            };
+        // Create RandomDataLoader from previously created Columns
+        auto rdGenerator = std::make_unique<RandomDatasetGenerator>(number_of_rows, cols, true);
 
-            RandomDatasetGenerator::ColumnDataType bern6{
-                    RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                    {{"prob", 0.5}, {"weight", 1.75}}
-            };
-            RandomDatasetGenerator::ColumnDataType bern7{
-                    RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                    {{"prob", 0.5}, {"weight", 2}}
-            };
+        // Create training RandomDataset from the RandomDatasetGenerator
+        auto rdTrain = std::make_unique<RandomDataset>(rdGenerator->getFeatures(), rdGenerator->getTarget(),
+                                                       RandomDataset::Mode::kTrain, 0.6);
+        auto numberOfTrainSamples = rdTrain->size().value();
 
-            RandomDatasetGenerator::ColumnDataType bern8{
-                    RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                    {{"prob", 0.5}, {"weight", 1.5}}
-            };
+        auto trainingDataLoader = torch::data::make_data_loader(
+                std::move(rdTrain->map(torch::data::transforms::Stack<>())),
+                torch::data::DataLoaderOptions().batch_size(batch_size).workers(2)
+        );
 
-            RandomDatasetGenerator::ColumnDataType bern9{
-                    RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                    {{"prob", 0.5}, {"weight", 2}}
-            };
+        // Create test RandomDataset from the RandomDatasetGenerator
+        auto rdTest = std::make_unique<RandomDataset>(rdGenerator->getFeatures(), rdGenerator->getTarget(),
+                                                      RandomDataset::Mode::kTest, 0.4);
+        auto numberOfTestSamples = rdTest->size().value();
 
-            RandomDatasetGenerator::ColumnDataType bern10{
-                    RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                    {{"prob", 0.5}, {"weight", 3}}
-            };
-
-            std::vector<RandomDatasetGenerator::ColumnDataType> cols{
-                    bern, bern2, bern3, bern4, bern5, bern6, bern7, bern, bern9, bern10
-            };
+        auto testingDataLoader = torch::data::make_data_loader(
+                std::move(rdTest->map(torch::data::transforms::Stack<>())),
+                torch::data::DataLoaderOptions().batch_size(batch_size).workers(2)
+        );
 
 
-            /*
-             * Creating Training and Test Data Loaders
-             */
+        // Logistic regression model
+        LogisticRegression model(number_of_features);
 
-            // Create RandomDataLoader from previously created Columns
-            auto rdGenerator = std::make_unique<RandomDatasetGenerator>(number_of_rows, cols, true);
+        // Loss and optimizer
+        torch::optim::SGD optimizer(model->parameters(), torch::optim::SGDOptions(learning_rate));
 
-            // Create training RandomDataset from the RandomDatasetGenerator
-            auto rdTrain = std::make_unique<RandomDataset>(rdGenerator->getFeatures(), rdGenerator->getTarget(),
-                                                           RandomDataset::Mode::kTrain, 0.6);
-            auto numberOfTrainSamples = rdTrain->size().value();
+        // Set floating point output precision - USE IF WANT TO PRINT RESULTS!!
+        //std::cout << std::fixed << std::setprecision(4);
 
-            auto trainingDataLoader = torch::data::make_data_loader(
-                    std::move(rdTrain->map(torch::data::transforms::Stack<>())),
-                    torch::data::DataLoaderOptions().batch_size(batch_size).workers(2)
-            );
+        /*
+         * Training the model
+         */
+        model->train();
+        for (size_t epoch = 0; epoch != number_of_epochs; epoch++) {
 
-            // Create test RandomDataset from the RandomDatasetGenerator
-            auto rdTest = std::make_unique<RandomDataset>(rdGenerator->getFeatures(), rdGenerator->getTarget(),
-                                                          RandomDataset::Mode::kTest, 0.4);
-            auto numberOfTestSamples = rdTest->size().value();
+            // Initializing running metrics
+            double runningLoss = 0.0;
 
-            auto testingDataLoader = torch::data::make_data_loader(
-                    std::move(rdTest->map(torch::data::transforms::Stack<>())),
-                    torch::data::DataLoaderOptions().batch_size(batch_size).workers(2)
-            );
+            for (auto &batch: *trainingDataLoader) {
+                optimizer.zero_grad();
 
+                auto data = batch.data.to(torch::kFloat32);
+                auto target = batch.target.to(torch::kFloat32);
 
-            // Logistic regression model
-            LogisticRegression model(number_of_features);
+                // Forward pass
+                auto output = model->forward(data);
 
-            // Loss and optimizer
-            torch::optim::SGD optimizer(model->parameters(), torch::optim::SGDOptions(learning_rate));
+                // Calculate loss
+                auto loss = torch::nn::functional::binary_cross_entropy(output, target);
 
-            // Set floating point output precision - USE IF WANT TO PRINT RESULTS!!
-            //std::cout << std::fixed << std::setprecision(4);
+                // Update running loss
+                runningLoss += loss.item<double>();
 
-            /*
-             * Training the model
-             */
-            model->train();
-            for (size_t epoch = 0; epoch != number_of_epochs; epoch++) {
-
-                // Initializing running metrics
-                double runningLoss = 0.0;
-
-                for (auto &batch: *trainingDataLoader) {
-                    optimizer.zero_grad();
-
-                    auto data = batch.data.to(torch::kFloat32);
-                    auto target = batch.target.to(torch::kFloat32);
-
-                    // Forward pass
-                    auto output = model->forward(data);
-
-                    // Calculate loss
-                    auto loss = torch::nn::functional::binary_cross_entropy(output, target);
-
-                    // Update running loss
-                    runningLoss += loss.item<double>();
-
-                    // Backward pass and updates
-                    loss.backward();
-                    optimizer.step();
-                }
-                //auto sampleMeanLoss = runningLoss / numberOfTrainSamples;
+                // Backward pass and updates
+                loss.backward();
+                optimizer.step();
             }
+            //auto sampleMeanLoss = runningLoss / numberOfTrainSamples;
+        }
 
-            /*
-             * Testing the trained model
-             */
+        /*
+         * Testing the trained model
+         */
+
+        for (const auto &threshold : thresholds) {
+
             model->eval();
             torch::NoGradGuard no_grad;
 
@@ -213,13 +211,14 @@ int main() {
 
                 // Rounding output's values via custom_threshold into 0 or 1
                 auto custom_threshold = torch::tensor({threshold});
-                auto rounded_output = torch::where(output > custom_threshold, torch::tensor({1}), torch::tensor({0}));
+                auto rounded_output = torch::where(output > custom_threshold, torch::tensor({1}),
+                                                   torch::tensor({0}));
 
                 // Calculate true positive, true negative, false positive, false positive (per batch)
-                auto tp_batch = torch::logical_and(target == 1 , rounded_output == 1).sum().to(torch::kFloat64);
+                auto tp_batch = torch::logical_and(target == 1, rounded_output == 1).sum().to(torch::kFloat64);
                 auto tn_batch = torch::logical_and(target == 0, rounded_output == 0).sum().to(torch::kFloat64);
                 auto fp_batch = torch::logical_and(target == 0, rounded_output == 1).sum().to(torch::kFloat64);
-                auto fn_batch = torch::logical_and(target == 1, rounded_output == 0 ).sum().to(torch::kFloat64);
+                auto fn_batch = torch::logical_and(target == 1, rounded_output == 0).sum().to(torch::kFloat64);
 
                 tp += tp_batch.item<double>();
                 tn += tn_batch.item<double>();
@@ -257,12 +256,13 @@ int main() {
             precision_results.emplace_back(precision);
             f1score_results.emplace_back(f1score);
             accuracy_results.emplace_back(accuracy);
-
-            /*
-            print_stored_metrics(sensitivity_results, specificity_results, precision_results,
-                                 f1score_results, accuracy_results);
-            */
         }
+
+        /*
+        print_stored_metrics(sensitivity_results, specificity_results, precision_results,
+                             f1score_results, accuracy_results);
+        */
+
         // Storing results of the given threshold
         all_specificity_results.emplace_back(specificity_results);
         all_sensitivity_results.emplace_back(sensitivity_results);
@@ -283,7 +283,6 @@ int main() {
     {
         thread.join();
     }
-
 
     std::cout << "Finished simulation. Files are ready to analyze!\n";
     return 0;
@@ -325,14 +324,14 @@ void write_csv(const std::vector<std::vector<double>> &result, const std::vector
     my_file << "\n";
 
     // Filling up all the rows with the generated results
-    for (size_t i = 0; i < result[0].size(); i++)
+    for (const auto &vec : result)
     {
-        for (size_t j = 0; j < result.size(); j++)
+        for (size_t i = 0; i < vec.size(); i++)
         {
-            my_file << result[j][i];
+            my_file << vec[i];
 
             // If the current index is not the last one, then we append a comma
-            if (j != result.size()-1)
+            if (i != vec.size()-1)
                 my_file << ",";
         }
         my_file << "\n";

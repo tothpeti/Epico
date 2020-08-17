@@ -40,4 +40,6 @@ class RandomDataset : public torch::data::Dataset<RandomDataset> {
     Return all m_target stacked into a single tensor
   */
   const torch::Tensor& getTarget() const;
+
+  std::vector<std::vector<double>> convert_dataset_to_vector();
 };

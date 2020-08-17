@@ -6,7 +6,10 @@
  * Helper functions
  */
 
-void write_csv(const std::vector<std::vector<double>> &result, const std::vector<double> &thresholds,
+void write_dataset_and_prediction_into_csv(size_t simulation_num,
+                                           const std::vector<std::vector<double>> &test_dataset,
+                                           const std::vector<double> &preds);
+void write_result_metrics_into_csv(const std::vector<std::vector<double>> &result, const std::vector<double> &thresholds,
                const std::string &metric_name);
 
 std::vector<double> generate_threshold_values(double from, double to, double stride);
@@ -92,17 +95,17 @@ int main() {
 
         RandomDatasetGenerator::ColumnDataType bern8{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", 1.5}}
+                {{"prob", 0.5}, {"weight", 2.25}}
         };
 
         RandomDatasetGenerator::ColumnDataType bern9{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", 2}}
+                {{"prob", 0.5}, {"weight", 2.5}}
         };
 
         RandomDatasetGenerator::ColumnDataType bern10{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", 3}}
+                {{"prob", 0.5}, {"weight", 2.75}}
         };
 
         std::vector<RandomDatasetGenerator::ColumnDataType> cols{
@@ -120,17 +123,21 @@ int main() {
         // Create training RandomDataset from the RandomDatasetGenerator
         auto rdTrain = std::make_unique<RandomDataset>(rdGenerator->getFeatures(), rdGenerator->getTarget(),
                                                        RandomDataset::Mode::kTrain, 0.6);
-        auto numberOfTrainSamples = rdTrain->size().value();
+        //auto numberOfTrainSamples = rdTrain->size().value();
 
         auto trainingDataLoader = torch::data::make_data_loader(
                 std::move(rdTrain->map(torch::data::transforms::Stack<>())),
                 torch::data::DataLoaderOptions().batch_size(batch_size).workers(2)
         );
 
+
+
         // Create test RandomDataset from the RandomDatasetGenerator
         auto rdTest = std::make_unique<RandomDataset>(rdGenerator->getFeatures(), rdGenerator->getTarget(),
                                                       RandomDataset::Mode::kTest, 0.4);
         auto numberOfTestSamples = rdTest->size().value();
+
+        auto test_vec = rdTest->convert_dataset_to_vector();
 
         auto testingDataLoader = torch::data::make_data_loader(
                 std::move(rdTest->map(torch::data::transforms::Stack<>())),
@@ -182,10 +189,15 @@ int main() {
          * Testing the trained model
          */
 
-        for (const auto &threshold : thresholds) {
 
-            model->eval();
-            torch::NoGradGuard no_grad;
+        model->eval();
+        torch::NoGradGuard no_grad;
+
+        bool store_once = true;
+        std::vector<double> preds;
+        preds.reserve(numberOfTestSamples);
+
+        for (const auto &threshold : thresholds) {
 
             double running_loss = 0.0;
             double numberOfCorrect = 0.0;
@@ -204,6 +216,17 @@ int main() {
 
                 // Forward pass
                 auto output = model->forward(data);
+
+                // Convert and store output into vector
+                if (store_once)
+                {
+                    const auto output_accessor = output.accessor<float, 2>();
+                    for (size_t col_idx = 0; col_idx < output_accessor.size(0); col_idx++)
+                    {
+                        for (size_t row_idx = 0; row_idx < output_accessor.size(1); row_idx++)
+                            preds.emplace_back(output_accessor[col_idx][row_idx]);
+                    }
+                }
 
                 // Calculate loss
                 auto loss = torch::nn::functional::binary_cross_entropy(output, target);
@@ -228,6 +251,9 @@ int main() {
                 // For calculating Accuracy
                 numberOfCorrect += rounded_output.view({-1, 1}).eq(target).sum().item<int>();
             }
+
+            // Used for storing predictions only once!!
+            store_once = false;
 
             /*
              * Calculating other metrics
@@ -257,6 +283,12 @@ int main() {
             f1score_results.emplace_back(f1score);
             accuracy_results.emplace_back(accuracy);
         }
+        std::thread t1(write_dataset_and_prediction_into_csv, i+1 , test_vec, preds);
+        t1.join();
+        //for (const auto &elem : preds)
+        //    std::cout << elem << " ";
+
+        //std::cout << "\n";
 
         /*
         print_stored_metrics(sensitivity_results, specificity_results, precision_results,
@@ -272,12 +304,13 @@ int main() {
     }
 
     // Writing results into csv files .. for analyzing and later visualization
+
     std::thread threads[5];
-    threads[0] = std::thread(write_csv, all_specificity_results, thresholds, "specificity");
-    threads[1] = std::thread(write_csv, all_sensitivity_results, thresholds, "sensitivity");
-    threads[2] = std::thread(write_csv, all_precision_results, thresholds, "precision");
-    threads[3] = std::thread(write_csv, all_f1score_results, thresholds, "f1score");
-    threads[4] = std::thread(write_csv, all_accuracy_results, thresholds, "accuracy");
+    threads[0] = std::thread(write_result_metrics_into_csv, all_specificity_results, thresholds, "specificity");
+    threads[1] = std::thread(write_result_metrics_into_csv, all_sensitivity_results, thresholds, "sensitivity");
+    threads[2] = std::thread(write_result_metrics_into_csv, all_precision_results, thresholds, "precision");
+    threads[3] = std::thread(write_result_metrics_into_csv, all_f1score_results, thresholds, "f1score");
+    threads[4] = std::thread(write_result_metrics_into_csv, all_accuracy_results, thresholds, "accuracy");
 
     for (auto &thread : threads)
     {
@@ -287,6 +320,8 @@ int main() {
     std::cout << "Finished simulation. Files are ready to analyze!\n";
     return 0;
 }
+
+
 
 
 std::vector<double> generate_threshold_values(double from, double to, double stride)
@@ -299,7 +334,43 @@ std::vector<double> generate_threshold_values(double from, double to, double str
     return tmp_results;
 }
 
-void write_csv(const std::vector<std::vector<double>> &result, const std::vector<double> &thresholds,
+
+void write_dataset_and_prediction_into_csv(size_t simulation_num,
+                                           const std::vector<std::vector<double>> &test_dataset,
+                                           const std::vector<double> &preds)
+{
+    // Create file name
+    std::string file_name = std::to_string(simulation_num);
+    file_name.append(".csv");
+
+    // Create file
+    std::ofstream my_file;
+    my_file.open(file_name);
+
+    // Create HEADER row
+    size_t features_num = test_dataset[0].size()-1;
+    for (size_t i = 0; i < features_num; i++)
+    {
+        std::string col_name = "x";
+        col_name.append(std::to_string(i+1));
+        my_file << col_name << ",";
+    }
+    my_file << "y,y_pred\n";
+
+    // Filling up the rows with values
+    for (size_t i = 0; i < test_dataset.size(); i++)
+    {
+        for (size_t j = 0; j < test_dataset[0].size(); j++)
+        {
+            my_file << test_dataset[i][j] << ",";
+        }
+        my_file << preds[i] << "\n";
+    }
+
+    my_file.close();
+}
+
+void write_result_metrics_into_csv(const std::vector<std::vector<double>> &result, const std::vector<double> &thresholds,
                const std::string &metric_name)
 {
     // Create file name

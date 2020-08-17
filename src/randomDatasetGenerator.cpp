@@ -165,7 +165,6 @@ void RandomDatasetGenerator::appendLabel(std::string &&base) {
 	}
 }
 
-
 void RandomDatasetGenerator::prettyPrint() const {
 	std::cout << std::fixed << std::setprecision(4);
 	std::cout << "\n";
@@ -250,3 +249,4 @@ void RandomDatasetGenerator::parseInputColumnData(const std::vector<ColumnDataTy
 		}
 	}
 }
+

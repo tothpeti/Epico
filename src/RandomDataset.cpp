@@ -45,3 +45,26 @@ torch::optional<size_t> RandomDataset::size() const
 {
 	return m_features.size(0);
 }
+
+std::vector<std::vector<double>> RandomDataset::convert_dataset_to_vector() {
+
+    std::vector<std::vector<double>> res;
+
+    const auto features_accessor = m_features.accessor<double, 2>();
+    const auto target_accessor = m_target.accessor<double, 2>();
+
+    for (size_t i = 0; i < features_accessor.size(0); i++)
+    {
+        std::vector<double> row;
+        row.reserve(features_accessor.size(1) + 1);
+
+        for (size_t j = 0; j < features_accessor.size(1); j++)
+        {
+            row.emplace_back(features_accessor[i][j]);
+        }
+        row.emplace_back(target_accessor[i][0]);
+        res.emplace_back(row);
+    }
+
+    return res;
+}

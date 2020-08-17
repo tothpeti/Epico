@@ -32,16 +32,12 @@ private:
     */
     template<typename T>
     torch::Tensor generateRandomValuesHelper(T &dist, double weight = 1.0) {
-
         // Creating X type of distributed random numbers, and storing them in distValues
         std::vector<double> distValues(m_rows);
 
         for (auto &elem : distValues) {
             elem = dist(m_generator) * weight;
         }
-
-        //auto generateElems = [this, &dist, &weight](){ return (dist(this->m_generator) * weight); };
-        //std::generate(begin(distValues), end(distValues), generateElems);
 
         // Converting the distValues vector into Tensor and returning it
         auto opts = torch::TensorOptions().dtype(torch::kFloat64);

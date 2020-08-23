@@ -65,47 +65,47 @@ int main() {
         //Creating columns for RandomDataset
         RandomDatasetGenerator::ColumnDataType bern{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,                //type
-                {{"prob", 0.5}, {"weight", 0.5}}        //parameters
+                {{"prob", 0.5}, {"weight", std::log(0.5)}}        //parameters
         };
         RandomDatasetGenerator::ColumnDataType bern2{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", 0.75}}
+                {{"prob", 0.5}, {"weight", std::log(0.75)}}
         };
         RandomDatasetGenerator::ColumnDataType bern3{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", 1}}
+                {{"prob", 0.5}, {"weight", std::log(1)}}
         };
         RandomDatasetGenerator::ColumnDataType bern4{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", 1.25}}
+                {{"prob", 0.5}, {"weight", std::log(1.25)}}
         };
         RandomDatasetGenerator::ColumnDataType bern5{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", 1.5}}
+                {{"prob", 0.5}, {"weight", std::log(1.5)}}
         };
 
         RandomDatasetGenerator::ColumnDataType bern6{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", 1.75}}
+                {{"prob", 0.5}, {"weight", std::log(1.75)}}
         };
         RandomDatasetGenerator::ColumnDataType bern7{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", 2}}
+                {{"prob", 0.5}, {"weight", std::log(2)}}
         };
 
         RandomDatasetGenerator::ColumnDataType bern8{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", 2.25}}
+                {{"prob", 0.5}, {"weight", std::log(2.25)}}
         };
 
         RandomDatasetGenerator::ColumnDataType bern9{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", 2.5}}
+                {{"prob", 0.5}, {"weight", std::log(2.5)}}
         };
 
         RandomDatasetGenerator::ColumnDataType bern10{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", 2.75}}
+                {{"prob", 0.5}, {"weight", std::log(2.75)}}
         };
 
         std::vector<RandomDatasetGenerator::ColumnDataType> cols{

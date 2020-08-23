@@ -114,6 +114,8 @@ void RandomDatasetGenerator::generateBinaryTargetColumn() {
 		return (std::exp(p) / (1 + std::exp(p)));
 	};
 
+	const double intercept = -1.5;
+
 	std::vector<double> probOutcome;
 	probOutcome.reserve(m_rows);
 
@@ -126,17 +128,19 @@ void RandomDatasetGenerator::generateBinaryTargetColumn() {
 		for(int j = 0; j < features_accessor.size(1); j++) {
 			probSum = probSum + features_accessor[i][j];
 		}
-		probOutcome.emplace_back(inverse_logit(probSum) );
+		probOutcome.emplace_back(inverse_logit(probSum + intercept) );
 	}
 
 	// Calculating the binary outcomes
 	std::vector<double> binaryOutcome;
 	binaryOutcome.reserve(probOutcome.size());
 
+	// Generating 0 or 1 value
 	for(const auto &val: probOutcome) {
-	    // Generating 0 or 1 value with probability of val
-		std::binomial_distribution<> dist(1, val);
-		binaryOutcome.emplace_back( dist(m_generator) );
+	    if (val < 0.5)
+	        binaryOutcome.emplace_back(0);
+	    else if (val >= 0.5)
+	        binaryOutcome.emplace_back(1);
 	}
 
 	// Converting the binaryOutcome vector into Tensor

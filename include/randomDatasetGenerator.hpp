@@ -16,6 +16,8 @@ class RandomDatasetGenerator {
 private:
     const size_t m_rows;
     std::vector<std::string> m_labels;
+    std::vector<double> m_outcome_probabilities;
+    std::vector<double> m_weights;
     torch::Tensor m_features;
     torch::Tensor m_target;
     std::mt19937 m_generator;
@@ -31,12 +33,12 @@ private:
       @return: torch::Tensor type column with the generated random values
     */
     template<typename T>
-    torch::Tensor generateRandomValuesHelper(T &dist, double weight = 1.0) {
+    torch::Tensor generateRandomValuesHelper(T &dist) {
         // Creating X type of distributed random numbers, and storing them in distValues
         std::vector<double> distValues(m_rows);
 
         for (auto &elem : distValues) {
-            elem = dist(m_generator) * weight;
+            elem = dist(m_generator);
         }
 
         // Converting the distValues vector into Tensor and returning it
@@ -182,6 +184,11 @@ public:
       With this function, can create the TARGET column, which contains values between 0 and 1
     */
     void generateBinaryTargetColumn();
+
+    /*
+     * Return the calculated probability outcome column for later usage (saving into file)
+     */
+    std::vector<double> getProbabilityOutput(const std::string &train_or_test = "test", double split_size = 0.6);
 
     /*
       This function helps parsing the input vector parameter of the RandomDatasetGenerator constructor.

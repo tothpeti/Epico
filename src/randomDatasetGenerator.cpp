@@ -41,11 +41,14 @@ void RandomDatasetGenerator::generateBinomialColumn(const size_t &num_trials, co
 	std::binomial_distribution<> d(num_trials, prob);
 
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, weight);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
 	appendToFeatures(tens);
 
+	// Saving weights for calculating outcome
+	m_weights.emplace_back(weight);
+
 	// Creating label for the column
-	appendLabel(std::string(1, 'x'));
+	//appendLabel(std::string(1, 'x'));
 }
 
 
@@ -53,11 +56,14 @@ void  RandomDatasetGenerator::generateBernoulliColumn(const double &prob, const 
 	std::bernoulli_distribution d(prob);
 
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, weight);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
 	appendToFeatures(tens);
 
+    // Saving weights for calculating outcome
+    m_weights.emplace_back(weight);
+
 	// Creating label for the column
-	appendLabel(std::string(1, 'x'));
+	//appendLabel(std::string(1, 'x'));
 }
 
 
@@ -65,11 +71,14 @@ void RandomDatasetGenerator::generateNormalColumn(const double &mean, const doub
 	std::normal_distribution<double> d(mean, stddev);
 	
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, weight);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
 	appendToFeatures(tens);
 
+    // Saving weights for calculating outcome
+    m_weights.emplace_back(weight);
+
 	// Creating label for the column
-	appendLabel(std::string(1, 'x'));
+	//appendLabel(std::string(1, 'x'));
 }
 
 
@@ -77,11 +86,14 @@ void RandomDatasetGenerator::generateUniformDiscreteColumn(const int &from, cons
 	std::uniform_int_distribution<> d(from, to);
 
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, weight);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
 	appendToFeatures(tens);
 
+    // Saving weights for calculating outcome
+    m_weights.emplace_back(weight);
+
 	// Creating label for the column
-	appendLabel(std::string(1, 'x'));
+	//appendLabel(std::string(1, 'x'));
 }
 
 
@@ -89,11 +101,14 @@ void RandomDatasetGenerator::generateUniformRealColumn(const double &from, const
 	std::uniform_real_distribution<double> d(from, to);
 	
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, weight);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
 	appendToFeatures(tens);
 
+    // Saving weights for calculating outcome
+    m_weights.emplace_back(weight);
+
 	// Creating label for the column
-	appendLabel(std::string(1, 'x'));
+	//appendLabel(std::string(1, 'x'));
 }
 
 
@@ -101,11 +116,14 @@ void RandomDatasetGenerator::generateGammaColumn(const double &alpha, const doub
 	std::gamma_distribution<double> d(alpha, beta);
 
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, weight);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
 	appendToFeatures(tens);
 
+    // Saving weights for calculating outcome
+    m_weights.emplace_back(weight);
+
 	// Creating label for the column
-	appendLabel(std::string(1, 'x'));
+	//appendLabel(std::string(1, 'x'));
 }
 
 
@@ -116,8 +134,9 @@ void RandomDatasetGenerator::generateBinaryTargetColumn() {
 
 	const double intercept = -1.5;
 
-	std::vector<double> probOutcome;
-	probOutcome.reserve(m_rows);
+	//std::vector<double> probOutcome;
+	//probOutcome.reserve(m_rows);
+    m_outcome_probabilities.reserve(m_rows);
 
 	// Get iterators for the m_features
 	const auto features_accessor = m_features.accessor<double, 2>();
@@ -126,17 +145,19 @@ void RandomDatasetGenerator::generateBinaryTargetColumn() {
 	for(int i = 0; i < features_accessor.size(0); i++) {
 		double probSum = 0.0;
 		for(int j = 0; j < features_accessor.size(1); j++) {
-			probSum = probSum + features_accessor[i][j];
+			probSum = probSum + (features_accessor[i][j] * m_weights[j]);
 		}
-		probOutcome.emplace_back(inverse_logit(probSum + intercept) );
+		//probOutcome.emplace_back(inverse_logit(probSum + intercept) );
+		m_outcome_probabilities.emplace_back(inverse_logit(probSum + intercept));
 	}
 
 	// Calculating the binary outcomes
 	std::vector<double> binaryOutcome;
-	binaryOutcome.reserve(probOutcome.size());
+	//binaryOutcome.reserve(probOutcome.size());
+    binaryOutcome.reserve(m_outcome_probabilities.size());
 
 	// Generating 0 or 1 value
-	for(const auto &val: probOutcome) {
+	for(const auto &val: m_outcome_probabilities) {
 	    if (val < 0.5)
 	        binaryOutcome.emplace_back(0);
 	    else if (val >= 0.5)
@@ -151,7 +172,7 @@ void RandomDatasetGenerator::generateBinaryTargetColumn() {
 	m_target = targetTens.clone().detach();
 
 	// Creating label for the column
-	appendLabel( std::string(1, 'y'));
+	//appendLabel( std::string(1, 'y'));
 }
 
 
@@ -252,5 +273,21 @@ void RandomDatasetGenerator::parseInputColumnData(const std::vector<ColumnDataTy
 				break;
 		}
 	}
+}
+
+std::vector<double> RandomDatasetGenerator::getProbabilityOutput(const std::string &train_or_test, double split_size) {
+    if (train_or_test == "test")
+    {
+        auto current_dataset_length = m_features.size(0);
+        auto cut_from = std::round(m_features.size(0) * (1 - split_size));
+
+        return {m_outcome_probabilities.begin() + cut_from, m_outcome_probabilities.end() };
+    }
+    else
+    {
+        auto cut_till = std::round(m_features.size(0) * split_size);
+
+        return {m_outcome_probabilities.begin(), m_outcome_probabilities.begin()+cut_till};
+    }
 }
 

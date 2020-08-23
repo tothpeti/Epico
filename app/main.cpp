@@ -8,6 +8,7 @@
 
 void write_dataset_and_prediction_into_csv(size_t simulation_num,
                                            const std::vector<std::vector<double>> &test_dataset,
+                                           const std::vector<double> &test_probs,
                                            const std::vector<double> &preds);
 void write_result_metrics_into_csv(const std::vector<std::vector<double>> &result, const std::vector<double> &thresholds,
                const std::string &metric_name);
@@ -137,7 +138,9 @@ int main() {
                                                       RandomDataset::Mode::kTest, 0.4);
         auto numberOfTestSamples = rdTest->size().value();
 
+        // SAVING DATA FOR LATER USAGE WHEN WANT TO WRITE IT TO FILE
         auto test_vec = rdTest->convert_dataset_to_vector();
+        auto test_prob_vec = rdGenerator->getProbabilityOutput("test", 0.6);
 
         auto testingDataLoader = torch::data::make_data_loader(
                 std::move(rdTest->map(torch::data::transforms::Stack<>())),
@@ -283,7 +286,7 @@ int main() {
             f1score_results.emplace_back(f1score);
             accuracy_results.emplace_back(accuracy);
         }
-        std::thread t1(write_dataset_and_prediction_into_csv, i+1 , test_vec, preds);
+        std::thread t1(write_dataset_and_prediction_into_csv, i+1 , test_vec, test_prob_vec, preds);
         t1.join();
         //for (const auto &elem : preds)
         //    std::cout << elem << " ";
@@ -337,6 +340,7 @@ std::vector<double> generate_threshold_values(double from, double to, double str
 
 void write_dataset_and_prediction_into_csv(size_t simulation_num,
                                            const std::vector<std::vector<double>> &test_dataset,
+                                           const std::vector<double> &test_probs,
                                            const std::vector<double> &preds)
 {
     // Create file name
@@ -355,7 +359,7 @@ void write_dataset_and_prediction_into_csv(size_t simulation_num,
         col_name.append(std::to_string(i+1));
         my_file << col_name << ",";
     }
-    my_file << "y,y_pred\n";
+    my_file << "y,y_pred,original_p\n";
 
     // Filling up the rows with values
     for (size_t i = 0; i < test_dataset.size(); i++)
@@ -364,7 +368,7 @@ void write_dataset_and_prediction_into_csv(size_t simulation_num,
         {
             my_file << test_dataset[i][j] << ",";
         }
-        my_file << preds[i] << "\n";
+        my_file << preds[i] <<"," << test_probs[i] << "\n";
     }
 
     my_file.close();

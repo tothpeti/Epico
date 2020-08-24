@@ -66,51 +66,51 @@ int main() {
         //Creating columns for RandomDataset
         RandomDatasetGenerator::ColumnDataType bern{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,                //type
-                {{"prob", 0.5}, {"weight", std::log(0.5)}}        //parameters
+                {{"prob", 0.5}, {"weight", std::log10(0.25)}}        //parameters
         };
         RandomDatasetGenerator::ColumnDataType bern2{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", std::log(0.75)}}
+                {{"prob", 0.5}, {"weight", std::log10(0.5)}}
         };
         RandomDatasetGenerator::ColumnDataType bern3{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", std::log(1)}}
+                {{"prob", 0.5}, {"weight", std::log10(0.75)}}
         };
         RandomDatasetGenerator::ColumnDataType bern4{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", std::log(1.25)}}
+                {{"prob", 0.5}, {"weight", std::log10(1)}}
         };
         RandomDatasetGenerator::ColumnDataType bern5{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", std::log(1.5)}}
+                {{"prob", 0.5}, {"weight", std::log10(1.25)}}
         };
 
         RandomDatasetGenerator::ColumnDataType bern6{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", std::log(1.75)}}
+                {{"prob", 0.5}, {"weight", std::log10(1.5)}}
         };
         RandomDatasetGenerator::ColumnDataType bern7{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", std::log(2)}}
+                {{"prob", 0.5}, {"weight", std::log10(1.75)}}
         };
 
         RandomDatasetGenerator::ColumnDataType bern8{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", std::log(2.25)}}
+                {{"prob", 0.5}, {"weight", std::log10(2)}}
         };
 
         RandomDatasetGenerator::ColumnDataType bern9{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", std::log(2.5)}}
+                {{"prob", 0.5}, {"weight", std::log10(2.25)}}
         };
 
         RandomDatasetGenerator::ColumnDataType bern10{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", std::log(2.75)}}
+                {{"prob", 0.5}, {"weight", std::log10(2.5)}}
         };
 
         std::vector<RandomDatasetGenerator::ColumnDataType> cols{
-                bern, bern2, bern3, bern4, bern5, bern6, bern7, bern, bern9, bern10
+                bern, bern2, bern3, bern4, bern5, bern6, bern7, bern8, bern9, bern10
         };
 
 
@@ -140,7 +140,7 @@ int main() {
 
         // SAVING DATA FOR LATER USAGE WHEN WANT TO WRITE IT TO FILE
         auto test_vec = rdTest->convert_dataset_to_vector();
-        auto test_prob_vec = rdGenerator->getProbabilityOutput("test", 0.6);
+        auto test_prob_vec = rdGenerator->getProbabilityOutput("test", 0.4);
 
         auto testingDataLoader = torch::data::make_data_loader(
                 std::move(rdTest->map(torch::data::transforms::Stack<>())),
@@ -308,6 +308,7 @@ int main() {
 
     // Writing results into csv files .. for analyzing and later visualization
 
+
     std::thread threads[5];
     threads[0] = std::thread(write_result_metrics_into_csv, all_specificity_results, thresholds, "specificity");
     threads[1] = std::thread(write_result_metrics_into_csv, all_sensitivity_results, thresholds, "sensitivity");
@@ -359,7 +360,7 @@ void write_dataset_and_prediction_into_csv(size_t simulation_num,
         col_name.append(std::to_string(i+1));
         my_file << col_name << ",";
     }
-    my_file << "y,y_pred,original_p\n";
+    my_file << "y,y_pred,p\n";
 
     // Filling up the rows with values
     for (size_t i = 0; i < test_dataset.size(); i++)

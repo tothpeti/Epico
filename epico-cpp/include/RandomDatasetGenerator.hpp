@@ -107,9 +107,9 @@ public:
 
     void testPrint() const;
 
-    torch::Tensor getFeatures() const;
+    torch::Tensor getFeatures();
 
-    torch::Tensor getTarget() const;
+    torch::Tensor getTarget();
 
     /*
       Produces random non-negative integer values into a column, distributed 

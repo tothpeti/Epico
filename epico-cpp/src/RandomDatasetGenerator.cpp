@@ -27,12 +27,12 @@ void RandomDatasetGenerator::testPrint() const {
 }
 
 
-torch::Tensor RandomDatasetGenerator::getFeatures() const {
+torch::Tensor RandomDatasetGenerator::getFeatures() {
 	return m_features;
 }
 
 
-torch::Tensor RandomDatasetGenerator::getTarget() const {
+torch::Tensor RandomDatasetGenerator::getTarget() {
 	return m_target;
 }
 
@@ -155,6 +155,7 @@ void RandomDatasetGenerator::generateBinaryTargetColumn() {
     binaryOutcome.reserve(m_outcome_probabilities.size());
 
 	// Generating 0 or 1 value
+	int counter = 0;
 	for(const auto &val: m_outcome_probabilities) {
 	    if (val < 0.5)
         {
@@ -162,9 +163,11 @@ void RandomDatasetGenerator::generateBinaryTargetColumn() {
         }
 	    else if (val >= 0.5)
         {
+	        counter++;
             binaryOutcome.push_back(1.0);
         }
 	}
+	//std::cout << "This many 1s : " << counter << "\n\n";
 
 	// Converting the binaryOutcome vector into Tensor
 	const auto opts = torch::TensorOptions().dtype(torch::kFloat64);

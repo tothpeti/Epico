@@ -11,11 +11,8 @@ struct LogisticRegressionImpl : torch::nn::Module {
 	{
 	}
 
-	torch::Tensor forward(const torch::Tensor &input) {
-		auto x = linear(input);
-		auto a = torch::sigmoid(x);
-		return a;
-		//return linear(input);
+	torch::Tensor forward(torch::Tensor &input) {
+		return torch::sigmoid(linear(input));
 	}
 };
 

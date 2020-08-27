@@ -29,6 +29,7 @@ void CsvFileWriter::saveTestDatasetAndPredictions(size_t simulation_num,
     {
         for (size_t j = 0; j < test_dataset[0].size(); j++)
         {
+            my_file << std::fixed << std::setprecision(3);
             my_file << test_dataset[i][j] << ",";
         }
         my_file << preds[i] <<"," << test_probs[i] << "\n";
@@ -68,7 +69,8 @@ void CsvFileWriter::saveWholeDataset(size_t simulation_num,
     {
         for (size_t j = 0; j < features_accessor.size(1); j++)
         {
-            my_file << (int)features_accessor[i][j] << ",";
+            my_file << std::fixed << std::setprecision(3);
+            my_file << features_accessor[i][j] << ",";
         }
         my_file << target_accessor[i][0] << "\n";
     }
@@ -106,6 +108,7 @@ void CsvFileWriter::saveMetricsResults(const std::vector<std::vector<double>> &r
     {
         for (size_t i = 0; i < vec.size(); i++)
         {
+            my_file << std::fixed << std::setprecision(3);
             my_file << vec[i];
 
             // If the current index is not the last one, then we append a comma

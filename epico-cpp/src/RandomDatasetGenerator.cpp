@@ -41,7 +41,8 @@ void RandomDatasetGenerator::generateBinomialColumn(const size_t &num_trials, co
 	std::binomial_distribution<> d(num_trials, prob);
 
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, "binomial");
+
 	appendToFeatures(tens);
 
 	// Saving weights for calculating outcome
@@ -56,7 +57,8 @@ void  RandomDatasetGenerator::generateBernoulliColumn(const double &prob, const 
 	std::bernoulli_distribution d(prob);
 
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, "bernoulli");
+
 	appendToFeatures(tens);
 
     // Saving weights for calculating outcome
@@ -72,6 +74,7 @@ void RandomDatasetGenerator::generateNormalColumn(const double &mean, const doub
 	
 	// Creating Tensor column filled with distributed values
 	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
+
 	appendToFeatures(tens);
 
     // Saving weights for calculating outcome
@@ -87,6 +90,7 @@ void RandomDatasetGenerator::generateUniformDiscreteColumn(const int &from, cons
 
 	// Creating Tensor column filled with distributed values
 	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
+
 	appendToFeatures(tens);
 
     // Saving weights for calculating outcome
@@ -102,6 +106,7 @@ void RandomDatasetGenerator::generateUniformRealColumn(const double &from, const
 	
 	// Creating Tensor column filled with distributed values
 	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
+
 	appendToFeatures(tens);
 
     // Saving weights for calculating outcome
@@ -117,6 +122,7 @@ void RandomDatasetGenerator::generateGammaColumn(const double &alpha, const doub
 
 	// Creating Tensor column filled with distributed values
 	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
+
 	appendToFeatures(tens);
 
     // Saving weights for calculating outcome

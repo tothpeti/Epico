@@ -33,14 +33,13 @@ private:
       @return: torch::Tensor type column with the generated random values
     */
     template<typename T>
-    torch::Tensor generateRandomValuesHelper(T &dist) {
+    torch::Tensor generateRandomValuesHelper(T &dist, const std::string &distype = "") {
         // Creating X type of distributed random numbers, and storing them in distValues
         std::vector<double> distValues(m_rows);
 
         for (auto &elem : distValues) {
-            elem = dist(m_generator);
+            elem = (int)(dist(m_generator));
         }
-
         // Converting the distValues vector into Tensor and returning it
         auto opts = torch::TensorOptions().dtype(torch::kFloat64);
 

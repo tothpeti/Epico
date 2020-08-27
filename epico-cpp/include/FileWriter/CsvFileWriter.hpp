@@ -3,6 +3,7 @@
 
 #include <string>
 #include <fstream>
+#include <iomanip>
 
 class CsvFileWriter : public FileWriter {
 

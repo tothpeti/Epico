@@ -68,6 +68,10 @@ def save_metrics(all_accuracy_list, all_f1_score_list,
     specificity_df.to_csv(os.path.join(path_to_save_folder, r'specificity.csv'), sep=',', index=False)
 
 
+def save_prediction_df(df, dataset_name, path):
+    df.to_csv(os.path.join(path, dataset_name), sep=',', index=False)
+
+
 def plot_roc_curve(df, y_test):
     logit_roc_auc = roc_auc_score(y_test, df['y_pred0.5'])
     fpr, tpr, thresholds = roc_curve(y_test, df['y_pred0.5'])
@@ -83,9 +87,12 @@ def plot_roc_curve(df, y_test):
     # plt.savefig('Log_ROC')
     plt.show()
 
+
+
 if __name__ == '__main__':
     path_to_files = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_TEST/datasets/"
     path_to_save_folder = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_TEST/"
+    path_to_predictions = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_TEST/predictions"
     datasets = get_all_datasets(path_to_files)
 
     """
@@ -100,13 +107,14 @@ if __name__ == '__main__':
     all_accuracy_list = []
     all_f1_score_list = []
     all_precision_list = []
-    all_sensitvity_list = []
+    all_sensitivity_list = []
     all_specificity_list = []
 
-    result_df = pd.DataFrame()
     for dataset in datasets:
-        path_to_dataset = path_to_files + dataset
-        df = pd.read_csv(path_to_dataset)
+        result_df = pd.DataFrame()
+
+        # path_to_dataset = path_to_files + dataset
+        df = pd.read_csv(os.path.join(path_to_files, dataset))
 
         x_train, x_test, y_train, y_test = train_test_split(df.iloc[:, 0:-1],
                                                             df['y'],
@@ -120,25 +128,31 @@ if __name__ == '__main__':
 
         # Test model
         #y_pred = logistic_reg.predict(x_test)
+        result_df = pd.concat([result_df, x_test, y_test], axis=1)
+        result_df.reset_index(inplace=True, drop=True)
+
+        # result_df['y'] = y_test
         result_df['y_pred_probs'] = logistic_reg.predict_proba(x_test)[:, 1]
+        result_df['y_pred_probs'] = result_df['y_pred_probs'].round(decimals=3)
         #df.loc[x_test.index, 'y_pred_probs'] = logistic_reg.predict_proba(x_test)[:, 1]
 
+        # Create y_predN columns by using threshold values
         for idx in range(len(thresholds)):
             result_df[threshold_col_names[idx]] = np.nan
             result_df.loc[result_df['y_pred_probs'] >= thresholds[idx], threshold_col_names[idx]] = 1
             result_df.loc[result_df['y_pred_probs'] < thresholds[idx], threshold_col_names[idx]] = 0
 
         accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(result_df, y_test, threshold_col_names)
-        plot_roc_curve(result_df, y_test)
+
+        # save_prediction_df(result_df, dataset, path_to_predictions)
 
         all_accuracy_list.append(accuracy_list)
         all_f1_score_list.append(f1_score_list)
         all_precision_list.append(precision_list)
-        all_sensitvity_list.append(sensitivity_list)
+        all_sensitivity_list.append(sensitivity_list)
         all_specificity_list.append(specificity_list)
-"""
-    save_metrics(all_accuracy_list, all_f1_score_list,
-                 all_precision_list, all_sensitvity_list,
-                 all_specificity_list, threshold_col_names,
-                 path_to_save_folder)
-"""
+
+    #save_metrics(all_accuracy_list, all_f1_score_list,
+    #             all_precision_list, all_sensitvity_list,
+    #             all_specificity_list, threshold_col_names,
+    #             path_to_save_folder)

@@ -103,9 +103,9 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagra
     ax2.set_xlabel('Thresholds', fontsize=16)
     ax2.set(xlim=(float(thresholds[0]), float(thresholds[-1])))
 
-    #file_name = name +'_lineplots_all_average_metrics_all_thresholds_all_covariates.png'
-    #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
-    plt.show()
+    file_name = name +'_lineplots_all_average_metrics_all_thresholds_all_covariates.png'
+    plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
+    #plt.show()
 
 
 def average_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets_name):
@@ -193,9 +193,9 @@ def min_max_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets_
 
 
 if __name__ == '__main__':
-    path_to_predictions = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_TEST/predictions/"
-    path_to_metrics = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_TEST/"
-    path_to_diagrams = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_TEST/diagrams/"
+    path_to_predictions = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_improved/predictions/"
+    path_to_metrics = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_improved/"
+    path_to_diagrams = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_improved/diagrams/"
     file_name = '50_simrounds_10_bern05prob'
 
     datasets = get_all_datasets(path_to_predictions)
@@ -208,11 +208,11 @@ if __name__ == '__main__':
     sensitivity_df = pd.read_csv(os.path.join(path_to_metrics, metrics[3]))
     specificity_df = pd.read_csv(os.path.join(path_to_metrics, metrics[4]))
 
-    #create_boxplot_for_all_metrics_and_thresholds(file_name, path_to_diagrams, accuracy_df, precision_df, f1score_df,
-    #                                              specificity_df, sensitivity_df)
+    create_boxplot_for_all_metrics_and_thresholds(file_name, path_to_diagrams, accuracy_df, precision_df, f1score_df,
+                                                  specificity_df, sensitivity_df)
 
-    #create_lineplot_averages_for_all_metrics_and_thresholds(file_name, path_to_diagrams ,accuracy_df, precision_df, f1score_df,
-    #                                                         specificity_df, sensitivity_df)
+    create_lineplot_averages_for_all_metrics_and_thresholds(file_name, path_to_diagrams ,accuracy_df, precision_df, f1score_df,
+                                                             specificity_df, sensitivity_df)
 
-    #min_max_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets)
-    #average_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets)
+    min_max_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets)
+    average_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets)

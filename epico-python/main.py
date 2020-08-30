@@ -26,11 +26,11 @@ def create_metrics(df, y_test, threshold_cols):
 
     for threshold_col in threshold_cols:
         conf_matrix = confusion_matrix(y_test, df[threshold_col])
-
-        tp = conf_matrix[0][0]
-        fn = conf_matrix[0][1]
-        fp = conf_matrix[1][0]
-        tn = conf_matrix[1][1]
+        #print(conf_matrix)
+        tn = conf_matrix[0][0]
+        fp = conf_matrix[0][1]
+        fn = conf_matrix[1][0]
+        tp = conf_matrix[1][1]
 
         #print(str(tp)+ " "+ str(fn)+ " "+ str(fp)+ " "+ str(tn))
         accuracy = (tp + tn) / (tp + tn + fp + fn)
@@ -90,9 +90,9 @@ def plot_roc_curve(df, y_test):
 
 
 if __name__ == '__main__':
-    path_to_files = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_TEST/datasets/"
-    path_to_save_folder = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_TEST/"
-    path_to_predictions = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_TEST/predictions"
+    path_to_files = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_improved/datasets/"
+    path_to_save_folder = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_improved/"
+    path_to_predictions = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_improved/predictions"
     datasets = get_all_datasets(path_to_files)
 
     """
@@ -144,7 +144,7 @@ if __name__ == '__main__':
 
         accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(result_df, y_test, threshold_col_names)
 
-        # save_prediction_df(result_df, dataset, path_to_predictions)
+        save_prediction_df(result_df, dataset, path_to_predictions)
 
         all_accuracy_list.append(accuracy_list)
         all_f1_score_list.append(f1_score_list)
@@ -152,7 +152,7 @@ if __name__ == '__main__':
         all_sensitivity_list.append(sensitivity_list)
         all_specificity_list.append(specificity_list)
 
-    #save_metrics(all_accuracy_list, all_f1_score_list,
-    #             all_precision_list, all_sensitvity_list,
-    #             all_specificity_list, threshold_col_names,
-    #             path_to_save_folder)
+    save_metrics(all_accuracy_list, all_f1_score_list,
+                 all_precision_list, all_sensitivity_list,
+                 all_specificity_list, threshold_col_names,
+                 path_to_save_folder)

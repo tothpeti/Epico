@@ -17,6 +17,10 @@ def get_all_datasets(path):
     return [file for file in glob.glob("*.csv")]
 
 
+def get_length_of_test_dataset(path_to_prediction, dataset_name):
+    return len(pd.read_csv(os.path.join(path_to_prediction, dataset_name)))
+
+
 def create_boxplot_for_all_metrics_and_thresholds(name, path_to_diagrams,
                                                   acc_df, prec_df, f1_df,
                                                   spec_df, sens_df):
@@ -108,9 +112,10 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagra
     #plt.show()
 
 
-def average_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets_name):
+def average_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets_name, len_of_test_datasets):
     # https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html
-    mean_fpr = np.linspace(0, 1, 100)
+    mean_fpr = np.linspace(0, 1, len_of_test_datasets)
+
     tpr_list = []
     auc_list = []
 
@@ -130,10 +135,10 @@ def average_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets_
     std_auc = np.std(auc_list)
 
     plt.figure( figsize=(12, 6))
-    plt.plot(mean_fpr, mean_tpr, label=r'Mean ROC (AUC = %0.2f $\pm$ %0.2f)' % (mean_auc, std_auc))
+    plt.plot(mean_fpr, mean_tpr, label=r'Mean ROC (AUC = %0.4f $\pm$ %0.3f)' % (mean_auc, std_auc))
     plt.plot([0, 1], [0, 1], 'r--')
-    plt.xlim([-0.025, 1.0])
-    plt.ylim([0.0, 1.05])
+    plt.xlim([-0.025, 1.05])
+    plt.ylim([-0.025, 1.05])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
     plt.title('Mean ROC curve')
@@ -158,13 +163,13 @@ def min_max_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets_
     max_auc_idx = auc_list.index(max(auc_list))
     min_auc_idx = auc_list.index(min(auc_list))
 
-    print('max auc idx: '+str(results_list[max_auc_idx][3]+1))
     print('min auc idx: '+str(results_list[min_auc_idx][3]+1))
+    print('max auc idx: '+str(results_list[max_auc_idx][3]+1))
 
     plt.figure(figsize=(16, 6))
     ax = plt.subplot(1, 2, 1)
     plt.title('ROC curve - maximum AUC', fontsize=16)
-    ax.plot(results_list[max_auc_idx][0], results_list[max_auc_idx][1], 'b', label='AUC = %0.3f' % results_list[max_auc_idx][2])
+    ax.plot(results_list[max_auc_idx][0], results_list[max_auc_idx][1], 'b', label='AUC = %0.4f' % results_list[max_auc_idx][2])
     ax.legend(loc='lower right', fontsize=12)
     ax.plot([0, 1], [0, 1], 'r--')
     plt.xticks(fontsize=14)
@@ -177,7 +182,7 @@ def min_max_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets_
 
     ax2 = plt.subplot(1, 2, 2)
     plt.title('ROC curve - minimum AUC', fontsize=16)
-    ax2.plot(results_list[min_auc_idx][0], results_list[min_auc_idx][1], 'b', label='AUC = %0.3f' % results_list[min_auc_idx][2])
+    ax2.plot(results_list[min_auc_idx][0], results_list[min_auc_idx][1], 'b', label='AUC = %0.4f' % results_list[min_auc_idx][2])
     ax2.legend(loc='lower right', fontsize=12)
     ax2.plot([0, 1], [0, 1], 'r--')
     plt.xticks(fontsize=14)
@@ -188,14 +193,15 @@ def min_max_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets_
     plt.xlabel('False Positive Rate', fontsize=16)
     #plt.show()
 
-    file_name = name +'_min_max_auc_roc_curve_all_covariates.png'
-    plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
+    #file_name = name +'_min_max_auc_roc_curve_all_covariates.png'
+    #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
 if __name__ == '__main__':
-    path_to_predictions = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_improved/predictions/"
-    path_to_metrics = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_improved/"
-    path_to_diagrams = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_improved/diagrams/"
+    path_to_predictions = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_05_to_095_thresholds_20200901/predictions/"
+    path_to_metrics = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_05_to_095_thresholds_20200901/"
+    path_to_diagrams = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_05_to_095_thresholds_20200901/diagrams/"
+
     file_name = '50_simrounds_10_bern05prob'
 
     datasets = get_all_datasets(path_to_predictions)
@@ -208,11 +214,13 @@ if __name__ == '__main__':
     sensitivity_df = pd.read_csv(os.path.join(path_to_metrics, metrics[3]))
     specificity_df = pd.read_csv(os.path.join(path_to_metrics, metrics[4]))
 
-    create_boxplot_for_all_metrics_and_thresholds(file_name, path_to_diagrams, accuracy_df, precision_df, f1score_df,
-                                                  specificity_df, sensitivity_df)
+    #create_boxplot_for_all_metrics_and_thresholds(file_name, path_to_diagrams, accuracy_df, precision_df, f1score_df,
+    #                                              specificity_df, sensitivity_df)
 
-    create_lineplot_averages_for_all_metrics_and_thresholds(file_name, path_to_diagrams ,accuracy_df, precision_df, f1score_df,
-                                                             specificity_df, sensitivity_df)
+    #create_lineplot_averages_for_all_metrics_and_thresholds(file_name, path_to_diagrams ,accuracy_df, precision_df, f1score_df,
+    #                                                         specificity_df, sensitivity_df)
 
-    min_max_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets)
-    average_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets)
+    #min_max_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets)
+    len_of_test_dataset = get_length_of_test_dataset(path_to_predictions, datasets[0])
+    average_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets, len_of_test_dataset)
+    #test_average_roc(file_name, path_to_predictions, path_to_diagrams, datasets)

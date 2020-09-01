@@ -88,18 +88,17 @@ def plot_roc_curve(df, y_test):
     plt.show()
 
 
-
 if __name__ == '__main__':
-    path_to_files = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_improved/datasets/"
-    path_to_save_folder = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_improved/"
-    path_to_predictions = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_with_05_to_095_thresholds_improved/predictions"
-    datasets = get_all_datasets(path_to_files)
+    path_to_datasets = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/Test/datasets/"
+    path_to_save_folder = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/Test/"
+    path_to_predictions = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/Test/predictions/"
+    datasets = get_all_datasets(path_to_datasets)
 
     """
         Preprocess and model train/test
     """
     # Start(inclusive), End(exclusive), Steps
-    thresholds = np.arange(0.5, 1, 0.05)
+    thresholds = np.arange(0.0, 1, 0.05)
     # Need to round the numbers to 2 decimal places, due to decimal error when try to print out the value
     thresholds = [round(threshold, 2) for threshold in thresholds]
     threshold_col_names = ['y_pred'+str(threshold) for threshold in thresholds]
@@ -114,7 +113,7 @@ if __name__ == '__main__':
         result_df = pd.DataFrame()
 
         # path_to_dataset = path_to_files + dataset
-        df = pd.read_csv(os.path.join(path_to_files, dataset))
+        df = pd.read_csv(os.path.join(path_to_datasets, dataset))
 
         x_train, x_test, y_train, y_test = train_test_split(df.iloc[:, 0:-1],
                                                             df['y'],

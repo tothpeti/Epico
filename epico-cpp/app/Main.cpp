@@ -75,7 +75,6 @@ int main() {
         // Create RandomDataLoader from previously created Columns
         auto rdGenerator = std::make_unique<RandomDatasetGenerator>(number_of_rows, cols, true);
         writer.saveWholeDataset(i+1, rdGenerator);
-
     }
     return 0;
 }

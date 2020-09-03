@@ -58,11 +58,12 @@ def create_boxplot_for_all_metrics_and_thresholds(name, path_to_diagrams,
 
 def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagrams,
                                                             acc_df, prec_df,
-                                                            f1_df, spec_df, sens_df):
+                                                            f1_df, spec_df,
+                                                            sens_df, thresholds):
 
-    cols_num = len(sens_df.columns)
+    # cols_num = len(sens_df.columns)
     # thresholds = [ thresh.split('_')[0] for thresh in sens_df.columns ]
-    thresholds = [thresh[6:] for thresh in sens_df.columns]
+    # thresholds = [thresh[6:] for thresh in sens_df.columns]
     avg_acc_list = []
     avg_sens_list = []
     avg_spec_list = []
@@ -87,7 +88,7 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagra
     plt.figure(figsize=(16, 6))
     plt.suptitle('Averages of each metrics (for all thresholds)', fontsize=16)
     ax = plt.subplot(1, 2, 1)
-    plt.xticks(fontsize=12)
+    plt.xticks(thresholds, rotation=70, fontsize=12)
     plt.yticks(fontsize=12)
     ax = sns.lineplot(data=tmp_all_metrics_df, x='thresholds', y='sens_mean', label='Sensitivity', palette="Set2")
     ax = sns.lineplot(data=tmp_all_metrics_df, x='thresholds', y='spec_mean', label='Specificity', palette="Set2")
@@ -96,16 +97,20 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagra
     ax.legend(loc='best')
     ax.set_ylabel('Mean', fontsize=16)
     ax.set_xlabel('Thresholds', fontsize=16)
-    ax.set(xlim=(float(thresholds[0]), float(thresholds[-1])))
+    # ax.set(xlim=(float(thresholds[0]), float(thresholds[-1])))
+    plt.xlim([float(thresholds[0])-0.025, float(thresholds[-1])+0.05])
+    plt.ylim([0.0, 1.05])
 
     ax2 = plt.subplot(1, 2, 2)
-    plt.xticks(fontsize=12)
+    plt.xticks(thresholds, rotation=70, fontsize=12)
     plt.yticks(fontsize=12)
     ax2 = sns.lineplot(data=tmp_all_metrics_df, x='thresholds', y='acc_mean', label='Accuracy', palette="Set2")
     ax2.legend(loc='best')
     ax2.set_ylabel('Mean', fontsize=16)
     ax2.set_xlabel('Thresholds', fontsize=16)
-    ax2.set(xlim=(float(thresholds[0]), float(thresholds[-1])))
+    # ax2.set(xlim=(float(thresholds[0]), float(thresholds[-1])))
+    plt.xlim([float(thresholds[0])-0.025, float(thresholds[-1])+0.05])
+    plt.ylim([0.0, 1.05])
 
     file_name = name +'_lineplots_all_average_metrics_all_thresholds_all_covariates.png'
     plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
@@ -193,14 +198,14 @@ def min_max_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets_
     plt.xlabel('False Positive Rate', fontsize=16)
     #plt.show()
 
-    #file_name = name +'_min_max_auc_roc_curve_all_covariates.png'
-    #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
+    file_name = name +'_min_max_auc_roc_curve_all_covariates.png'
+    plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
 if __name__ == '__main__':
-    path_to_predictions = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_05_to_095_thresholds_20200901/predictions/"
-    path_to_metrics = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_05_to_095_thresholds_20200901/"
-    path_to_diagrams = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_05_to_095_thresholds_20200901/diagrams/"
+    path_to_predictions = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_0_to_1_thresholds_20200903/predictions/"
+    path_to_metrics = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_0_to_1_thresholds_20200903/"
+    path_to_diagrams = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_0_to_1_thresholds_20200903/diagrams/"
 
     file_name = '50_simrounds_10_bern05prob'
 
@@ -214,13 +219,14 @@ if __name__ == '__main__':
     sensitivity_df = pd.read_csv(os.path.join(path_to_metrics, metrics[3]))
     specificity_df = pd.read_csv(os.path.join(path_to_metrics, metrics[4]))
 
-    #create_boxplot_for_all_metrics_and_thresholds(file_name, path_to_diagrams, accuracy_df, precision_df, f1score_df,
-    #                                              specificity_df, sensitivity_df)
+    create_boxplot_for_all_metrics_and_thresholds(file_name, path_to_diagrams, accuracy_df, precision_df, f1score_df,
+                                                  specificity_df, sensitivity_df)
 
-    #create_lineplot_averages_for_all_metrics_and_thresholds(file_name, path_to_diagrams ,accuracy_df, precision_df, f1score_df,
-    #                                                         specificity_df, sensitivity_df)
+    thresholds = np.arange(0.0, 1.05, 0.05)
+    create_lineplot_averages_for_all_metrics_and_thresholds(file_name, path_to_diagrams, accuracy_df, precision_df, f1score_df,
+                                                             specificity_df, sensitivity_df, thresholds)
 
-    #min_max_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets)
+    min_max_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets)
+
     len_of_test_dataset = get_length_of_test_dataset(path_to_predictions, datasets[0])
     average_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets, len_of_test_dataset)
-    #test_average_roc(file_name, path_to_predictions, path_to_diagrams, datasets)

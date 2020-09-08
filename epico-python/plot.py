@@ -61,9 +61,6 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagra
                                                             f1_df, spec_df,
                                                             sens_df, thresholds):
 
-    # cols_num = len(sens_df.columns)
-    # thresholds = [ thresh.split('_')[0] for thresh in sens_df.columns ]
-    # thresholds = [thresh[6:] for thresh in sens_df.columns]
     avg_acc_list = []
     avg_sens_list = []
     avg_spec_list = []
@@ -85,30 +82,21 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagra
     tmp_all_metrics_df['prec_mean'] = pd.to_numeric(pd.Series(avg_prec_list), errors='coerce')
     tmp_all_metrics_df['f1_mean'] = pd.to_numeric(pd.Series(avg_f1_list), errors='coerce')
 
-    plt.figure(figsize=(16, 6))
-    plt.suptitle('Averages of each metrics (for all thresholds)', fontsize=16)
-    ax = plt.subplot(1, 2, 1)
+    y_range = np.arange(0.0, 1.1, 0.1)
+
+    ax = plt.figure(figsize=(12, 6))
+    plt.title('Averages of each metrics (for all thresholds)', fontsize=16)
     plt.xticks(thresholds, rotation=70, fontsize=12)
-    plt.yticks(fontsize=12)
+    plt.yticks(y_range, fontsize=12)
     ax = sns.lineplot(data=tmp_all_metrics_df, x='thresholds', y='sens_mean', label='Sensitivity', palette="Set2")
     ax = sns.lineplot(data=tmp_all_metrics_df, x='thresholds', y='spec_mean', label='Specificity', palette="Set2")
     ax = sns.lineplot(data=tmp_all_metrics_df, x='thresholds', y='prec_mean', label='Precision', palette="Set2")
     ax = sns.lineplot(data=tmp_all_metrics_df, x='thresholds', y='f1_mean', label='F1 score', palette="Set2")
+    ax = sns.lineplot(data=tmp_all_metrics_df, x='thresholds', y='acc_mean', label='Accuracy', palette="Set2")
     ax.legend(loc='best')
     ax.set_ylabel('Mean', fontsize=16)
     ax.set_xlabel('Thresholds', fontsize=16)
     # ax.set(xlim=(float(thresholds[0]), float(thresholds[-1])))
-    plt.xlim([float(thresholds[0])-0.025, float(thresholds[-1])+0.05])
-    plt.ylim([0.0, 1.05])
-
-    ax2 = plt.subplot(1, 2, 2)
-    plt.xticks(thresholds, rotation=70, fontsize=12)
-    plt.yticks(fontsize=12)
-    ax2 = sns.lineplot(data=tmp_all_metrics_df, x='thresholds', y='acc_mean', label='Accuracy', palette="Set2")
-    ax2.legend(loc='best')
-    ax2.set_ylabel('Mean', fontsize=16)
-    ax2.set_xlabel('Thresholds', fontsize=16)
-    # ax2.set(xlim=(float(thresholds[0]), float(thresholds[-1])))
     plt.xlim([float(thresholds[0])-0.025, float(thresholds[-1])+0.05])
     plt.ylim([0.0, 1.05])
 
@@ -219,14 +207,14 @@ if __name__ == '__main__':
     sensitivity_df = pd.read_csv(os.path.join(path_to_metrics, metrics[3]))
     specificity_df = pd.read_csv(os.path.join(path_to_metrics, metrics[4]))
 
-    create_boxplot_for_all_metrics_and_thresholds(file_name, path_to_diagrams, accuracy_df, precision_df, f1score_df,
-                                                  specificity_df, sensitivity_df)
+    #create_boxplot_for_all_metrics_and_thresholds(file_name, path_to_diagrams, accuracy_df, precision_df, f1score_df,
+    #                                              specificity_df, sensitivity_df)
 
     thresholds = np.arange(0.0, 1.05, 0.05)
     create_lineplot_averages_for_all_metrics_and_thresholds(file_name, path_to_diagrams, accuracy_df, precision_df, f1score_df,
                                                              specificity_df, sensitivity_df, thresholds)
 
-    min_max_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets)
+    #min_max_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets)
 
-    len_of_test_dataset = get_length_of_test_dataset(path_to_predictions, datasets[0])
-    average_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets, len_of_test_dataset)
+    #len_of_test_dataset = get_length_of_test_dataset(path_to_predictions, datasets[0])
+    #average_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets, len_of_test_dataset)

@@ -85,7 +85,7 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagra
     y_range = np.arange(0.0, 1.1, 0.1)
 
     ax = plt.figure(figsize=(12, 6))
-    plt.title('Averages of each metrics (for all thresholds)', fontsize=16)
+    plt.title('Logistic regression considering all predictive variables', fontsize=16)
     plt.xticks(thresholds, rotation=70, fontsize=12)
     plt.yticks(y_range, fontsize=12)
     ax = sns.lineplot(data=tmp_all_metrics_df, x='thresholds', y='sens_mean', label='Sensitivity', palette="Set2")
@@ -94,8 +94,8 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagra
     ax = sns.lineplot(data=tmp_all_metrics_df, x='thresholds', y='f1_mean', label='F1 score', palette="Set2")
     ax = sns.lineplot(data=tmp_all_metrics_df, x='thresholds', y='acc_mean', label='Accuracy', palette="Set2")
     ax.legend(loc='best')
-    ax.set_ylabel('Mean', fontsize=16)
-    ax.set_xlabel('Thresholds', fontsize=16)
+    ax.set_ylabel('The average value of quality metrics', fontsize=16)
+    ax.set_xlabel('Threshold', fontsize=16)
     # ax.set(xlim=(float(thresholds[0]), float(thresholds[-1])))
     plt.xlim([float(thresholds[0])-0.025, float(thresholds[-1])+0.05])
     plt.ylim([0.0, 1.05])
@@ -134,7 +134,7 @@ def average_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets_
     plt.ylim([-0.025, 1.05])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
-    plt.title('Mean ROC curve')
+    plt.title('Logistic regression considering all predictive variables')
     plt.legend(loc="lower right")
     #plt.show()
 
@@ -216,5 +216,5 @@ if __name__ == '__main__':
 
     #min_max_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets)
 
-    #len_of_test_dataset = get_length_of_test_dataset(path_to_predictions, datasets[0])
-    #average_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets, len_of_test_dataset)
+    len_of_test_dataset = get_length_of_test_dataset(path_to_predictions, datasets[0])
+    average_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets, len_of_test_dataset)

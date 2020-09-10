@@ -1,0 +1,59 @@
+import os
+from sklearn.metrics import confusion_matrix
+import pandas as pd
+
+
+
+def create_metrics(df, y_test, threshold_cols):
+    accuracy_list = []
+    f1_score_list = []
+    precision_list = []
+    sensitvity_list = []
+    specificity_list = []
+
+    for threshold_col in threshold_cols:
+        conf_matrix = confusion_matrix(y_test, df[threshold_col])
+        #print(conf_matrix)
+        tn = conf_matrix[0][0]
+        fp = conf_matrix[0][1]
+        fn = conf_matrix[1][0]
+        tp = conf_matrix[1][1]
+
+        #print(str(tp)+ " "+ str(fn)+ " "+ str(fp)+ " "+ str(tn))
+        accuracy = (tp + tn) / (tp + tn + fp + fn)
+        f1_score = (2 * tp) / (2*tp + fp + fn)
+        precision = tp / (tp + fp)
+        sensitivity = tp / (tp + fn)
+        specificity = tn / (tn + fp)
+
+        accuracy_list.append(round(accuracy, 3))
+        f1_score_list.append(round(f1_score, 3))
+        precision_list.append(round(precision, 3))
+        sensitvity_list.append(round(sensitivity, 3))
+        specificity_list.append(round(specificity, 3))
+
+    return accuracy_list, f1_score_list, precision_list, sensitvity_list, specificity_list
+
+
+def save_metrics(all_accuracy_list, all_f1_score_list,
+                 all_precision_list, all_sensitvity_list,
+                 all_specificity_list, threshold_col_names,
+                 path_to_save_folder):
+
+    # Convert lists to DataFrames
+    accuracy_df = pd.DataFrame(all_accuracy_list, columns=threshold_col_names)
+    f1_score_df = pd.DataFrame(all_f1_score_list, columns=threshold_col_names)
+    precision_df = pd.DataFrame(all_precision_list, columns=threshold_col_names)
+    sensitivity_df = pd.DataFrame(all_sensitvity_list, columns=threshold_col_names)
+    specificity_df = pd.DataFrame(all_specificity_list, columns=threshold_col_names)
+
+    # Save DataFrames into csv files
+    accuracy_df.to_csv(os.path.join(path_to_save_folder, r'accuracy.csv'), sep=',', index=False)
+    f1_score_df.to_csv(os.path.join(path_to_save_folder, r'f1_score.csv'), sep=',', index=False)
+    precision_df.to_csv(os.path.join(path_to_save_folder, r'precision.csv'), sep=',', index=False)
+    sensitivity_df.to_csv(os.path.join(path_to_save_folder, r'sensitivity.csv'), sep=',', index=False)
+    specificity_df.to_csv(os.path.join(path_to_save_folder, r'specificity.csv'), sep=',', index=False)
+
+
+def save_prediction_df(df, dataset_name, path):
+    df.to_csv(os.path.join(path, dataset_name), sep=',', index=False)

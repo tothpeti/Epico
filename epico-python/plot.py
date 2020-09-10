@@ -192,8 +192,9 @@ def min_max_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets_
 
 if __name__ == '__main__':
     path_to_predictions = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_0_to_1_thresholds_20200903/predictions/"
-    path_to_metrics = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_0_to_1_thresholds_20200903/"
-    path_to_diagrams = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_0_to_1_thresholds_20200903/diagrams/"
+    path_to_metrics = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_0_to_1_thresholds_20200903/metrics/"
+    path_to_diagrams_without_excl = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_0_to_1_thresholds_20200903/diagrams/without_column_excluding"
+    path_to_diagrams_with_excl = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_0_to_1_thresholds_20200903/diagrams/with_column_excluding"
 
     file_name = '50_simrounds_10_bern05prob'
 
@@ -211,10 +212,10 @@ if __name__ == '__main__':
     #                                              specificity_df, sensitivity_df)
 
     thresholds = np.arange(0.0, 1.05, 0.05)
-    create_lineplot_averages_for_all_metrics_and_thresholds(file_name, path_to_diagrams, accuracy_df, precision_df, f1score_df,
+    create_lineplot_averages_for_all_metrics_and_thresholds(file_name, path_to_diagrams_without_excl, accuracy_df, precision_df, f1score_df,
                                                              specificity_df, sensitivity_df, thresholds)
 
     #min_max_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets)
 
     len_of_test_dataset = get_length_of_test_dataset(path_to_predictions, datasets[0])
-    average_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, datasets, len_of_test_dataset)
+    average_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams_without_excl, datasets, len_of_test_dataset)

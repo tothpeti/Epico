@@ -38,7 +38,10 @@ if __name__ == '__main__':
     all_sensitivity_list = []
     all_specificity_list = []
 
-    for col_to_exclude in range(10):
+    # Number of features
+    num_of_cols = 10
+
+    for col_to_exclude in range(num_of_cols):
         for dataset in datasets:
 
             df = pd.read_csv(os.path.join(path_to_datasets, dataset))

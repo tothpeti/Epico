@@ -21,9 +21,9 @@ def create_metrics(df, y_test, threshold_cols):
         accuracy = (tp + tn) / (tp + tn + fp + fn)
         f1_score = (2 * tp) / (2*tp + fp + fn)
 
-        precision = tp / (tp + fp)
-        sensitivity = tp / (tp + fn)
-        specificity = tn / (tn + fp)
+        precision = tp / (tp + fp) if (tp+fp) != 0 else 0.0
+        sensitivity = tp / (tp + fn) if (tp + fn) != 0 else 0.0
+        specificity = tn / (tn + fp) if (tn + fn) != 0 else 0.0
 
         accuracy_list.append(round(accuracy, 3))
         f1_score_list.append(round(f1_score, 3))
@@ -37,7 +37,7 @@ def create_metrics(df, y_test, threshold_cols):
 def save_metrics(all_accuracy_list, all_f1_score_list,
                  all_precision_list, all_sensitivity_list,
                  all_specificity_list, threshold_col_names,
-                 path_to_save_folder, excluded_col):
+                 path_to_save_folder, excluded_col=""):
 
     # Convert lists to DataFrames
     accuracy_df = pd.DataFrame(all_accuracy_list, columns=threshold_col_names)
@@ -62,3 +62,7 @@ def save_metrics(all_accuracy_list, all_f1_score_list,
 
 def save_prediction_df(df, dataset_name, path):
     df.to_csv(os.path.join(path, dataset_name), sep=',', index=False)
+
+
+def open_metrics_files_for():
+    pass

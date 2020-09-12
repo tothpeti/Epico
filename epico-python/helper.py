@@ -9,6 +9,10 @@ def get_all_datasets_names(path):
     return [file for file in glob.glob("*.csv")]
 
 
+def get_length_of_test_dataset(path_to_prediction, dataset_name):
+    return len(pd.read_csv(os.path.join(path_to_prediction, dataset_name)))
+
+
 def read_all_datasets_in_memory(datasets_names_list, path_to_datasets):
     tmp = [read_csv(os.path.join(path_to_datasets, dataset_name)) for dataset_name in datasets_names_list]
     return tmp

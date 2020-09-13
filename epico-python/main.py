@@ -17,7 +17,7 @@ if __name__ == '__main__':
     datasets_names = get_all_datasets_names(path_to_datasets)
     datasets = read_all_datasets_in_memory(datasets_names, path_to_datasets)
 
-
+    """
     # Start(inclusive), End(exclusive), Steps
     # 0.0 - 1.0
     thresholds = np.arange(0.0, 1.05, 0.05)
@@ -38,3 +38,4 @@ if __name__ == '__main__':
 
     put_column_excluded_files_into_folders(path_to_metrics_col_excluding)
     put_column_excluded_files_into_folders(path_to_predictions_col_excluding)
+    """

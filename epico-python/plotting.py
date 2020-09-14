@@ -6,7 +6,7 @@ import numpy as np
     Custom files
 """
 from plots import create_lineplot_averages_for_all_metrics_and_thresholds, create_boxplot_for_all_metrics_and_thresholds
-from plots import create_average_auc_roc_curve, create_min_max_auc_roc_curve
+from plots import create_average_auc_roc_curve, create_min_max_auc_roc_curve, create_3d_plot_for_each_metrics
 from helper import get_all_datasets_names, get_length_of_test_dataset, read_all_datasets_in_memory, read_all_folders_files_in_memory
 
 
@@ -14,13 +14,25 @@ def create_plots_for_column_excluded_datasets(file_name, path_to_predictions, pa
     all_pred_dirs = os.listdir(path_to_predictions)
     all_metrics_dirs = os.listdir(path_to_metrics)
 
-    all_pred_datasets = read_all_folders_files_in_memory(all_pred_dirs, path_to_predictions)
+    all_pred_datasets = read_all_folders_files_in_memory(all_pred_dirs, path_to_predictions, is_prediction=True)
 
     # indexes --> 0: accuracy, 1: f1_score, 2: precision, 3: sensitivity, 4: specificity
-    all_metrics_datasets = read_all_folders_files_in_memory(all_metrics_dirs, path_to_metrics)
+    all_metrics_datasets = read_all_folders_files_in_memory(all_metrics_dirs, path_to_metrics, is_prediction=False)
 
-    for idx in range(len(all_pred_datasets)):
-        pass
+    #for col_excl_idx, pred_df_list in enumerate(all_pred_datasets):
+    #    create_average_auc_roc_curve(file_name, path_to_predictions, path_to_diagrams, pred_df_list, len(pred_df_list[0]), col_excl_idx)
+
+    thresholds = np.arange(0.0, 1.05, 0.05)
+    for col_excl_idx, metric_df_list in enumerate(all_metrics_datasets):
+        """
+        create_lineplot_averages_for_all_metrics_and_thresholds(file_name, path_to_diagrams_col_excl, acc_df=metric_df_list[0],
+                                                                f1_df=metric_df_list[1], prec_df=metric_df_list[2],
+                                                                sens_df=metric_df_list[3], spec_df=metric_df_list[4],
+                                                                thresholds=thresholds, col_excl_idx=col_excl_idx)
+                                                                """
+        create_3d_plot_for_each_metrics(acc_df=metric_df_list[0], thresholds=thresholds, col_excl_idx=col_excl_idx)
+    # print(all_pred_datasets[0][0]['y'])
+    # print(len(all_pred_datasets[0]))
 
 
 if __name__ == '__main__':
@@ -33,10 +45,11 @@ if __name__ == '__main__':
 
     file_name = '50_simrounds_10_bern05prob'
 
-    #datasets = get_all_datasets_names(path_to_predictions)
-    #metrics = get_all_datasets_names(path_to_metrics)
+    # Used for single folders
+    #datasets = read_all_datasets_in_memory(path_to_predictions)
+    #metrics = read_all_datasets_in_memory(path_to_metrics)
 
-    create_plots_for_column_excluded_datasets(path_to_predictions_col_excl, path_to_metrics_col_excl)
+    create_plots_for_column_excluded_datasets(file_name, path_to_predictions_col_excl, path_to_metrics_col_excl, path_to_diagrams_col_excl)
     """
     # Open previously saved metrics
     accuracy_df = pd.read_csv(os.path.join(path_to_metrics, metrics[0]))

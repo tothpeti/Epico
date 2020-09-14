@@ -17,7 +17,6 @@ if __name__ == '__main__':
     datasets_names = get_all_datasets_names(path_to_datasets)
     datasets = read_all_datasets_in_memory(datasets_names, path_to_datasets)
 
-    """
     # Start(inclusive), End(exclusive), Steps
     # 0.0 - 1.0
     thresholds = np.arange(0.0, 1.05, 0.05)
@@ -30,12 +29,11 @@ if __name__ == '__main__':
     # Number of features
     num_of_cols = 10
 
-    run_process_without_column_excluding(datasets, datasets_names, thresholds, threshold_col_names,
-                                         path_to_predictions, path_to_metrics)
+    #run_process_without_column_excluding(datasets, datasets_names, thresholds, threshold_col_names,
+    #                                     path_to_predictions, path_to_metrics)
 
     run_process_with_column_excluding(num_of_cols, datasets, datasets_names, thresholds, threshold_col_names,
                                       path_to_predictions_col_excluding, path_to_metrics_col_excluding)
 
     put_column_excluded_files_into_folders(path_to_metrics_col_excluding)
     put_column_excluded_files_into_folders(path_to_predictions_col_excluding)
-    """

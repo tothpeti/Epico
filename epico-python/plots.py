@@ -43,10 +43,10 @@ def create_boxplot_for_all_metrics_and_thresholds(name, path_to_diagrams,
         plt.yticks(fontsize=14)
         ax = sns.boxplot(data=tmp_df[['accuracy']], orient="h", palette="Set2")
 
-        #plt.show()
+        plt.show()
 
-        file_name = name +'_boxplot_'+ thresholds[i]+'_all_metrics_all_covariates.png'
-        plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
+        #file_name = name +'_boxplot_'+ thresholds[i]+'_all_metrics_all_covariates.png'
+        #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
 def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagrams,
@@ -55,11 +55,14 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagra
                                                             sens_df, thresholds, col_excl_idx=None):
 
     title = ""
+    file_name = ""
     if col_excl_idx is None:
         title = 'Logistic regression considering all predictive variables.'
+        file_name = 'lineplots_all_average_metrics_all_thresholds_all_covariates.png'
     else:
         col_excl_idx = str(col_excl_idx+1)
         title = f'Logistic regression considering {col_excl_idx}. predictive variable excluded.'
+        file_name = f'lineplots_all_average_metrics_all_thresholds_{col_excl_idx}col_excluded.png'
 
     avg_acc_list = []
     avg_sens_list = []
@@ -101,7 +104,6 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagra
     plt.xlim([float(thresholds[0])-0.025, float(thresholds[-1])+0.05])
     plt.ylim([0.0, 1.05])
 
-    #file_name = name +'_lineplots_all_average_metrics_all_thresholds_all_covariates.png'
     #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
     plt.show()
 
@@ -109,11 +111,14 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagra
 def create_average_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets, len_of_test_datasets, col_excl_idx=None):
 
     title = ""
+    file_name = ""
     if col_excl_idx is None:
         title = 'Logistic regression considering all predictive variables.'
+        file_name = 'average_roc_curve_all_covariates.png'
     else:
         col_excl_idx = str(col_excl_idx+1)
         title = f'Logistic regression considering {col_excl_idx}. predictive variable excluded.'
+        file_name = f'average_roc_curve_{col_excl_idx}col_excluded.png'
 
 
     # https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html
@@ -149,7 +154,6 @@ def create_average_auc_roc_curve(name, path_to_predictions, path_to_diagrams, da
     plt.legend(loc="lower right")
     plt.show()
 
-    #file_name = name +'_average_roc_curve_all_covariates.png'
     #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
@@ -195,10 +199,10 @@ def create_min_max_auc_roc_curve(name, path_to_predictions, path_to_diagrams, da
     plt.ylim([0.0, 1.05])
     plt.ylabel('True Positive Rate', fontsize=16)
     plt.xlabel('False Positive Rate', fontsize=16)
-    #plt.show()
+    plt.show()
 
-    file_name = name +'_min_max_auc_roc_curve_all_covariates.png'
-    plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
+    #file_name = name +'_min_max_auc_roc_curve_all_covariates.png'
+    #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
 def create_3d_plot_for_each_metrics(acc_df, thresholds, col_excl_idx):
@@ -214,46 +218,49 @@ def create_3d_plot_for_each_metrics(acc_df, thresholds, col_excl_idx):
     tmp_all_metrics_df = pd.DataFrame()
     tmp_all_metrics_df['thresholds'] = pd.to_numeric(pd.Series(thresholds), errors='coerce')
     tmp_all_metrics_df['acc_mean'] = pd.to_numeric(pd.Series(avg_acc_list), errors='coerce')
-
-    y_range = np.arange(0.0, 1.1, 0.1)
+    tmp_all_metrics_df['excluded_col'] = pd.Series(np.repeat(col_excl_idx+1, len(tmp_all_metrics_df['acc_mean'])))
 
     fig = plt.figure(figsize=(12, 6))
     ax = fig.add_subplot(111, projection='3d')
-    plt.xticks(thresholds, rotation=70, fontsize=12)
-    plt.yticks(y_range, fontsize=12)
-    ax.scatter(col_excl_idx+1, tmp_all_metrics_df['thresholds'], tmp_all_metrics_df['acc_mean'])
-    ax.legend(loc='best')
-    ax.set_ylabel('The average value of quality metrics', fontsize=16)
-    ax.set_xlabel('Threshold', fontsize=16)
-    # ax.set(xlim=(float(thresholds[0]), float(thresholds[-1])))
-    plt.xlim([float(thresholds[0])-0.025, float(thresholds[-1])+0.05])
-    plt.ylim([0.0, 1.05])
+
+    ax.scatter(xs=tmp_all_metrics_df['excluded_col'], ys=tmp_all_metrics_df['thresholds'], zs=tmp_all_metrics_df['acc_mean'])
+    ax.set_xlabel('Excluded pred value')
+    ax.set_ylabel('Thresholds')
+    ax.set_zlabel('Mean')
+    ax.set_xticks([col_excl_idx+1])
+    ax.set_xticklabels([f'{col_excl_idx+1}'])
+    ax.set_yticks(np.arange(0.0, 1.1, 0.2))
+
+    #file_name = name +'_min_max_auc_roc_curve_all_covariates.png'
+    #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
+
     plt.show()
-    """
-    avg_acc_list = []
-    avg_sens_list = []
-    avg_spec_list = []
-    avg_prec_list = []
-    avg_f1_list = []
-
-    for i in range(0, len(sens_df.columns)):
-        avg_acc_list.append(acc_df.iloc[:, i].mean())
-        avg_sens_list.append(sens_df.iloc[:, i].mean())
-        avg_spec_list.append(spec_df.iloc[:, i].mean())
-        avg_prec_list.append(prec_df.iloc[:, i].mean())
-        avg_f1_list.append(f1_df.iloc[:, i].mean())
-
-    tmp_all_metrics_df = pd.DataFrame()
-    tmp_all_metrics_df['thresholds'] = pd.to_numeric(pd.Series(thresholds), errors='coerce')
-    tmp_all_metrics_df['acc_mean'] = pd.to_numeric(pd.Series(avg_acc_list), errors='coerce')
-    tmp_all_metrics_df['sens_mean'] = pd.to_numeric(pd.Series(avg_sens_list), errors='coerce')
-    tmp_all_metrics_df['spec_mean'] = pd.to_numeric(pd.Series(avg_spec_list), errors='coerce')
-    tmp_all_metrics_df['prec_mean'] = pd.to_numeric(pd.Series(avg_prec_list), errors='coerce')
-    tmp_all_metrics_df['f1_mean'] = pd.to_numeric(pd.Series(avg_f1_list), errors='coerce')
-    """
 
 
-def create_2d_plot_for_each_metrics(datasets, metrics):
+def create_boxplot_for_col_excluded_datasets(datasets, path_to_diagrams):
     # X tengelyen melyik kovariánst hagytuk ki
     # Y tengelyen átlagos AUC érték
-    pass
+
+    col_excl_indexes = []
+    all_avg_auc_list = []
+
+    for col_excl_idx, pred_df_list in enumerate(datasets):
+        col_excl_indexes.append(col_excl_idx+1)
+        tmp_auc_list = []
+        for df in pred_df_list:
+            roc_auc = roc_auc_score(df['y'], df['y_pred_probs'])
+            tmp_auc_list.append(roc_auc)
+
+        all_avg_auc_list.append(tmp_auc_list)
+
+    plt.figure(figsize=(12,6))
+    plt.title('Logistic regression considering column excluding', fontsize=16)
+    sns.boxplot(col_excl_indexes, all_avg_auc_list, palette='Set2')
+    plt.xlabel('Excluded column', fontsize=14)
+    plt.ylabel('AUC value', fontsize=14)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    # plt.show()
+
+    #file_name = 'boxplot_auc_col_excluded.png'
+    #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')

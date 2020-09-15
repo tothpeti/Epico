@@ -117,7 +117,7 @@ def create_average_auc_roc_curve(name, path_to_predictions, path_to_diagrams, da
         file_name = 'average_roc_curve_all_covariates.png'
     else:
         col_excl_idx = 'x_'+str(col_excl_idx+1)
-        title = f'Logistic regression considering {col_excl_idx}. predictive variable excluded.'
+        title = f'Logistic regression considering {col_excl_idx} predictive variable excluded'
         file_name = f'average_roc_curve_{col_excl_idx}col_excluded.png'
 
 
@@ -151,9 +151,9 @@ def create_average_auc_roc_curve(name, path_to_predictions, path_to_diagrams, da
     plt.ylabel('True Positive Rate')
     plt.title(title)
     plt.legend(loc="lower right")
-    plt.show()
+    #plt.show()
 
-    # plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
+    plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
 def create_min_max_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets):
@@ -325,11 +325,11 @@ def helper_lineplot_for_one_metric_col_excl(metric_name, avg_metric_list, thresh
         plt.plot(thresholds, metric_list, label=col_excl_indexes[idx])
 
     plt.legend(loc='best', title="Excluded column")
-    plt.ylabel('The average value of quality metrics', fontsize=16)
+    plt.ylabel('The average value of quality metric', fontsize=16)
     plt.xlabel('Threshold', fontsize=16)
     plt.xlim([float(thresholds[0])-0.025, float(thresholds[-1])+0.05])
     plt.ylim([0.0, 1.05])
 
-    #file_name = f"lineplot_{metric_name}_col_excl.png"
-    #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
+    file_name = f"lineplot_{metric_name}_col_excl.png"
+    plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
     #plt.show()

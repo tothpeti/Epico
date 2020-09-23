@@ -27,26 +27,24 @@ def create_plots_for_column_excluded_datasets(file_name, path_to_predictions, pa
 
     thresholds = np.arange(0.0, 1.05, 0.05)
 
-    """
     for col_excl_idx, metric_df_list in enumerate(all_metrics_datasets):
         create_lineplot_averages_for_all_metrics_and_thresholds(file_name, path_to_diagrams, acc_df=metric_df_list[0],
                                                                 f1_df=metric_df_list[1], prec_df=metric_df_list[2],
                                                                 sens_df=metric_df_list[3], spec_df=metric_df_list[4],
                                                                 thresholds=thresholds, col_excl_idx=col_excl_idx)
-        """
         #create_3d_plot_for_each_metrics(acc_df=metric_df_list[0], thresholds=thresholds, col_excl_idx=col_excl_idx)
 
     # create_boxplot_for_col_excluded_datasets(datasets=all_pred_datasets, path_to_diagrams=path_to_diagrams)
-    create_lineplot_for_one_metric_col_excluded_datasets(all_metrics_datasets, thresholds, path_to_diagrams)
+    # create_lineplot_for_one_metric_col_excluded_datasets(all_metrics_datasets, thresholds, path_to_diagrams)
 
 
 if __name__ == '__main__':
-    path_to_predictions = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_0_to_1_thresholds_20200910/predictions/"
-    path_to_predictions_col_excl = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_0_to_1_thresholds_20200910/predictions/column_excluding"
-    path_to_metrics = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_0_to_1_thresholds_20200910/metrics/"
-    path_to_metrics_col_excl = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_0_to_1_thresholds_20200910/metrics/column_excluding"
-    path_to_diagrams = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_0_to_1_thresholds_20200910/diagrams/"
-    path_to_diagrams_col_excl = "D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_10_bern05prob_with_0_to_1_thresholds_20200910/diagrams/column_excluding"
+    path_to_predictions = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_0to1_thresholds_20200915/predictions"
+    path_to_predictions_col_excl = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_0to1_thresholds_20200915/predictions/column_excluding"
+    path_to_metrics = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_0to1_thresholds_20200915/metrics"
+    path_to_metrics_col_excl = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_0to1_thresholds_20200915/metrics/column_excluding"
+    path_to_diagrams = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_0to1_thresholds_20200915/diagrams/without_column_excluding"
+    path_to_diagrams_col_excl = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_10_bern05prob_0to1_thresholds_20200915/diagrams/column_excluding/separate_diagrams"
 
     file_name = '50_simrounds_10_bern05prob'
 

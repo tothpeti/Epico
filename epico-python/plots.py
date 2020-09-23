@@ -57,11 +57,11 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagra
     title = ""
     file_name = ""
     if col_excl_idx is None:
-        title = 'Logistic regression considering all predictive variables.'
+        title = 'Logistic regression considering all predictive variables'
         file_name = 'lineplots_all_average_metrics_all_thresholds_all_covariates.png'
     else:
-        col_excl_idx = str(col_excl_idx+1)
-        title = f'Logistic regression considering {col_excl_idx}. predictive variable excluded.'
+        col_excl_idx = 'x_'+str(col_excl_idx+1)
+        title = f'Logistic regression considering {col_excl_idx} predictive variable excluded'
         file_name = f'lineplots_all_average_metrics_all_thresholds_{col_excl_idx}col_excluded.png'
 
     avg_acc_list = []
@@ -104,8 +104,8 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagra
     plt.xlim([float(thresholds[0])-0.025, float(thresholds[-1])+0.05])
     plt.ylim([0.0, 1.05])
 
-    #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
-    plt.show()
+    plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
+    #plt.show()
 
 
 def create_average_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets, len_of_test_datasets, col_excl_idx=None):

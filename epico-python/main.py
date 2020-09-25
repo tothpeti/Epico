@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.linear_model import LogisticRegression
 
 """
 Custom files
@@ -29,10 +30,13 @@ if __name__ == '__main__':
     # Number of features
     num_of_cols = 10
 
-    #run_process_without_column_excluding(datasets, datasets_names, thresholds, threshold_col_names,
+    # Initialize model
+    model = LogisticRegression(n_jobs=-1)
+
+    #run_process_without_column_excluding(model, datasets, datasets_names, thresholds, threshold_col_names,
     #                                     path_to_predictions, path_to_metrics)
 
-    run_process_with_column_excluding(num_of_cols, datasets, datasets_names, thresholds, threshold_col_names,
+    run_process_with_column_excluding(model, num_of_cols, datasets, datasets_names, thresholds, threshold_col_names,
                                       path_to_predictions_col_excluding, path_to_metrics_col_excluding)
 
     put_column_excluded_files_into_folders(path_to_metrics_col_excluding)

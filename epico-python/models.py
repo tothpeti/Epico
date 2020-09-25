@@ -1,5 +1,4 @@
 import os
-from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
@@ -10,7 +9,7 @@ import numpy as np
 from metrics import create_metrics, save_metrics, save_prediction_df
 
 
-def run_logistic_reg(features, target, thresholds, threshold_col_names, test_size=0.3):
+def run_model(model, features, target, thresholds, threshold_col_names, test_size=0.3):
 
     result_df = pd.DataFrame()
 
@@ -20,13 +19,13 @@ def run_logistic_reg(features, target, thresholds, threshold_col_names, test_siz
                                                         random_state=0)
 
     # Initialize and train model
-    logistic_reg = LogisticRegression(n_jobs=-1).fit(x_train, y_train)
+    trained_model = model.fit(x_train, y_train)
 
     # Test model
     result_df = pd.concat([result_df, x_test, y_test], axis=1)
     result_df.reset_index(inplace=True, drop=True)
 
-    result_df['y_pred_probs'] = logistic_reg.predict_proba(x_test)[:, 1]
+    result_df['y_pred_probs'] = trained_model.predict_proba(x_test)[:, 1]
     result_df['y_pred_probs'] = result_df['y_pred_probs'].round(decimals=3)
 
     # Create y_predN columns by using threshold values
@@ -38,7 +37,8 @@ def run_logistic_reg(features, target, thresholds, threshold_col_names, test_siz
     return result_df, y_test
 
 
-def run_process_without_column_excluding(datasets: list,
+def run_process_without_column_excluding(model,
+                                         datasets: list,
                                          datasets_names: list,
                                          thresholds: np.ndarray,
                                          threshold_col_names: list,
@@ -53,7 +53,7 @@ def run_process_without_column_excluding(datasets: list,
     for idx, df in enumerate(datasets):
         features = df.drop(columns=['y'], axis=1)
         target = df['y']
-        result_df, y_test = run_logistic_reg(features, target, thresholds, threshold_col_names, test_size=0.3)
+        result_df, y_test = run_model(model, features, target, thresholds, threshold_col_names, test_size=0.3)
 
         accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(result_df,
                                                                                                           y_test,
@@ -74,7 +74,8 @@ def run_process_without_column_excluding(datasets: list,
                  path_to_metrics)
 
 
-def run_process_with_column_excluding(num_of_cols: int,
+def run_process_with_column_excluding(model,
+                                      num_of_cols: int,
                                       datasets: list,
                                       datasets_names: list,
                                       thresholds: np.ndarray,
@@ -94,9 +95,11 @@ def run_process_with_column_excluding(num_of_cols: int,
             col_name_to_exclude = 'x'+str(col_to_exclude+1)
             features = df.drop(columns=[col_name_to_exclude, 'y'], axis=1)
             target = df['y']
-            result_df, y_test = run_logistic_reg(features, target, thresholds, threshold_col_names, test_size=0.3)
+            result_df, y_test = run_model(model, features, target, thresholds, threshold_col_names, test_size=0.3)
 
-            accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(result_df, y_test, threshold_col_names)
+            accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(result_df,
+                                                                                                              y_test,
+                                                                                                              threshold_col_names)
 
             prediction_file_name = datasets_names[idx].split('.')[0]+'_'+str(col_to_exclude)+'.csv'
             save_prediction_df(result_df, prediction_file_name, path_to_predictions_col_excluding)

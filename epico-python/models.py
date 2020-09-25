@@ -1,5 +1,6 @@
 import os
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import RandomizedSearchCV
 import pandas as pd
 import numpy as np
 
@@ -9,7 +10,7 @@ import numpy as np
 from metrics import create_metrics, save_metrics, save_prediction_df
 
 
-def run_model(model, features, target, thresholds, threshold_col_names, test_size=0.3):
+def run_model(model, features, target, thresholds, threshold_col_names, test_size=0.3, model_params=None):
 
     result_df = pd.DataFrame()
 
@@ -20,6 +21,15 @@ def run_model(model, features, target, thresholds, threshold_col_names, test_siz
 
     # Initialize and train model
     trained_model = model.fit(x_train, y_train)
+
+    if model_params is not None:
+        n_iter_search = 20
+        random_search = RandomizedSearchCV(estimator=trained_model,
+                                           param_distributions=model_params,
+                                           n_iter=n_iter_search,
+                                           random_state=0,
+                                           n_jobs=-1)
+
 
     # Test model
     result_df = pd.concat([result_df, x_test, y_test], axis=1)
@@ -43,7 +53,8 @@ def run_process_without_column_excluding(model,
                                          thresholds: np.ndarray,
                                          threshold_col_names: list,
                                          path_to_predictions: str,
-                                         path_to_metrics: str) -> None:
+                                         path_to_metrics: str,
+                                         model_params: dict = None) -> None:
     all_accuracy_list = []
     all_f1_score_list = []
     all_precision_list = []
@@ -53,7 +64,13 @@ def run_process_without_column_excluding(model,
     for idx, df in enumerate(datasets):
         features = df.drop(columns=['y'], axis=1)
         target = df['y']
-        result_df, y_test = run_model(model, features, target, thresholds, threshold_col_names, test_size=0.3)
+        result_df, y_test = run_model(model=model,
+                                      model_params=model_params,
+                                      features=features,
+                                      target=target,
+                                      thresholds=thresholds,
+                                      threshold_col_names=threshold_col_names,
+                                      test_size=0.3)
 
         accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(result_df,
                                                                                                           y_test,
@@ -81,7 +98,8 @@ def run_process_with_column_excluding(model,
                                       thresholds: np.ndarray,
                                       threshold_col_names: list,
                                       path_to_predictions_col_excluding: str,
-                                      path_to_metrics_col_excluding: str) -> None:
+                                      path_to_metrics_col_excluding: str,
+                                      model_params: dict = None) -> None:
 
     all_accuracy_list = []
     all_f1_score_list = []
@@ -95,7 +113,12 @@ def run_process_with_column_excluding(model,
             col_name_to_exclude = 'x'+str(col_to_exclude+1)
             features = df.drop(columns=[col_name_to_exclude, 'y'], axis=1)
             target = df['y']
-            result_df, y_test = run_model(model, features, target, thresholds, threshold_col_names, test_size=0.3)
+            result_df, y_test = run_model(model=model,
+                                          model_params=model_params,
+                                          features=features,
+                                          target=target,
+                                          thresholds=thresholds,
+                                          threshold_col_names=threshold_col_names, test_size=0.3)
 
             accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(result_df,
                                                                                                               y_test,

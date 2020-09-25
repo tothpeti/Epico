@@ -3,7 +3,6 @@ import glob
 import shutil
 import pandas as pd
 import concurrent.futures
-import numpy as np
 
 
 def get_all_datasets_names(path: str,
@@ -73,4 +72,3 @@ def put_column_excluded_files_into_folders(path_to_folder: str) -> None:
         else:
             os.rename(f, stripped_file_name)
             shutil.move(stripped_file_name, excluded_col_idx)
-

@@ -47,10 +47,10 @@ def create_boxplot_for_all_metrics_and_thresholds(name: str,
         plt.yticks(fontsize=14)
         ax = sns.boxplot(data=tmp_df[['accuracy']], orient="h", palette="Set2")
 
-        plt.show()
+        # plt.show()
 
-        #file_name = name +'_boxplot_'+ thresholds[i]+'_all_metrics_all_covariates.png'
-        #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
+        file_name = name +'_boxplot_'+ thresholds[i]+'_all_metrics_all_covariates.png'
+        plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
 def create_lineplot_averages_for_all_metrics_and_thresholds(name: str,
@@ -215,10 +215,10 @@ def create_min_max_auc_roc_curve(name: str,
     plt.ylim([0.0, 1.05])
     plt.ylabel('True Positive Rate', fontsize=16)
     plt.xlabel('False Positive Rate', fontsize=16)
-    plt.show()
+    #plt.show()
 
-    #file_name = name +'_min_max_auc_roc_curve_all_covariates.png'
-    #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
+    file_name = name +'_min_max_auc_roc_curve_all_covariates.png'
+    plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
 def create_3d_plot_for_each_metrics(acc_df: pd.DataFrame,
@@ -252,7 +252,7 @@ def create_3d_plot_for_each_metrics(acc_df: pd.DataFrame,
     #file_name = name +'_min_max_auc_roc_curve_all_covariates.png'
     #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
-    plt.show()
+    #plt.show()
 
 
 def create_boxplot_for_col_excluded_datasets(datasets: list,
@@ -281,8 +281,8 @@ def create_boxplot_for_col_excluded_datasets(datasets: list,
     plt.yticks(fontsize=12)
     # plt.show()
 
-    # file_name = 'boxplot_auc_col_excluded.png'
-    # plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
+    file_name = 'boxplot_auc_col_excluded.png'
+    plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
 def create_lineplot_for_one_metric_col_excluded_datasets(metrics: list,

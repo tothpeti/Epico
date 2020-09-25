@@ -22,6 +22,7 @@ def run_model(model, features, target, thresholds, threshold_col_names, test_siz
     # Initialize and train model
     trained_model = model.fit(x_train, y_train)
 
+    """
     if model_params is not None:
         n_iter_search = 20
         random_search = RandomizedSearchCV(estimator=trained_model,
@@ -29,7 +30,7 @@ def run_model(model, features, target, thresholds, threshold_col_names, test_siz
                                            n_iter=n_iter_search,
                                            random_state=0,
                                            n_jobs=-1)
-
+    """
 
     # Test model
     result_df = pd.concat([result_df, x_test, y_test], axis=1)
@@ -50,7 +51,7 @@ def run_model(model, features, target, thresholds, threshold_col_names, test_siz
 def run_process_without_column_excluding(model,
                                          datasets: list,
                                          datasets_names: list,
-                                         thresholds: np.ndarray,
+                                         thresholds: list,
                                          threshold_col_names: list,
                                          path_to_predictions: str,
                                          path_to_metrics: str,
@@ -95,7 +96,7 @@ def run_process_with_column_excluding(model,
                                       num_of_cols: int,
                                       datasets: list,
                                       datasets_names: list,
-                                      thresholds: np.ndarray,
+                                      thresholds: list,
                                       threshold_col_names: list,
                                       path_to_predictions_col_excluding: str,
                                       path_to_metrics_col_excluding: str,

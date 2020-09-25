@@ -11,7 +11,10 @@ from plots import create_boxplot_for_col_excluded_datasets, create_lineplot_for_
 from helper import get_all_datasets_names, get_length_of_test_dataset, read_all_datasets_in_memory, read_all_folders_files_in_memory
 
 
-def create_plots_for_column_excluded_datasets(file_name, path_to_predictions, path_to_metrics, path_to_diagrams):
+def create_plots_for_column_excluded_datasets(file_name: str,
+                                              path_to_predictions: str,
+                                              path_to_metrics: str,
+                                              path_to_diagrams: str) -> None:
     all_pred_dirs = os.listdir(path_to_predictions)
     all_metrics_dirs = os.listdir(path_to_metrics)
 

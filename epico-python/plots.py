@@ -14,9 +14,13 @@ import numpy as np
 """
 
 
-def create_boxplot_for_all_metrics_and_thresholds(name, path_to_diagrams,
-                                                  acc_df, prec_df, f1_df,
-                                                  spec_df, sens_df):
+def create_boxplot_for_all_metrics_and_thresholds(name: str,
+                                                  path_to_diagrams: str,
+                                                  acc_df: pd.DataFrame,
+                                                  prec_df: pd.DataFrame,
+                                                  f1_df: pd.DataFrame,
+                                                  spec_df: pd.DataFrame,
+                                                  sens_df: pd.DataFrame) -> None:
     cols_num = len(sens_df.columns)
     thresholds = [thresh[6:] + ' threshold' for thresh in sens_df.columns]
     # thresholds = [ thresh.split('_')[0] + ' threshold' for thresh in sens_df.columns ]
@@ -49,10 +53,15 @@ def create_boxplot_for_all_metrics_and_thresholds(name, path_to_diagrams,
         #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
-def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagrams,
-                                                            acc_df, prec_df,
-                                                            f1_df, spec_df,
-                                                            sens_df, thresholds, col_excl_idx=None):
+def create_lineplot_averages_for_all_metrics_and_thresholds(name: str,
+                                                            path_to_diagrams: str,
+                                                            acc_df: pd.DataFrame,
+                                                            prec_df: pd.DataFrame,
+                                                            f1_df: pd.DataFrame,
+                                                            spec_df: pd.DataFrame,
+                                                            sens_df: pd.DataFrame,
+                                                            thresholds: np.ndarray,
+                                                            col_excl_idx: int =None) -> None:
 
     title = ""
     file_name = ""
@@ -108,7 +117,12 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name, path_to_diagra
     #plt.show()
 
 
-def create_average_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets, len_of_test_datasets, col_excl_idx=None):
+def create_average_auc_roc_curve(name: str,
+                                 path_to_predictions: str,
+                                 path_to_diagrams: str,
+                                 datasets: list,
+                                 len_of_test_datasets: int,
+                                 col_excl_idx: int =None) -> None:
 
     title = ""
     file_name = ""
@@ -156,7 +170,10 @@ def create_average_auc_roc_curve(name, path_to_predictions, path_to_diagrams, da
     plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
-def create_min_max_auc_roc_curve(name, path_to_predictions, path_to_diagrams, datasets):
+def create_min_max_auc_roc_curve(name: str,
+                                 path_to_predictions: str,
+                                 path_to_diagrams: str,
+                                 datasets: list) -> None:
 
     results_list = []
     auc_list = []
@@ -204,7 +221,9 @@ def create_min_max_auc_roc_curve(name, path_to_predictions, path_to_diagrams, da
     #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
-def create_3d_plot_for_each_metrics(acc_df, thresholds, col_excl_idx):
+def create_3d_plot_for_each_metrics(acc_df: pd.DataFrame,
+                                    thresholds: np.ndarray,
+                                    col_excl_idx: int) -> None:
     # X axis which column we excluded
     # Y axis threshold values (0-1)
     # Z axis average of the given metric
@@ -236,7 +255,8 @@ def create_3d_plot_for_each_metrics(acc_df, thresholds, col_excl_idx):
     plt.show()
 
 
-def create_boxplot_for_col_excluded_datasets(datasets, path_to_diagrams):
+def create_boxplot_for_col_excluded_datasets(datasets: list,
+                                             path_to_diagrams: str) -> None:
     # X axis which covariant we excluded
     # Y axis average of AUC
 
@@ -265,7 +285,9 @@ def create_boxplot_for_col_excluded_datasets(datasets, path_to_diagrams):
     # plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
-def create_lineplot_for_one_metric_col_excluded_datasets(metrics, thresholds, path_to_diagrams):
+def create_lineplot_for_one_metric_col_excluded_datasets(metrics: list,
+                                                         thresholds: np.ndarray,
+                                                         path_to_diagrams: str) -> None:
 
     col_excl_indexes = []
     avg_acc_list = []
@@ -311,8 +333,11 @@ def create_lineplot_for_one_metric_col_excluded_datasets(metrics, thresholds, pa
                                             path_to_diagrams)
 
 
-def helper_lineplot_for_one_metric_col_excl(metric_name, avg_metric_list, thresholds, col_excl_indexes,
-                                            path_to_diagrams):
+def helper_lineplot_for_one_metric_col_excl(metric_name: str,
+                                            avg_metric_list: list,
+                                            thresholds: np.ndarray,
+                                            col_excl_indexes: list,
+                                            path_to_diagrams: str) -> None:
 
     y_range = np.arange(0.0, 1.1, 0.1)
 

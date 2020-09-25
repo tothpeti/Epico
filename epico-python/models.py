@@ -20,7 +20,7 @@ def run_logistic_reg(features, target, thresholds, threshold_col_names, test_siz
                                                         random_state=0)
 
     # Initialize and train model
-    logistic_reg = LogisticRegression().fit(x_train, y_train)
+    logistic_reg = LogisticRegression(n_jobs=-1).fit(x_train, y_train)
 
     # Test model
     result_df = pd.concat([result_df, x_test, y_test], axis=1)
@@ -38,8 +38,12 @@ def run_logistic_reg(features, target, thresholds, threshold_col_names, test_siz
     return result_df, y_test
 
 
-def run_process_without_column_excluding(datasets, datasets_names, thresholds, threshold_col_names,
-                                         path_to_predictions, path_to_metrics):
+def run_process_without_column_excluding(datasets: list,
+                                         datasets_names: list,
+                                         thresholds: np.ndarray,
+                                         threshold_col_names: list,
+                                         path_to_predictions: str,
+                                         path_to_metrics: str) -> None:
     all_accuracy_list = []
     all_f1_score_list = []
     all_precision_list = []
@@ -70,8 +74,13 @@ def run_process_without_column_excluding(datasets, datasets_names, thresholds, t
                  path_to_metrics)
 
 
-def run_process_with_column_excluding(num_of_cols, datasets, datasets_names, thresholds, threshold_col_names,
-                                      path_to_predictions_col_excluding, path_to_metrics_col_excluding):
+def run_process_with_column_excluding(num_of_cols: int,
+                                      datasets: list,
+                                      datasets_names: list,
+                                      thresholds: np.ndarray,
+                                      threshold_col_names: list,
+                                      path_to_predictions_col_excluding: str,
+                                      path_to_metrics_col_excluding: str) -> None:
 
     all_accuracy_list = []
     all_f1_score_list = []

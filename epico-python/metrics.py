@@ -34,10 +34,14 @@ def create_metrics(df, y_test, threshold_cols):
     return accuracy_list, f1_score_list, precision_list, sensitvity_list, specificity_list
 
 
-def save_metrics(all_accuracy_list, all_f1_score_list,
-                 all_precision_list, all_sensitivity_list,
-                 all_specificity_list, threshold_col_names,
-                 path_to_save_folder, excluded_col=""):
+def save_metrics(all_accuracy_list: list,
+                 all_f1_score_list: list,
+                 all_precision_list: list,
+                 all_sensitivity_list: list,
+                 all_specificity_list: list,
+                 threshold_col_names: list,
+                 path_to_save_folder: str,
+                 excluded_col: str = "") -> None:
 
     # Convert lists to DataFrames
     accuracy_df = pd.DataFrame(all_accuracy_list, columns=threshold_col_names)
@@ -60,9 +64,7 @@ def save_metrics(all_accuracy_list, all_f1_score_list,
     specificity_df.to_csv(os.path.join(path_to_save_folder, specificity_file_name), sep=',', index=False)
 
 
-def save_prediction_df(df, dataset_name, path):
+def save_prediction_df(df: pd.DataFrame,
+                       dataset_name: str,
+                       path: str) -> None:
     df.to_csv(os.path.join(path, dataset_name), sep=',', index=False)
-
-
-def open_metrics_files_for():
-    pass

@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 """
@@ -11,11 +12,11 @@ from helper import get_all_datasets_names, read_all_datasets_in_memory, put_colu
 
 if __name__ == '__main__':
     # Home PC
-    path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200925/datasets/'
-    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200925/metrics/'
-    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200925/metrics/column_excluding/'
-    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200925/predictions/'
-    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200925/predictions/column_excluding/'
+    path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/datasets/'
+    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/metrics/'
+    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/metrics/column_excluding/'
+    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/predictions/'
+    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/predictions/column_excluding/'
 
     # Laptop
     # path_to_datasets = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200925/datasets/"
@@ -42,9 +43,14 @@ if __name__ == '__main__':
     num_of_cols = 10
 
     # Initialize model
-    # model = LogisticRegression(n_jobs=-1)
-    model = RandomForestClassifier(n_jobs=-1)
+    # model = LogisticRegression(random_state=0, n_jobs=-1)
+    # model = RandomForestClassifier(random_state=0, n_jobs=-1)
 
+    all_datasets = pd.concat(datasets, ignore_index=True).reset_index(drop=True)
+    all_datasets.drop_duplicates(inplace=True, ignore_index=True)
+    all_datasets.reset_index(drop=True)
+    print(len(all_datasets))
+    """
     run_process_without_column_excluding(model, datasets, datasets_names, thresholds, threshold_col_names,
                                          path_to_predictions, path_to_metrics)
 
@@ -57,3 +63,4 @@ if __name__ == '__main__':
     put_column_excluded_files_into_folders(path_to_predictions_col_excluding)
 
     print("--- %s seconds ---" % (time.time() - start_time))
+    """

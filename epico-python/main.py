@@ -6,7 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 """
 Custom files
 """
-from models import run_with_column_excluding, run_without_column_excluding, run_with_hyperparameter_search_and_without_column_excluding
+from models import run_with_column_excluding, run_without_column_excluding, run_with_hyperparameter_search_once_and_with_column_excluding
 from helper import get_all_datasets_names, read_all_datasets_in_memory, put_column_excluded_files_into_folders
 
 
@@ -52,19 +52,20 @@ if __name__ == '__main__':
     # max_features    --> maximum number of features to consider at every split
     # min_samples_leaf --> minimum number of samples required to be a leaf node
     model_params = {
-        'n_estimators': [500, 550, 600],
+        'n_estimators': [550, 600, 700, 700],
         'max_features': ['auto', 'sqrt', 'log2'],
         'max_depth': [10, 20, 30],
         'min_samples_leaf': [50, 55]
     }
-    run_with_hyperparameter_search_and_without_column_excluding(model=model,
-                                                                model_params=model_params,
-                                                                datasets=datasets,
-                                                                datasets_names=datasets_names,
-                                                                thresholds=thresholds,
-                                                                threshold_col_names=threshold_col_names,
-                                                                path_to_predictions=path_to_predictions,
-                                                                path_to_metrics=path_to_metrics)
+    run_with_hyperparameter_search_once_and_with_column_excluding(model=model,
+                                                                  model_params=model_params,
+                                                                  num_of_cols=num_of_cols,
+                                                                  datasets=datasets,
+                                                                  datasets_names=datasets_names,
+                                                                  thresholds=thresholds,
+                                                                  threshold_col_names=threshold_col_names,
+                                                                  path_to_predictions=path_to_predictions,
+                                                                  path_to_metrics=path_to_metrics)
     # run_process_without_column_excluding(model, datasets, datasets_names, thresholds, threshold_col_names,
     #                                     path_to_predictions, path_to_metrics)
 

@@ -49,7 +49,7 @@ def create_boxplot_for_all_metrics_and_thresholds(name: str,
 
         # plt.show()
 
-        file_name = name +'_boxplot_'+ thresholds[i]+'_all_metrics_all_covariates.png'
+        file_name = 'boxplot_'+thresholds[i]+'_all_metrics_all_covariates.png'
         plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 

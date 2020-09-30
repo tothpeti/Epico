@@ -6,24 +6,24 @@ from sklearn.ensemble import RandomForestClassifier
 """
 Custom files
 """
-from models import run_process_with_column_excluding, run_process_without_column_excluding
+from models import run_with_column_excluding, run_without_column_excluding, run_with_hyperparameter_search_and_without_column_excluding
 from helper import get_all_datasets_names, read_all_datasets_in_memory, put_column_excluded_files_into_folders
 
 
 if __name__ == '__main__':
     # Home PC
-    path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/datasets/'
-    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/metrics/'
-    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/metrics/column_excluding/'
-    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/predictions/'
-    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/predictions/column_excluding/'
+    # path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/datasets/'
+    # path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/metrics/'
+    # path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/metrics/column_excluding/'
+    # path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/predictions/'
+    # path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/predictions/column_excluding/'
 
     # Laptop
-    # path_to_datasets = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200925/datasets/"
-    # path_to_metrics = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200925/metrics/"
-    # path_to_metrics_col_excluding = 'C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200925/metrics/column_excluding'
-    # path_to_predictions = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200925/predictions/"
-    # path_to_predictions_col_excluding = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200925/predictions/column_excluding/"
+    path_to_datasets = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20200930/datasets/"
+    path_to_metrics = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20200930/metrics/"
+    path_to_metrics_col_excluding = 'C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20200930/metrics/column_excluding'
+    path_to_predictions = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20200930/predictions/"
+    path_to_predictions_col_excluding = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20200930/predictions/column_excluding/"
 
     start_time = time.time()
 
@@ -44,23 +44,36 @@ if __name__ == '__main__':
 
     # Initialize model
     # model = LogisticRegression(random_state=0, n_jobs=-1)
-    # model = RandomForestClassifier(random_state=0, n_jobs=-1)
+    model = RandomForestClassifier(random_state=0, n_jobs=-1)
 
-    all_datasets = pd.concat(datasets, ignore_index=True).reset_index(drop=True)
-    all_datasets.drop_duplicates(inplace=True, ignore_index=True)
-    all_datasets.reset_index(drop=True)
-    print(len(all_datasets))
-    """
-    run_process_without_column_excluding(model, datasets, datasets_names, thresholds, threshold_col_names,
-                                         path_to_predictions, path_to_metrics)
+    # RF
+    # n_estimators    --> put as high as your CPU can handle!! more is better, but it is very time expensive
+    # max_depth       --> maximum number of levels in tree
+    # max_features    --> maximum number of features to consider at every split
+    # min_samples_leaf --> minimum number of samples required to be a leaf node
+    model_params = {
+        'n_estimators': [500, 550, 600],
+        'max_features': ['auto', 'sqrt', 'log2'],
+        'max_depth': [10, 20, 30],
+        'min_samples_leaf': [50, 55]
+    }
+    run_with_hyperparameter_search_and_without_column_excluding(model=model,
+                                                                model_params=model_params,
+                                                                datasets=datasets,
+                                                                datasets_names=datasets_names,
+                                                                thresholds=thresholds,
+                                                                threshold_col_names=threshold_col_names,
+                                                                path_to_predictions=path_to_predictions,
+                                                                path_to_metrics=path_to_metrics)
+    # run_process_without_column_excluding(model, datasets, datasets_names, thresholds, threshold_col_names,
+    #                                     path_to_predictions, path_to_metrics)
 
-    print('step 1 finished')
-    run_process_with_column_excluding(model, num_of_cols, datasets, datasets_names, thresholds, threshold_col_names,
-                                      path_to_predictions_col_excluding, path_to_metrics_col_excluding)
+    # print('step 1 finished')
+    # run_process_with_column_excluding(model, num_of_cols, datasets, datasets_names, thresholds, threshold_col_names,
+    #                                  path_to_predictions_col_excluding, path_to_metrics_col_excluding)
 
-    print('step 2 finished')
-    put_column_excluded_files_into_folders(path_to_metrics_col_excluding)
-    put_column_excluded_files_into_folders(path_to_predictions_col_excluding)
+    # print('step 2 finished')
+    # put_column_excluded_files_into_folders(path_to_metrics_col_excluding)
+    # put_column_excluded_files_into_folders(path_to_predictions_col_excluding)
 
     print("--- %s seconds ---" % (time.time() - start_time))
-    """

@@ -1,4 +1,3 @@
-import os
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import RandomizedSearchCV
 import pandas as pd
@@ -10,10 +9,14 @@ import numpy as np
 from metrics import create_metrics, save_metrics, save_prediction_df
 
 
-def run_model(model, features, target, thresholds, threshold_col_names, test_size=0.3, model_params=None):
+def run_model(model,
+              features,
+              target,
+              thresholds,
+              threshold_col_names,
+              test_size=0.3):
 
-    result_df = pd.DataFrame()
-
+    # Split dataset
     x_train, x_test, y_train, y_test = train_test_split(features,
                                                         target,
                                                         test_size=test_size,
@@ -23,6 +26,17 @@ def run_model(model, features, target, thresholds, threshold_col_names, test_siz
     trained_model = model.fit(x_train, y_train)
 
     # Test model
+    return test_model(trained_model, x_test, y_test, thresholds, threshold_col_names)
+
+
+def test_model(trained_model,
+               x_test,
+               y_test,
+               thresholds,
+               threshold_col_names):
+
+    # Combine x_test, and y_test into one dataframe
+    result_df = pd.DataFrame()
     result_df = pd.concat([result_df, x_test, y_test], axis=1)
     result_df.reset_index(inplace=True, drop=True)
 
@@ -38,14 +52,14 @@ def run_model(model, features, target, thresholds, threshold_col_names, test_siz
     return result_df, y_test
 
 
-def run_process_without_column_excluding(model,
-                                         datasets: list,
-                                         datasets_names: list,
-                                         thresholds: list,
-                                         threshold_col_names: list,
-                                         path_to_predictions: str,
-                                         path_to_metrics: str,
-                                         model_params: dict = None) -> None:
+def run_without_column_excluding(model,
+                                 datasets: list,
+                                 datasets_names: list,
+                                 thresholds: list,
+                                 threshold_col_names: list,
+                                 path_to_predictions: str,
+                                 path_to_metrics: str) -> None:
+
     all_accuracy_list = []
     all_f1_score_list = []
     all_precision_list = []
@@ -56,7 +70,6 @@ def run_process_without_column_excluding(model,
         features = df.drop(columns=['y'], axis=1)
         target = df['y']
         result_df, y_test = run_model(model=model,
-                                      model_params=model_params,
                                       features=features,
                                       target=target,
                                       thresholds=thresholds,
@@ -82,15 +95,14 @@ def run_process_without_column_excluding(model,
                  path_to_metrics)
 
 
-def run_process_with_column_excluding(model,
-                                      num_of_cols: int,
-                                      datasets: list,
-                                      datasets_names: list,
-                                      thresholds: list,
-                                      threshold_col_names: list,
-                                      path_to_predictions_col_excluding: str,
-                                      path_to_metrics_col_excluding: str,
-                                      model_params: dict = None) -> None:
+def run_with_column_excluding(model,
+                              num_of_cols: int,
+                              datasets: list,
+                              datasets_names: list,
+                              thresholds: list,
+                              threshold_col_names: list,
+                              path_to_predictions_col_excluding: str,
+                              path_to_metrics_col_excluding: str) -> None:
 
     all_accuracy_list = []
     all_f1_score_list = []
@@ -105,7 +117,6 @@ def run_process_with_column_excluding(model,
             features = df.drop(columns=[col_name_to_exclude, 'y'], axis=1)
             target = df['y']
             result_df, y_test = run_model(model=model,
-                                          model_params=model_params,
                                           features=features,
                                           target=target,
                                           thresholds=thresholds,
@@ -130,14 +141,14 @@ def run_process_with_column_excluding(model,
                      path_to_metrics_col_excluding, str(col_to_exclude))
 
 
-def run_process_with_hyperparam_search_and_without_column_excluding(model,
-                                                                    datasets: list,
-                                                                    datasets_names: list,
-                                                                    thresholds: list,
-                                                                    threshold_col_names: list,
-                                                                    path_to_predictions: str,
-                                                                    path_to_metrics: str,
-                                                                    model_params: dict = None):
+def run_with_hyperparameter_search_and_without_column_excluding(model,
+                                                                datasets: list,
+                                                                datasets_names: list,
+                                                                thresholds: list,
+                                                                threshold_col_names: list,
+                                                                path_to_predictions: str,
+                                                                path_to_metrics: str,
+                                                                model_params: dict = None) -> None:
 
     all_accuracy_list = []
     all_f1_score_list = []
@@ -146,21 +157,36 @@ def run_process_with_hyperparam_search_and_without_column_excluding(model,
     all_specificity_list = []
 
     # Combine datasets into one DataFrame
+    all_datasets = pd.concat(datasets, ignore_index=True).reset_index(drop=True)
+    all_datasets.drop_duplicates(inplace=True, ignore_index=True)
+    all_datasets.reset_index(drop=True)
 
-    # Run Hyperparameter optimization
+    # Split dataset
+    tmp_features = all_datasets.drop(columns=['y'], axis=1)
+    tmp_target = all_datasets['y']
+    x_train, x_test, y_train, y_test = train_test_split(tmp_features,
+                                                        tmp_target,
+                                                        test_size=0.3,
+                                                        random_state=0)
+
+    # Run hyperparameter search
+    clf = RandomizedSearchCV(model, model_params, n_iter=50, cv=10, verbose=0, random_state=0, n_jobs=-1)
+    best_model = clf.fit(x_train, y_train)
+    print(best_model.best_params_)
 
     # Predict on all the datasets separately by using the best model
-
     for idx, df in enumerate(datasets):
         features = df.drop(columns=['y'], axis=1)
         target = df['y']
-        result_df, y_test = run_model(model=model,
-                                      model_params=model_params,
-                                      features=features,
-                                      target=target,
-                                      thresholds=thresholds,
-                                      threshold_col_names=threshold_col_names,
-                                      test_size=0.3)
+        x_train, x_test, y_train, y_test = train_test_split(features,
+                                                            target,
+                                                            test_size=0.3,
+                                                            random_state=0)
+        result_df, y_test = test_model(trained_model=best_model,
+                                       x_test=x_test,
+                                       y_test=y_test,
+                                       thresholds=thresholds,
+                                       threshold_col_names=threshold_col_names)
 
         accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(result_df,
                                                                                                           y_test,
@@ -181,6 +207,5 @@ def run_process_with_hyperparam_search_and_without_column_excluding(model,
                  path_to_metrics)
 
 
-
-def run_process_with_hyperparam_search_and_with_column_excluding():
+def run_with_hyperparameter_search_and_with_column_excluding():
     pass

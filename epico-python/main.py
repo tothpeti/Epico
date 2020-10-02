@@ -18,6 +18,7 @@ if __name__ == '__main__':
     path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/metrics/column_excluding/'
     path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/predictions/'
     path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/predictions/column_excluding/'
+    path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/best_model_parameters/'
 
     # Laptop
     # path_to_datasets = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20200930/datasets/"
@@ -53,20 +54,24 @@ if __name__ == '__main__':
     # max_features    --> maximum number of features to consider at every split
     # min_samples_leaf --> minimum number of samples required to be a leaf node
     model_params = {
-        'n_estimators': [550, 600, 700, 700],
-        'max_features': ['auto', 'sqrt', 'log2'],
-        'max_depth': [10, 20, 30],
-        'min_samples_leaf': [50, 55]
+        'n_estimators': [10, 25, 50, 100, 150],
+        'max_features': ['sqrt'],
+        'max_depth': [5, 10, 15],
+        'min_samples_leaf': [2, 5, 10]
     }
-    run_with_hyperparameter_search_once_and_with_column_excluding(model=model,
-                                                                  model_params=model_params,
-                                                                  num_of_cols=num_of_cols,
-                                                                  datasets=datasets,
-                                                                  datasets_names=datasets_names,
-                                                                  thresholds=thresholds,
-                                                                  threshold_col_names=threshold_col_names,
-                                                                  path_to_predictions=path_to_predictions,
-                                                                  path_to_metrics=path_to_metrics)
+
+    run_with_hyperparameter_search_and_column_excluding(model=model,
+                                                        model_params=model_params,
+                                                        num_of_cols=num_of_cols,
+                                                        datasets=datasets,
+                                                        datasets_names=datasets_names,
+                                                        thresholds=thresholds,
+                                                        threshold_col_names=threshold_col_names,
+                                                        path_to_predictions_col_excluding=path_to_predictions_col_excluding,
+                                                        path_to_metrics_col_excluding=path_to_metrics_col_excluding,
+                                                        path_to_model_params=path_to_model_params,
+                                                        num_of_workers=8)
+
     # run_process_without_column_excluding(model, datasets, datasets_names, thresholds, threshold_col_names,
     #                                     path_to_predictions, path_to_metrics)
 
@@ -74,8 +79,8 @@ if __name__ == '__main__':
     # run_process_with_column_excluding(model, num_of_cols, datasets, datasets_names, thresholds, threshold_col_names,
     #                                  path_to_predictions_col_excluding, path_to_metrics_col_excluding)
 
-    # print('step 2 finished')
-    # put_column_excluded_files_into_folders(path_to_metrics_col_excluding)
-    # put_column_excluded_files_into_folders(path_to_predictions_col_excluding)
-
+    print('Rearranging files finished')
+    put_column_excluded_files_into_folders(path_to_metrics_col_excluding)
+    put_column_excluded_files_into_folders(path_to_predictions_col_excluding)
+    put_column_excluded_files_into_folders(path_to_model_params)
     print("--- %s seconds ---" % (time.time() - start_time))

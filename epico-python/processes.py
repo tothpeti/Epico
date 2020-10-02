@@ -1,12 +1,13 @@
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+from dask.distributed import Client
 import pandas as pd
 import numpy as np
-
+import joblib
 """
     Custom files
 """
-from metrics import create_metrics, save_metrics, save_prediction_df
+from metrics import create_metrics, save_metrics, save_prediction_df, save_best_model_parameters
 
 
 def run_model(model,
@@ -147,9 +148,13 @@ def run_with_hyperparameter_search_and_column_excluding(model,
                                                         thresholds: list,
                                                         threshold_col_names: list,
                                                         num_of_cols: int,
-                                                        path_to_predictions: str,
-                                                        path_to_metrics: str,
-                                                        model_params: dict = None):
+                                                        path_to_predictions_col_excluding: str,
+                                                        path_to_metrics_col_excluding: str,
+                                                        path_to_model_params: str,
+                                                        model_params: dict = None,
+                                                        num_of_workers: int = 4):
+
+    # client = Client(n_workers=4)
 
     all_accuracy_list = []
     all_f1_score_list = []
@@ -169,10 +174,20 @@ def run_with_hyperparameter_search_and_column_excluding(model,
                                                                 target,
                                                                 test_size=0.3,
                                                                 random_state=0)
-            # Run hyperparameter search
-            clf = RandomizedSearchCV(model, model_params, n_iter=50, cv=10, verbose=0, random_state=0, n_jobs=-1)
+
+            # clf = GridSearchCV(model, model_params, cv=10, verbose=0, n_jobs=-1)
+            clf = RandomizedSearchCV(model, model_params, cv=5, n_iter=50, refit=True, verbose=0, n_jobs=-1)
             best_model = clf.fit(x_train, y_train)
-            print(best_model.best_params_)
+
+            # Run hyperparameter search
+            # with joblib.parallel_backend('dask'):
+            #    best_model = clf.fit(x_train, y_train)
+
+            # Save best parameters into csv file
+            best_params_df_name = str(idx + 1) + '_' + str(col_to_exclude) + '.csv'
+            save_best_model_parameters(best_params_dict=best_model.best_params_,
+                                       dataset_name=best_params_df_name,
+                                       path=path_to_model_params)
 
             result_df, y_test = test_model(trained_model=best_model,
                                            x_test=x_test,
@@ -184,8 +199,8 @@ def run_with_hyperparameter_search_and_column_excluding(model,
                                                                                                               y_test,
                                                                                                               threshold_col_names)
 
-            prediction_file_name = datasets_names[idx]
-            save_prediction_df(result_df, prediction_file_name, path_to_predictions)
+            prediction_file_name = datasets_names[idx].split('.')[0]+'_'+str(col_to_exclude)+'.csv'
+            save_prediction_df(result_df, prediction_file_name, path_to_predictions_col_excluding)
 
             all_accuracy_list.append(accuracy_list)
             all_f1_score_list.append(f1_score_list)
@@ -193,8 +208,10 @@ def run_with_hyperparameter_search_and_column_excluding(model,
             all_sensitivity_list.append(sensitivity_list)
             all_specificity_list.append(specificity_list)
 
+            print('Finished with '+str(idx+1)+' dataset, column excluded: '+str(col_to_exclude))
+
         save_metrics(all_accuracy_list, all_f1_score_list,
                      all_precision_list, all_sensitivity_list,
                      all_specificity_list, threshold_col_names,
-                     path_to_metrics)
+                     path_to_metrics_col_excluding, str(col_to_exclude))
 

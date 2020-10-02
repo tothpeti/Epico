@@ -68,3 +68,12 @@ def save_prediction_df(df: pd.DataFrame,
                        dataset_name: str,
                        path: str) -> None:
     df.to_csv(os.path.join(path, dataset_name), sep=',', index=False)
+
+
+def save_best_model_parameters(best_params_dict: dict,
+                               dataset_name: str,
+                               path: str) -> None:
+
+    tmp_dict = {key:[value] for (key, value) in best_params_dict.items()}
+    df = pd.DataFrame.from_dict(tmp_dict)
+    df.to_csv(os.path.join(path, dataset_name), sep=',', index=False)

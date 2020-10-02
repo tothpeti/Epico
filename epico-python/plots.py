@@ -66,11 +66,11 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name: str,
     title = ""
     file_name = ""
     if col_excl_idx is None:
-        title = 'Default Random Forest considering all predictive variables'
+        title = 'Tuned Random Forest considering all predictive variables'
         file_name = 'lineplots_all_average_metrics_all_thresholds_all_covariates.png'
     else:
         col_excl_idx = 'x_'+str(col_excl_idx+1)
-        title = f'Default Random Forest considering {col_excl_idx} predictive variable excluded'
+        title = f'Tuned Random Forest considering {col_excl_idx} predictive variable excluded'
         file_name = f'lineplots_all_average_metrics_all_thresholds_{col_excl_idx}col_excluded.png'
 
     avg_acc_list = []
@@ -126,11 +126,11 @@ def create_average_auc_roc_curve(name: str,
     title = ""
     file_name = ""
     if col_excl_idx is None:
-        title = 'Default Random Forest considering all predictive variables.'
+        title = 'Tuned Random Forest considering all predictive variables.'
         file_name = 'average_roc_curve_all_covariates.png'
     else:
         col_excl_idx = 'x_'+str(col_excl_idx+1)
-        title = f'Default Random Forest considering {col_excl_idx} predictive variable excluded'
+        title = f'Tuned Random Forest considering {col_excl_idx} predictive variable excluded'
         file_name = f'average_roc_curve_{col_excl_idx}col_excluded.png'
 
 
@@ -272,7 +272,7 @@ def create_boxplot_for_col_excluded_datasets(datasets: list,
         all_avg_auc_list.append(tmp_auc_list)
 
     plt.figure(figsize=(12,6))
-    plt.title('Default Random Forest considering column excluding', fontsize=16)
+    plt.title('Tuned Random Forest considering column excluding', fontsize=16)
     sns.boxplot(col_excl_indexes, all_avg_auc_list, palette='Set2')
     plt.xlabel('Excluded column', fontsize=14)
     plt.ylabel('AUC value', fontsize=14)
@@ -341,7 +341,7 @@ def helper_lineplot_for_one_metric_col_excl(metric_name: str,
     y_range = np.arange(0.0, 1.1, 0.1)
 
     plt.figure(figsize=(12, 6))
-    plt.title(f'Default Random Forest {metric_name} considering column excluding', fontsize=16)
+    plt.title(f'Tuned Random Forest {metric_name} considering column excluding', fontsize=16)
     plt.xticks(thresholds, rotation=70, fontsize=12)
     plt.yticks(y_range, fontsize=12)
 

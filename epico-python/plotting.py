@@ -5,13 +5,13 @@ from plots import create_plots_for_without_column_excluded_datasets, create_plot
 
 if __name__ == '__main__':
     # Home PC
-    path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/datasets/'
-    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/metrics/'
-    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/metrics/column_excluding/'
-    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/predictions/'
-    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/predictions/column_excluding/'
-    path_to_diagrams = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/diagrams/'
-    path_to_diagrams_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_default_randomF_10_bern05prob_0to1_thresh_20200928/diagrams/column_excluding'
+    path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20201003/datasets/'
+    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20201003/metrics/'
+    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20201003/metrics/column_excluding/'
+    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20201003/predictions/'
+    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20201003/predictions/column_excluding/'
+    path_to_diagrams = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20201003/diagrams/'
+    path_to_diagrams_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20201003/diagrams/column_excluding'
 
     # Laptop
     # path_to_metrics = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20200930/metrics/"

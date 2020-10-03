@@ -2,9 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import train_test_split
-from ray.tune.sklearn import TuneGridSearchCV
-import ray
-import logging
+
 """
     Custom files
 """
@@ -155,8 +153,6 @@ def run_with_hyperparameter_search_and_column_excluding(model,
                                                         model_params: dict = None,
                                                         num_of_workers: int = 4):
 
-    ray.init(configure_logging=False, logging_level=logging.ERROR, log_to_driver=False, _temp_dir='D:/ray_tune')
-
     all_accuracy_list = []
     all_f1_score_list = []
     all_precision_list = []
@@ -177,13 +173,16 @@ def run_with_hyperparameter_search_and_column_excluding(model,
                                                                 random_state=0)
 
             # clf = GridSearchCV(model, model_params, cv=10, verbose=0, n_jobs=-1)
-            # clf = RandomizedSearchCV(model, model_params, cv=5, n_iter=50, refit=True, verbose=0, n_jobs=-1)
+            clf = RandomizedSearchCV(model, model_params, cv=5, n_iter=50, refit=True, verbose=0, n_jobs=-1, scoring='roc_auc')
+            """
             tune_search = TuneGridSearchCV(
                 model, model_params, refit=True, max_iters=10,
                 use_gpu=True, scoring='f1', early_stopping=True, n_jobs=-1, local_dir='D:/ray_tune'
             )
-            best_model = tune_search.fit(x_train, y_train)
-            print('finished finding best model: dataset '+str(idx)+' - column excluded '+str(col_to_exclude))
+            """
+            best_model = clf.fit(x_train, y_train)
+
+            # print('finished finding best model: dataset '+str(idx)+' - column excluded '+str(col_to_exclude))
             # Run hyperparameter search
             # with joblib.parallel_backend('dask'):
             #    best_model = clf.fit(x_train, y_train)

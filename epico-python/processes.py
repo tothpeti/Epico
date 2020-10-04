@@ -20,7 +20,7 @@ def run_model(model,
     x_train, x_test, y_train, y_test = train_test_split(features,
                                                         target,
                                                         test_size=test_size,
-                                                        random_state=0)
+                                                        random_state=42)
 
     # Initialize and train model
     trained_model = model.fit(x_train, y_train)
@@ -120,7 +120,8 @@ def run_with_column_excluding(model,
                                           features=features,
                                           target=target,
                                           thresholds=thresholds,
-                                          threshold_col_names=threshold_col_names, test_size=0.3)
+                                          threshold_col_names=threshold_col_names,
+                                          test_size=0.3)
 
             accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(result_df,
                                                                                                               y_test,
@@ -141,7 +142,73 @@ def run_with_column_excluding(model,
                      path_to_metrics_col_excluding, str(col_to_exclude))
 
 
+def run_with_hyperparameter_search_and_without_column_excluding(model,
+                                                                model_params: dict,
+                                                                scoring: str,
+                                                                datasets: list,
+                                                                datasets_names: list,
+                                                                thresholds: list,
+                                                                threshold_col_names: list,
+                                                                path_to_model_params: str,
+                                                                path_to_predictions: str,
+                                                                path_to_metrics: str) -> None:
+
+    all_accuracy_list = []
+    all_f1_score_list = []
+    all_precision_list = []
+    all_sensitivity_list = []
+    all_specificity_list = []
+
+    for idx, df in enumerate(datasets):
+        features = df.drop(columns=['y'], axis=1)
+        target = df['y']
+        x_train, x_test, y_train, y_test = train_test_split(features,
+                                                            target,
+                                                            test_size=0.3,
+                                                            random_state=42)
+
+        clf = RandomizedSearchCV(model, model_params, cv=5, n_iter=50, refit=True, verbose=0, n_jobs=-1,
+                                 scoring=scoring)
+
+        best_model = clf.fit(x_train, y_train)
+
+        # Save best parameters into csv file
+        best_params_df_name = str(idx + 1) + '.csv'
+        save_best_model_parameters(best_params_dict=best_model.best_params_,
+                                   dataset_name=best_params_df_name,
+                                   path=path_to_model_params)
+
+        # Predict outcomes
+        result_df, y_test = test_model(trained_model=best_model,
+                                       x_test=x_test,
+                                       y_test=y_test,
+                                       thresholds=thresholds,
+                                       threshold_col_names=threshold_col_names)
+
+        accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(result_df,
+                                                                                                          y_test,
+                                                                                                          threshold_col_names)
+
+        prediction_file_name = datasets_names[idx]
+        save_prediction_df(result_df, prediction_file_name, path_to_predictions)
+
+        all_accuracy_list.append(accuracy_list)
+        all_f1_score_list.append(f1_score_list)
+        all_precision_list.append(precision_list)
+        all_sensitivity_list.append(sensitivity_list)
+        all_specificity_list.append(specificity_list)
+
+        print('Finished with ' + str(idx + 1) + ' dataset')
+
+    save_metrics(all_accuracy_list, all_f1_score_list,
+                 all_precision_list, all_sensitivity_list,
+                 all_specificity_list, threshold_col_names,
+                 path_to_metrics)
+
+
 def run_with_hyperparameter_search_and_column_excluding(model,
+                                                        model_params: dict,
+                                                        scoring: str,
                                                         datasets: list,
                                                         datasets_names: list,
                                                         thresholds: list,
@@ -149,9 +216,7 @@ def run_with_hyperparameter_search_and_column_excluding(model,
                                                         num_of_cols: int,
                                                         path_to_predictions_col_excluding: str,
                                                         path_to_metrics_col_excluding: str,
-                                                        path_to_model_params: str,
-                                                        model_params: dict = None,
-                                                        num_of_workers: int = 4):
+                                                        path_to_model_params_col_excluding: str) -> None:
 
     all_accuracy_list = []
     all_f1_score_list = []
@@ -170,10 +235,11 @@ def run_with_hyperparameter_search_and_column_excluding(model,
             x_train, x_test, y_train, y_test = train_test_split(features,
                                                                 target,
                                                                 test_size=0.3,
-                                                                random_state=0)
+                                                                random_state=42)
 
             # clf = GridSearchCV(model, model_params, cv=10, verbose=0, n_jobs=-1)
-            clf = RandomizedSearchCV(model, model_params, cv=5, n_iter=50, refit=True, verbose=0, n_jobs=-1, scoring='roc_auc')
+            clf = RandomizedSearchCV(model, model_params, cv=5, n_iter=50, refit=True, verbose=0, n_jobs=-1,
+                                     scoring=scoring)
             """
             tune_search = TuneGridSearchCV(
                 model, model_params, refit=True, max_iters=10,
@@ -182,16 +248,11 @@ def run_with_hyperparameter_search_and_column_excluding(model,
             """
             best_model = clf.fit(x_train, y_train)
 
-            # print('finished finding best model: dataset '+str(idx)+' - column excluded '+str(col_to_exclude))
-            # Run hyperparameter search
-            # with joblib.parallel_backend('dask'):
-            #    best_model = clf.fit(x_train, y_train)
-
             # Save best parameters into csv file
             best_params_df_name = str(idx + 1) + '_' + str(col_to_exclude) + '.csv'
             save_best_model_parameters(best_params_dict=best_model.best_params_,
                                        dataset_name=best_params_df_name,
-                                       path=path_to_model_params)
+                                       path=path_to_model_params_col_excluding)
 
             result_df, y_test = test_model(trained_model=best_model,
                                            x_test=x_test,

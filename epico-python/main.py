@@ -14,13 +14,13 @@ from helper import get_all_datasets_names, read_all_datasets_in_memory, put_colu
 
 if __name__ == '__main__':
     # Home PC
-    path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201003/datasets/'
-    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201003/metrics/'
-    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201003/metrics/column_excluding/'
-    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201003/predictions/'
-    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201003/predictions/column_excluding/'
-    path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201003/best_model_parameters/'
-    path_to_model_params_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201003/best_model_parameters/column_excluding/'
+    path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedACC_randomF_10_bern05prob_0to1_thresh_20201002/datasets/'
+    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedACC_randomF_10_bern05prob_0to1_thresh_20201002/metrics/'
+    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedACC_randomF_10_bern05prob_0to1_thresh_20201002/metrics/column_excluding/'
+    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedACC_randomF_10_bern05prob_0to1_thresh_20201002/predictions/'
+    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedACC_randomF_10_bern05prob_0to1_thresh_20201002/predictions/column_excluding/'
+    path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedACC_randomF_10_bern05prob_0to1_thresh_20201002/best_model_parameters/'
+    path_to_model_params_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedACC_randomF_10_bern05prob_0to1_thresh_20201002/best_model_parameters/column_excluding/'
 
     # Laptop
     # path_to_datasets = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20200930/datasets/"
@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
     run_with_hyperparameter_search_and_without_column_excluding(model=model,
                                                                 model_params=model_params,
-                                                                scoring='roc_auc',
+                                                                scoring='accuracy',
                                                                 datasets=datasets,
                                                                 datasets_names=datasets_names,
                                                                 thresholds=thresholds,

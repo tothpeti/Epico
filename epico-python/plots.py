@@ -14,8 +14,7 @@ import numpy as np
 from helper import get_all_datasets_names, read_all_datasets_in_memory, read_all_folders_files_in_memory
 
 
-def create_boxplot_for_all_metrics_and_thresholds(name: str,
-                                                  path_to_diagrams: str,
+def create_boxplot_for_all_metrics_and_thresholds(path_to_diagrams: str,
                                                   acc_df: pd.DataFrame,
                                                   prec_df: pd.DataFrame,
                                                   f1_df: pd.DataFrame,
@@ -53,7 +52,7 @@ def create_boxplot_for_all_metrics_and_thresholds(name: str,
         plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
-def create_lineplot_averages_for_all_metrics_and_thresholds(name: str,
+def create_lineplot_averages_for_all_metrics_and_thresholds(title_name: str,
                                                             path_to_diagrams: str,
                                                             acc_df: pd.DataFrame,
                                                             prec_df: pd.DataFrame,
@@ -61,16 +60,16 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name: str,
                                                             spec_df: pd.DataFrame,
                                                             sens_df: pd.DataFrame,
                                                             thresholds: np.ndarray,
-                                                            col_excl_idx: int =None) -> None:
+                                                            col_excl_idx: int = None) -> None:
 
     title = ""
     file_name = ""
     if col_excl_idx is None:
-        title = 'Tuned Random Forest considering all predictive variables'
+        title = title_name + ' considering all predictive variables'
         file_name = 'lineplots_all_average_metrics_all_thresholds_all_covariates.png'
     else:
         col_excl_idx = 'x_'+str(col_excl_idx+1)
-        title = f'Tuned Random Forest considering {col_excl_idx} predictive variable excluded'
+        title = f'{title_name} considering {col_excl_idx} predictive variable excluded'
         file_name = f'lineplots_all_average_metrics_all_thresholds_{col_excl_idx}col_excluded.png'
 
     avg_acc_list = []
@@ -116,8 +115,7 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(name: str,
     #plt.show()
 
 
-def create_average_auc_roc_curve(name: str,
-                                 path_to_predictions: str,
+def create_average_auc_roc_curve(title_name: str,
                                  path_to_diagrams: str,
                                  datasets: list,
                                  len_of_test_datasets: int,
@@ -126,11 +124,11 @@ def create_average_auc_roc_curve(name: str,
     title = ""
     file_name = ""
     if col_excl_idx is None:
-        title = 'Tuned Random Forest considering all predictive variables.'
+        title = title_name + ' considering all predictive variables.'
         file_name = 'average_roc_curve_all_covariates.png'
     else:
         col_excl_idx = 'x_'+str(col_excl_idx+1)
-        title = f'Tuned Random Forest considering {col_excl_idx} predictive variable excluded'
+        title = f'{title_name} considering {col_excl_idx} predictive variable excluded'
         file_name = f'average_roc_curve_{col_excl_idx}col_excluded.png'
 
 
@@ -155,7 +153,7 @@ def create_average_auc_roc_curve(name: str,
     mean_auc = auc(mean_fpr, mean_tpr)
     std_auc = np.std(auc_list)
 
-    plt.figure( figsize=(12, 6))
+    plt.figure(figsize=(12, 6))
     plt.plot(mean_fpr, mean_tpr, label=r'Mean ROC (AUC = %0.4f $\pm$ %0.3f)' % (mean_auc, std_auc))
     plt.plot([0, 1], [0, 1], 'r--')
     plt.xlim([-0.025, 1.05])
@@ -169,9 +167,7 @@ def create_average_auc_roc_curve(name: str,
     plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
-def create_min_max_auc_roc_curve(name: str,
-                                 path_to_predictions: str,
-                                 path_to_diagrams: str,
+def create_min_max_auc_roc_curve(path_to_diagrams: str,
                                  datasets: list) -> None:
 
     results_list = []
@@ -216,7 +212,7 @@ def create_min_max_auc_roc_curve(name: str,
     plt.xlabel('False Positive Rate', fontsize=16)
     #plt.show()
 
-    file_name = name +'_min_max_auc_roc_curve_all_covariates.png'
+    file_name = 'min_max_auc_roc_curve_all_covariates.png'
     plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
@@ -254,13 +250,15 @@ def create_3d_plot_for_each_metrics(acc_df: pd.DataFrame,
     #plt.show()
 
 
-def create_boxplot_for_col_excluded_datasets(datasets: list,
+def create_boxplot_for_col_excluded_datasets(title_name: str,
+                                             datasets: list,
                                              path_to_diagrams: str) -> None:
     # X axis which covariant we excluded
     # Y axis average of AUC
 
     col_excl_indexes = []
     all_avg_auc_list = []
+    title = f'{title_name} considering column excluding'
 
     for col_excl_idx, pred_df_list in enumerate(datasets):
         col_excl_indexes.append('x_'+str((col_excl_idx+1)))
@@ -271,8 +269,8 @@ def create_boxplot_for_col_excluded_datasets(datasets: list,
 
         all_avg_auc_list.append(tmp_auc_list)
 
-    plt.figure(figsize=(12,6))
-    plt.title('Tuned Random Forest considering column excluding', fontsize=16)
+    plt.figure(figsize=(12, 6))
+    plt.title(title, fontsize=16)
     sns.boxplot(col_excl_indexes, all_avg_auc_list, palette='Set2')
     plt.xlabel('Excluded column', fontsize=14)
     plt.ylabel('AUC value', fontsize=14)
@@ -284,7 +282,8 @@ def create_boxplot_for_col_excluded_datasets(datasets: list,
     plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
-def create_lineplot_for_one_metric_col_excluded_datasets(metrics: list,
+def create_lineplot_for_one_metric_col_excluded_datasets(title_name: str,
+                                                         metrics: list,
                                                          thresholds: np.ndarray,
                                                          path_to_diagrams: str) -> None:
 
@@ -316,23 +315,44 @@ def create_lineplot_for_one_metric_col_excluded_datasets(metrics: list,
         avg_sens_list.append(tmp_sens_list)
         avg_spec_list.append(tmp_spec_list)
 
-    helper_lineplot_for_one_metric_col_excl("accuracy", avg_acc_list, thresholds, col_excl_indexes,
-                                            path_to_diagrams)
+    helper_lineplot_for_one_metric_col_excl(title_name=title_name,
+                                            metric_name="accuracy",
+                                            avg_metric_list=avg_acc_list,
+                                            thresholds=thresholds,
+                                            col_excl_indexes=col_excl_indexes,
+                                            path_to_diagrams=path_to_diagrams)
 
-    helper_lineplot_for_one_metric_col_excl("f1_score", avg_f1_list, thresholds, col_excl_indexes,
-                                            path_to_diagrams)
+    helper_lineplot_for_one_metric_col_excl(title_name=title_name,
+                                            metric_name="f1_score",
+                                            avg_metric_list=avg_acc_list,
+                                            thresholds=thresholds,
+                                            col_excl_indexes=col_excl_indexes,
+                                            path_to_diagrams=path_to_diagrams)
 
-    helper_lineplot_for_one_metric_col_excl("precision", avg_prec_list, thresholds, col_excl_indexes,
-                                            path_to_diagrams)
+    helper_lineplot_for_one_metric_col_excl(title_name=title_name,
+                                            metric_name="precision",
+                                            avg_metric_list=avg_acc_list,
+                                            thresholds=thresholds,
+                                            col_excl_indexes=col_excl_indexes,
+                                            path_to_diagrams=path_to_diagrams)
 
-    helper_lineplot_for_one_metric_col_excl("sensitivity", avg_sens_list, thresholds, col_excl_indexes,
-                                            path_to_diagrams)
+    helper_lineplot_for_one_metric_col_excl(title_name=title_name,
+                                            metric_name="sensitivity",
+                                            avg_metric_list=avg_acc_list,
+                                            thresholds=thresholds,
+                                            col_excl_indexes=col_excl_indexes,
+                                            path_to_diagrams=path_to_diagrams)
 
-    helper_lineplot_for_one_metric_col_excl("specificity", avg_spec_list, thresholds, col_excl_indexes,
-                                            path_to_diagrams)
+    helper_lineplot_for_one_metric_col_excl(title_name=title_name,
+                                            metric_name="specificity",
+                                            avg_metric_list=avg_acc_list,
+                                            thresholds=thresholds,
+                                            col_excl_indexes=col_excl_indexes,
+                                            path_to_diagrams=path_to_diagrams)
 
 
-def helper_lineplot_for_one_metric_col_excl(metric_name: str,
+def helper_lineplot_for_one_metric_col_excl(title_name: str,
+                                            metric_name: str,
                                             avg_metric_list: list,
                                             thresholds: np.ndarray,
                                             col_excl_indexes: list,
@@ -341,7 +361,7 @@ def helper_lineplot_for_one_metric_col_excl(metric_name: str,
     y_range = np.arange(0.0, 1.1, 0.1)
 
     plt.figure(figsize=(12, 6))
-    plt.title(f'Tuned Random Forest {metric_name} considering column excluding', fontsize=16)
+    plt.title(f'{title_name} {metric_name} considering column excluding', fontsize=16)
     plt.xticks(thresholds, rotation=70, fontsize=12)
     plt.yticks(y_range, fontsize=12)
 
@@ -359,16 +379,16 @@ def helper_lineplot_for_one_metric_col_excl(metric_name: str,
     #plt.show()
 
 
-def create_plots_for_without_column_excluded_datasets(file_name: str,
+def create_plots_for_without_column_excluded_datasets(title_name: str,
                                                       path_to_predictions: str,
                                                       path_to_metrics: str,
                                                       path_to_diagrams: str) -> None:
 
     datasets_names = get_all_datasets_names(path=path_to_predictions,
-                                            is_prediction=True)
+                                            is_prediction_dataset=True)
 
     metrics_names = get_all_datasets_names(path=path_to_metrics,
-                                           is_prediction=False)
+                                           is_prediction_dataset=False)
 
     datasets = read_all_datasets_in_memory(datasets_names_list=datasets_names,
                                            path_to_datasets=path_to_predictions)
@@ -377,8 +397,7 @@ def create_plots_for_without_column_excluded_datasets(file_name: str,
     metrics = read_all_datasets_in_memory(datasets_names_list=metrics_names,
                                           path_to_datasets=path_to_metrics)
 
-    create_boxplot_for_all_metrics_and_thresholds(name=file_name,
-                                                  path_to_diagrams=path_to_diagrams,
+    create_boxplot_for_all_metrics_and_thresholds(path_to_diagrams=path_to_diagrams,
                                                   acc_df=metrics[0],
                                                   f1_df=metrics[1],
                                                   prec_df=metrics[2],
@@ -386,7 +405,7 @@ def create_plots_for_without_column_excluded_datasets(file_name: str,
                                                   spec_df=metrics[4])
 
     thresholds = np.arange(0.0, 1.05, 0.05)
-    create_lineplot_averages_for_all_metrics_and_thresholds(name=file_name,
+    create_lineplot_averages_for_all_metrics_and_thresholds(title_name=title_name,
                                                             path_to_diagrams=path_to_diagrams,
                                                             acc_df=metrics[0],
                                                             f1_df=metrics[1],
@@ -395,20 +414,17 @@ def create_plots_for_without_column_excluded_datasets(file_name: str,
                                                             spec_df=metrics[4],
                                                             thresholds=thresholds)
 
-    create_min_max_auc_roc_curve(name=file_name,
-                                 path_to_predictions=path_to_predictions,
-                                 path_to_diagrams=path_to_diagrams,
+    create_min_max_auc_roc_curve(path_to_diagrams=path_to_diagrams,
                                  datasets=datasets)
 
     len_of_dataset = len(datasets[0])
-    create_average_auc_roc_curve(name=file_name,
-                                 path_to_predictions=path_to_predictions,
+    create_average_auc_roc_curve(title_name=title_name,
                                  path_to_diagrams=path_to_diagrams,
                                  datasets=datasets,
                                  len_of_test_datasets=len_of_dataset)
 
 
-def create_plots_for_column_excluded_datasets(file_name: str,
+def create_plots_for_column_excluded_datasets(title_name: str,
                                               path_to_predictions: str,
                                               path_to_metrics: str,
                                               path_to_diagrams: str) -> None:
@@ -426,8 +442,7 @@ def create_plots_for_column_excluded_datasets(file_name: str,
                                                             is_prediction=False)
 
     for col_excl_idx, pred_df_list in enumerate(all_pred_datasets):
-        create_average_auc_roc_curve(name=file_name,
-                                     path_to_predictions=path_to_predictions,
+        create_average_auc_roc_curve(title_name=title_name,
                                      path_to_diagrams=path_to_diagrams,
                                      datasets=pred_df_list,
                                      len_of_test_datasets=len(pred_df_list[0]),
@@ -436,7 +451,7 @@ def create_plots_for_column_excluded_datasets(file_name: str,
     thresholds = np.arange(0.0, 1.05, 0.05)
 
     for col_excl_idx, metric_df_list in enumerate(all_metrics_datasets):
-        create_lineplot_averages_for_all_metrics_and_thresholds(name=file_name,
+        create_lineplot_averages_for_all_metrics_and_thresholds(title_name=title_name,
                                                                 path_to_diagrams=path_to_diagrams,
                                                                 acc_df=metric_df_list[0],
                                                                 f1_df=metric_df_list[1],
@@ -447,7 +462,11 @@ def create_plots_for_column_excluded_datasets(file_name: str,
                                                                 col_excl_idx=col_excl_idx)
         # create_3d_plot_for_each_metrics(acc_df=metric_df_list[0], thresholds=thresholds, col_excl_idx=col_excl_idx)
 
-    create_boxplot_for_col_excluded_datasets(datasets=all_pred_datasets, path_to_diagrams=path_to_diagrams)
-    create_lineplot_for_one_metric_col_excluded_datasets(metrics=all_metrics_datasets,
+    create_boxplot_for_col_excluded_datasets(title_name=title_name,
+                                             datasets=all_pred_datasets,
+                                             path_to_diagrams=path_to_diagrams)
+
+    create_lineplot_for_one_metric_col_excluded_datasets(title_name=title_name,
+                                                         metrics=all_metrics_datasets,
                                                          thresholds=thresholds,
                                                          path_to_diagrams=path_to_diagrams)

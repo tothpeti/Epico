@@ -6,12 +6,12 @@ import concurrent.futures
 
 
 def get_all_datasets_names(path: str,
-                           is_prediction: bool) -> list:
+                           is_prediction_dataset: bool) -> list:
     os.chdir(path)
 
     tmp = [file for file in glob.glob("*.csv")]
 
-    if is_prediction:
+    if is_prediction_dataset:
         tmp.sort(key=sort_csv_files_by_id)
     else:
         tmp.sort(key=sort_csv_files_by_name)

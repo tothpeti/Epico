@@ -159,6 +159,8 @@ def run_with_hyperparameter_search_and_without_column_excluding(model,
     all_sensitivity_list = []
     all_specificity_list = []
 
+    max_best_model = None
+
     for idx, df in enumerate(datasets):
         features = df.drop(columns=['y'], axis=1)
         target = df['y']
@@ -174,6 +176,7 @@ def run_with_hyperparameter_search_and_without_column_excluding(model,
 
         # Save best parameters into csv file
         best_params_df_name = str(idx + 1) + '.csv'
+
         save_best_model_parameters(best_params_dict=best_model.best_params_,
                                    dataset_name=best_params_df_name,
                                    path=path_to_model_params)
@@ -185,9 +188,17 @@ def run_with_hyperparameter_search_and_without_column_excluding(model,
                                        thresholds=thresholds,
                                        threshold_col_names=threshold_col_names)
 
+        if max_best_model is None:
+            max_best_model = best_model
+        else:
+            if max_best_model.best_score_ < best_model.best_score_:
+                max_best_model = best_model
+
         accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(result_df,
                                                                                                           y_test,
                                                                                                           threshold_col_names)
+
+        print('---Max_depth of best model: ' + str([str(est.get_depth())+'-'+str(est.max_depth) for est in best_model.best_estimator_.estimators_]))
 
         prediction_file_name = datasets_names[idx]
         save_prediction_df(result_df, prediction_file_name, path_to_predictions)
@@ -197,8 +208,9 @@ def run_with_hyperparameter_search_and_without_column_excluding(model,
         all_precision_list.append(precision_list)
         all_sensitivity_list.append(sensitivity_list)
         all_specificity_list.append(specificity_list)
-
         print('Finished with ' + str(idx + 1) + ' dataset')
+
+    print('Max_depth of one of the tree of best model: '+str(max([est.get_depth() for est in max_best_model.best_estimator_.estimators_])))
 
     save_metrics(all_accuracy_list, all_f1_score_list,
                  all_precision_list, all_sensitivity_list,
@@ -226,6 +238,9 @@ def run_with_hyperparameter_search_and_column_excluding(model,
 
     # Predict on all the datasets separately by using the best model
     for col_to_exclude in range(num_of_cols):
+
+        max_best_model = None
+
         for idx, df in enumerate(datasets):
 
             col_name_to_exclude = 'x'+str(col_to_exclude+1)
@@ -260,9 +275,18 @@ def run_with_hyperparameter_search_and_column_excluding(model,
                                            thresholds=thresholds,
                                            threshold_col_names=threshold_col_names)
 
+            if max_best_model is None:
+                max_best_model = best_model
+            else:
+                if max_best_model.best_score_ < best_model.best_score_:
+                    max_best_model = best_model
+
             accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(result_df,
                                                                                                               y_test,
                                                                                                               threshold_col_names)
+
+            print('---Max_depth of best model: ' + str(
+                [str(est.get_depth()) + '-' + str(est.max_depth) for est in best_model.best_estimator_.estimators_]))
 
             prediction_file_name = datasets_names[idx].split('.')[0]+'_'+str(col_to_exclude)+'.csv'
             save_prediction_df(result_df, prediction_file_name, path_to_predictions_col_excluding)
@@ -274,6 +298,9 @@ def run_with_hyperparameter_search_and_column_excluding(model,
             all_specificity_list.append(specificity_list)
 
             print('Finished with '+str(idx+1)+' dataset, column excluded: '+str(col_to_exclude))
+
+        print('Max_depth of one of the tree of best model: ' + str(
+            max([est.get_depth() for est in max_best_model.best_estimator_.estimators_])))
 
         save_metrics(all_accuracy_list, all_f1_score_list,
                      all_precision_list, all_sensitivity_list,

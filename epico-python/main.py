@@ -14,13 +14,13 @@ from helper import get_all_datasets_names, read_all_datasets_in_memory, put_colu
 
 if __name__ == '__main__':
     # Home PC
-    path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedACC_randomF_10_bern05prob_0to1_thresh_20201002/datasets/'
-    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedACC_randomF_10_bern05prob_0to1_thresh_20201002/metrics/'
-    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedACC_randomF_10_bern05prob_0to1_thresh_20201002/metrics/column_excluding/'
-    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedACC_randomF_10_bern05prob_0to1_thresh_20201002/predictions/'
-    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedACC_randomF_10_bern05prob_0to1_thresh_20201002/predictions/column_excluding/'
-    path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedACC_randomF_10_bern05prob_0to1_thresh_20201002/best_model_parameters/'
-    path_to_model_params_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedACC_randomF_10_bern05prob_0to1_thresh_20201002/best_model_parameters/column_excluding/'
+    path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201005/datasets/'
+    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201005/metrics/'
+    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201005/metrics/column_excluding/'
+    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201005/predictions/'
+    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201005/predictions/column_excluding/'
+    path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201005/best_model_parameters/'
+    path_to_model_params_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201005/best_model_parameters/column_excluding/'
 
     # Laptop
     # path_to_datasets = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20200930/datasets/"
@@ -56,15 +56,15 @@ if __name__ == '__main__':
     # max_features    --> maximum number of features to consider at every split
     # min_samples_leaf --> minimum number of samples required to be a leaf node
     model_params = {
-        "n_estimators": [10, 25, 50, 100, 150],
+        "n_estimators": [100, 150, 200, 250, 300],
         "max_features": ["sqrt"],
-        "max_depth": [5, 10, 15],
-        "min_samples_leaf": [2, 5, 10]
+        "max_depth": [None, 5, 10, 15],
+        "min_samples_leaf": [1, 2, 5, 10]
     }
-
+    """
     run_with_hyperparameter_search_and_without_column_excluding(model=model,
                                                                 model_params=model_params,
-                                                                scoring='accuracy',
+                                                                scoring='roc_auc',
                                                                 datasets=datasets,
                                                                 datasets_names=datasets_names,
                                                                 thresholds=thresholds,
@@ -85,7 +85,7 @@ if __name__ == '__main__':
                                                         path_to_metrics_col_excluding=path_to_metrics_col_excluding,
                                                         path_to_model_params_col_excluding=path_to_model_params_col_excluding)
 
-    """
+
     # run_process_without_column_excluding(model, datasets, datasets_names, thresholds, threshold_col_names,
     #                                     path_to_predictions, path_to_metrics)
 
@@ -94,8 +94,8 @@ if __name__ == '__main__':
     #                                  path_to_predictions_col_excluding, path_to_metrics_col_excluding)
 
     # This step is only needed when we do column excluding runs
-    # print('Rearranging files finished')
-    # put_column_excluded_files_into_folders(path_to_metrics_col_excluding)
-    # put_column_excluded_files_into_folders(path_to_predictions_col_excluding)
-    # put_column_excluded_files_into_folders(path_to_model_params_col_excluding)
+    print('Rearranging files finished')
+    put_column_excluded_files_into_folders(path_to_metrics_col_excluding)
+    put_column_excluded_files_into_folders(path_to_predictions_col_excluding)
+    put_column_excluded_files_into_folders(path_to_model_params_col_excluding)
     print("--- %s seconds ---" % (time.time() - start_time))

@@ -40,31 +40,31 @@ int main() {
         };
         RandomDatasetGenerator::ColumnDataType bern5{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", std::log(1.25)}}
+                {{"prob", 0.5}, {"weight", std::log(1.5)}}
         };
 
         RandomDatasetGenerator::ColumnDataType bern6{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", std::log(1.5)}}
+                {{"prob", 0.5}, {"weight", std::log(2)}}
         };
         RandomDatasetGenerator::ColumnDataType bern7{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", std::log(1.75)}}
+                {{"prob", 0.5}, {"weight", std::log(2.5)}}
         };
 
         RandomDatasetGenerator::ColumnDataType bern8{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", std::log(2)}}
+                {{"prob", 0.5}, {"weight", std::log(3)}}
         };
 
         RandomDatasetGenerator::ColumnDataType bern9{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", std::log(2.25)}}
+                {{"prob", 0.5}, {"weight", std::log(3.5)}}
         };
 
         RandomDatasetGenerator::ColumnDataType bern10{
                 RandomDatasetGenerator::DistributionTypes::Bernoulli,
-                {{"prob", 0.5}, {"weight", std::log(2.5)}}
+                {{"prob", 0.5}, {"weight", std::log(4)}}
         };
 
         std::vector<RandomDatasetGenerator::ColumnDataType> cols{

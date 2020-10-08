@@ -14,6 +14,7 @@ from helper import get_all_datasets_names, read_all_datasets_in_memory, put_colu
 
 if __name__ == '__main__':
     # Home PC
+    """
     path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201005/datasets/'
     path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201005/metrics/'
     path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201005/metrics/column_excluding/'
@@ -21,13 +22,15 @@ if __name__ == '__main__':
     path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201005/predictions/column_excluding/'
     path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201005/best_model_parameters/'
     path_to_model_params_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/Generated_Data_Visualizations/50rounds_tunedROC_randomF_10_bern05prob_0to1_thresh_20201005/best_model_parameters/column_excluding/'
-
+    """
     # Laptop
-    # path_to_datasets = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20200930/datasets/"
-    # path_to_metrics = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20200930/metrics/"
-    # path_to_metrics_col_excluding = 'C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20200930/metrics/column_excluding'
-    # path_to_predictions = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20200930/predictions/"
-    # path_to_predictions_col_excluding = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/50rounds_tuned_randomF_10_bern05prob_0to1_thresh_20200930/predictions/column_excluding/"
+    path_to_datasets = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/Scenario2/tuned_ROC_random_forest_0to1_threshold/datasets/"
+    path_to_metrics = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/Scenario2/tuned_ROC_random_forest_0to1_threshold/metrics/"
+    path_to_metrics_col_excluding = 'C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/Scenario2/tuned_ROC_random_forest_0to1_threshold/metrics/column_excluding'
+    path_to_predictions = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/Scenario2/tuned_ROC_random_forest_0to1_threshold/predictions/"
+    path_to_predictions_col_excluding = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/Scenario2/tuned_ROC_random_forest_0to1_threshold/predictions/column_excluding/"
+    path_to_model_params = 'C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/Scenario2/tuned_ROC_random_forest_0to1_threshold/best_model_parameters/'
+    path_to_model_params_col_excluding = 'C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/Scenario2/tuned_ROC_random_forest_0to1_threshold/best_model_parameters/column_excluding/'
 
     start_time = time.time()
 
@@ -47,8 +50,8 @@ if __name__ == '__main__':
     num_of_cols = 10
 
     # Initialize model
-    # model = LogisticRegression(random_state=0, n_jobs=-1)
-    model = RandomForestClassifier(random_state=42)
+    # model = LogisticRegression(random_state=42, n_jobs=-1)
+    model = RandomForestClassifier(random_state=42, n_jobs=-1)
 
     # RF
     # n_estimators    --> put as high as your CPU can handle!! more is better, but it is very time expensive
@@ -61,7 +64,7 @@ if __name__ == '__main__':
         "max_depth": [None, 5, 10, 15],
         "min_samples_leaf": [1, 2, 5, 10]
     }
-    """
+
     run_with_hyperparameter_search_and_without_column_excluding(model=model,
                                                                 model_params=model_params,
                                                                 scoring='roc_auc',
@@ -72,7 +75,7 @@ if __name__ == '__main__':
                                                                 path_to_predictions=path_to_predictions,
                                                                 path_to_metrics=path_to_metrics,
                                                                 path_to_model_params=path_to_model_params)
-    """
+    """ 
     run_with_hyperparameter_search_and_column_excluding(model=model,
                                                         model_params=model_params,
                                                         scoring='roc_auc',
@@ -85,14 +88,25 @@ if __name__ == '__main__':
                                                         path_to_metrics_col_excluding=path_to_metrics_col_excluding,
                                                         path_to_model_params_col_excluding=path_to_model_params_col_excluding)
 
+    
+    run_without_column_excluding(model=model,
+                                 datasets=datasets,
+                                 datasets_names=datasets_names,
+                                 thresholds=thresholds,
+                                 threshold_col_names=threshold_col_names,
+                                 path_to_predictions=path_to_predictions,
+                                 path_to_metrics=path_to_metrics)
 
-    # run_process_without_column_excluding(model, datasets, datasets_names, thresholds, threshold_col_names,
-    #                                     path_to_predictions, path_to_metrics)
-
-    # print('step 1 finished')
-    # run_process_with_column_excluding(model, num_of_cols, datasets, datasets_names, thresholds, threshold_col_names,
-    #                                  path_to_predictions_col_excluding, path_to_metrics_col_excluding)
-
+    print('step 1 finished')
+    run_with_column_excluding(model=model,
+                              num_of_cols=num_of_cols,
+                              datasets=datasets,
+                              datasets_names=datasets_names,
+                              thresholds=thresholds,
+                              threshold_col_names=threshold_col_names,
+                              path_to_predictions_col_excluding=path_to_predictions_col_excluding,
+                              path_to_metrics_col_excluding=path_to_metrics_col_excluding)
+    """
     # This step is only needed when we do column excluding runs
     print('Rearranging files finished')
     put_column_excluded_files_into_folders(path_to_metrics_col_excluding)

@@ -11,7 +11,7 @@ import numpy as np
 """
     Custom files
 """
-from helper import get_all_datasets_names, read_all_datasets_in_memory, read_all_folders_files_in_memory
+from utils import get_all_datasets_names, read_all_datasets_in_memory, read_all_folders_files_in_memory
 
 
 def create_boxplot_for_all_metrics_and_thresholds(path_to_diagrams: str,

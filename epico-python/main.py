@@ -14,14 +14,13 @@ from utils import get_all_datasets_names, read_all_datasets_in_memory, put_colum
 
 if __name__ == '__main__':
     # Home PC
-
-    path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario2/tunedACC_randomF_0to1_thresholds/datasets/'
-    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario2/tunedACC_randomF_0to1_thresholds/metrics/'
-    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario2/tunedACC_randomF_0to1_thresholds/metrics/column_excluding/'
-    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario2/tunedACC_randomF_0to1_thresholds/predictions/'
-    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario2/tunedACC_randomF_0to1_thresholds/predictions/column_excluding/'
-    path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario2/tunedACC_randomF_0to1_thresholds/best_model_parameters/'
-    path_to_model_params_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario2/tunedACC_randomF_0to1_thresholds/best_model_parameters/column_excluding/'
+    path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/datasets/'
+    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/metrics/'
+    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/metrics/column_excluding/'
+    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/predictions/'
+    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/predictions/column_excluding/'
+    path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/best_model_parameters/'
+    path_to_model_params_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/best_model_parameters/column_excluding/'
     
     # Laptop
     """
@@ -65,10 +64,10 @@ if __name__ == '__main__':
         "max_depth": [None, 5, 10, 15],
         "min_samples_leaf": [1, 2, 5, 10]
     }
-    """
+
     run_with_hyperparameter_search_and_without_column_excluding(model=model,
                                                                 model_params=model_params,
-                                                                scoring='accuracy',
+                                                                scoring='roc_auc',
                                                                 datasets=datasets,
                                                                 datasets_names=datasets_names,
                                                                 thresholds=thresholds,
@@ -79,7 +78,7 @@ if __name__ == '__main__':
     
     run_with_hyperparameter_search_and_column_excluding(model=model,
                                                         model_params=model_params,
-                                                        scoring='accuracy',
+                                                        scoring='roc_auc',
                                                         num_of_cols=num_of_cols,
                                                         datasets=datasets,
                                                         datasets_names=datasets_names,
@@ -88,7 +87,8 @@ if __name__ == '__main__':
                                                         path_to_predictions_col_excluding=path_to_predictions_col_excluding,
                                                         path_to_metrics_col_excluding=path_to_metrics_col_excluding,
                                                         path_to_model_params_col_excluding=path_to_model_params_col_excluding)
-    """
+
+
     """
     run_without_column_excluding(model=model,
                                  datasets=datasets,
@@ -110,7 +110,7 @@ if __name__ == '__main__':
     """
     # This step is only needed when we do column excluding runs
     print('Rearranging files finished')
-    # put_column_excluded_files_into_folders(path_to_metrics_col_excluding)
-    # put_column_excluded_files_into_folders(path_to_predictions_col_excluding)
-    # put_column_excluded_files_into_folders(path_to_model_params_col_excluding)
+    put_column_excluded_files_into_folders(path_to_metrics_col_excluding)
+    put_column_excluded_files_into_folders(path_to_predictions_col_excluding)
+    put_column_excluded_files_into_folders(path_to_model_params_col_excluding)
     print("--- %s seconds ---" % (time.time() - start_time))

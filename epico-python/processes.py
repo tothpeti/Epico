@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import train_test_split
-
+from sklearn.preprocessing import StandardScaler
 """
     Custom files
 """
@@ -10,10 +10,10 @@ from metrics import create_metrics, save_metrics, save_prediction_df, save_best_
 
 
 def run_model(model,
-              features,
-              target,
-              thresholds,
-              threshold_col_names,
+              features: pd.DataFrame,
+              target: pd.DataFrame,
+              thresholds: list,
+              threshold_col_names: list,
               test_size=0.3):
 
     # Split dataset
@@ -21,6 +21,16 @@ def run_model(model,
                                                         target,
                                                         test_size=test_size,
                                                         random_state=42)
+
+    # Preprocess data
+    standard_scaler = StandardScaler()
+    x_train_norm = standard_scaler.fit_transform(x_train)
+    x_test_norm = standard_scaler.transform(x_test)
+
+    # Convert ndarrays to DataFrames
+    features_column_names = features.columns
+    x_train = pd.DataFrame(data=x_train_norm, index=y_train.index, columns=features_column_names)
+    x_test = pd.DataFrame(data=x_test_norm, index=y_test.index, columns=features_column_names)
 
     # Initialize and train model
     trained_model = model.fit(x_train, y_train)
@@ -164,10 +174,22 @@ def run_with_hyperparameter_search_and_without_column_excluding(model,
     for idx, df in enumerate(datasets):
         features = df.drop(columns=['y'], axis=1)
         target = df['y']
+
         x_train, x_test, y_train, y_test = train_test_split(features,
                                                             target,
                                                             test_size=0.3,
                                                             random_state=42)
+
+
+        # Preprocess data
+        standard_scaler = StandardScaler()
+        x_train_norm = standard_scaler.fit_transform(x_train)
+        x_test_norm = standard_scaler.transform(x_test)
+
+        # Convert ndarrays to DataFrames
+        features_column_names = features.columns
+        x_train = pd.DataFrame(data=x_train_norm, index=y_train.index, columns=features_column_names)
+        x_test = pd.DataFrame(data=x_test_norm, index=y_test.index, columns=features_column_names)
 
         clf = RandomizedSearchCV(model, model_params, cv=5, n_iter=50, refit=True, verbose=0, n_jobs=-1,
                                  scoring=scoring)
@@ -251,6 +273,16 @@ def run_with_hyperparameter_search_and_column_excluding(model,
                                                                 target,
                                                                 test_size=0.3,
                                                                 random_state=42)
+
+            # Preprocess data
+            standard_scaler = StandardScaler()
+            x_train_norm = standard_scaler.fit_transform(x_train)
+            x_test_norm = standard_scaler.transform(x_test)
+
+            # Convert ndarrays to DataFrames
+            features_column_names = features.columns
+            x_train = pd.DataFrame(data=x_train_norm, index=y_train.index, columns=features_column_names)
+            x_test = pd.DataFrame(data=x_test_norm, index=y_test.index, columns=features_column_names)
 
             # clf = GridSearchCV(model, model_params, cv=10, verbose=0, n_jobs=-1)
             clf = RandomizedSearchCV(model, model_params, cv=5, n_iter=50, refit=True, verbose=0, n_jobs=-1,

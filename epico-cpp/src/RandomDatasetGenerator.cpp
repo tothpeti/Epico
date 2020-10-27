@@ -41,7 +41,7 @@ void RandomDatasetGenerator::generateBinomialColumn(const size_t &num_trials, co
 	std::binomial_distribution<> d(num_trials, prob);
 
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, "binomial");
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, true);
 
 	appendToFeatures(tens);
 
@@ -57,7 +57,7 @@ void  RandomDatasetGenerator::generateBernoulliColumn(const double &prob, const 
 	std::bernoulli_distribution d(prob);
 
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, "bernoulli");
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, true);
 
 	appendToFeatures(tens);
 
@@ -73,7 +73,7 @@ void RandomDatasetGenerator::generateNormalColumn(const double &mean, const doub
 	std::normal_distribution<double> d(mean, stddev);
 	
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, false);
 
 	appendToFeatures(tens);
 
@@ -89,7 +89,7 @@ void RandomDatasetGenerator::generateUniformDiscreteColumn(const int &from, cons
 	std::uniform_int_distribution<> d(from, to);
 
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, true);
 
 	appendToFeatures(tens);
 
@@ -105,7 +105,7 @@ void RandomDatasetGenerator::generateUniformRealColumn(const double &from, const
 	std::uniform_real_distribution<double> d(from, to);
 	
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, false);
 
 	appendToFeatures(tens);
 
@@ -121,7 +121,7 @@ void RandomDatasetGenerator::generateGammaColumn(const double &alpha, const doub
 	std::gamma_distribution<double> d(alpha, beta);
 
 	// Creating Tensor column filled with distributed values
-	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d);
+	auto tens = RandomDatasetGenerator::generateRandomValuesHelper(d, false);
 
 	appendToFeatures(tens);
 

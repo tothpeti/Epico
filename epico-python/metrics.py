@@ -10,6 +10,7 @@ def create_metrics(df, y_test, threshold_cols):
     sensitvity_list = []
     specificity_list = []
 
+    # For each predicted column, calculate metrics
     for threshold_col in threshold_cols:
         conf_matrix = confusion_matrix(y_test, df[threshold_col])
 

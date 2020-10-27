@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-
+import sys
 """
 Custom files
 """
@@ -37,11 +37,6 @@ if __name__ == '__main__':
 
     datasets_names = get_all_datasets_names(path_to_datasets, True)
     datasets = read_all_datasets_in_memory(datasets_names, path_to_datasets)
-
-
-
-
-
 
     # Start(inclusive), End(exclusive), Steps
     # 0.0 - 1.0

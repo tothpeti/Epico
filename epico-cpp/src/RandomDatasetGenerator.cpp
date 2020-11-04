@@ -38,6 +38,9 @@ torch::Tensor RandomDatasetGenerator::getTarget() {
 
 
 void RandomDatasetGenerator::generateBinomialColumn(const size_t &num_trials, const double &prob, const double &weight){
+    assert(("Probability values must be between 0 and 1 (inclusive)", 0 <= prob && prob <= 1));
+    assert(("Number of trials value must be greater than 0 (exclusive)", 0 < num_Trial));
+
 	std::binomial_distribution<> d(num_trials, prob);
 
 	// Creating Tensor column filled with distributed values
@@ -54,6 +57,8 @@ void RandomDatasetGenerator::generateBinomialColumn(const size_t &num_trials, co
 
 
 void  RandomDatasetGenerator::generateBernoulliColumn(const double &prob, const double &weight) {
+    assert(("Probability values must be between 0 and 1 (inclusive)", 0 <= prob && prob <= 1));
+
 	std::bernoulli_distribution d(prob);
 
 	// Creating Tensor column filled with distributed values
@@ -70,6 +75,8 @@ void  RandomDatasetGenerator::generateBernoulliColumn(const double &prob, const 
 
 
 void RandomDatasetGenerator::generateNormalColumn(const double &mean, const double &stddev, const double &weight){
+    assert(("Stddev value must be greater than 0 (exclusive)", 0 < stddev));
+
 	std::normal_distribution<double> d(mean, stddev);
 	
 	// Creating Tensor column filled with distributed values
@@ -86,6 +93,8 @@ void RandomDatasetGenerator::generateNormalColumn(const double &mean, const doub
 
 
 void RandomDatasetGenerator::generateUniformDiscreteColumn(const int &from, const int &to, const double &weight) {
+    assert(("Parameter TO must be greater than or equal to FROM", from <= to));
+
 	std::uniform_int_distribution<> d(from, to);
 
 	// Creating Tensor column filled with distributed values
@@ -102,6 +111,8 @@ void RandomDatasetGenerator::generateUniformDiscreteColumn(const int &from, cons
 
 
 void RandomDatasetGenerator::generateUniformRealColumn(const double &from, const double &to, const double &weight) {
+    assert(("Parameter TO must be greater than FROM (exclusive)", from < to));
+
 	std::uniform_real_distribution<double> d(from, to);
 	
 	// Creating Tensor column filled with distributed values
@@ -118,6 +129,9 @@ void RandomDatasetGenerator::generateUniformRealColumn(const double &from, const
 
 
 void RandomDatasetGenerator::generateGammaColumn(const double &alpha, const double &beta, const double &weight) {
+    assert(("Alpha must be greater than 0 (exclusive)", 0 < alpha));
+    assert(("Beta must be greater than 0 (exclusive)", 0 < beta));
+
 	std::gamma_distribution<double> d(alpha, beta);
 
 	// Creating Tensor column filled with distributed values

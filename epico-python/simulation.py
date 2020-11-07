@@ -26,6 +26,8 @@ class Simulation:
 
         # Used for preprocessing
         self.feature_transformer: ColumnTransformer = ColumnTransformer()
+        self.feature_cols_idx = []
+        self.target_col_idx = None
 
         # Used for model training and testing
         self.x_train = None
@@ -53,12 +55,20 @@ class Simulation:
         self.df = read_datasets(self.path_to_datasets)
         return self
 
+    def init_feature_cols_indexes(self, indexes):
+        self.feature_cols_idx = indexes
+
+    def init_target_col_indexes(self, index):
+        self.target_col_idx = index
+
     def init_feature_transformer(self, transformer):
         self.feature_transformer = transformer
         return self
 
     def apply_feature_transformer(self):
         self.feature_transformer.fit(self.x_train)
+        self.x_train = self.feature_transformer.transform(self.x_train)
+        self.x_test = self.feature_transformer.transform(self.x_test)
         return self
 
     def binarize_target(self):
@@ -81,6 +91,9 @@ class Simulation:
                                                                                 random_state=42)
         y_train_idx = self.y_train.index
         y_test_idx = self.y_test.index
+
+        self.apply_feature_transformer()\
+            .binarize_target()
 
         # Convert ndarrays to DataFrames
         features_column_names = features.columns

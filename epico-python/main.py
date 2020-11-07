@@ -1,9 +1,13 @@
 import time
 import numpy as np
 import pandas as pd
+from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 import sys
+
+from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder, StandardScaler
+
 """
 Custom files
 """
@@ -36,8 +40,8 @@ if __name__ == '__main__':
     """
     start_time = time.time()
 
-    datasets_names = get_all_datasets_names(path_to_datasets, True)
-    datasets = read_all_datasets_in_memory(datasets_names, path_to_datasets)
+    # datasets_names = get_all_datasets_names(path_to_datasets, True)
+    # datasets = read_all_datasets_in_memory(datasets_names, path_to_datasets)
 
     # Start(inclusive), End(exclusive), Steps
     # 0.0 - 1.0
@@ -51,14 +55,37 @@ if __name__ == '__main__':
     # Number of features
     num_of_cols = 10
 
-    sim = Simulation(thresholds=thresholds, threshold_col_names=threshold_col_names,
-                     path_to_datasets=path_to_datasets, path_to_metrics=path_to_metrics,
-                     path_to_metrics_col_excluding= path_to_metrics_col_excluding,
-                     path_to_predictions=path_to_predictions, path_to_predictions_col_excluding=path_to_predictions_col_excluding)
+    sim = Simulation(thresholds=thresholds,
+                     threshold_col_names=threshold_col_names,
+                     path_to_datasets=path_to_datasets,
+                     path_to_metrics=path_to_metrics,
+                     path_to_metrics_col_excluding=path_to_metrics_col_excluding,
+                     path_to_predictions=path_to_predictions,
+                     path_to_predictions_col_excluding=path_to_predictions_col_excluding)
+
+    # Columns to transform
+    ord_enc_cols = [1, 3, 5, 6, 7, 13]
+    one_hot_cols = [8, 9]
+    standard_scaler_cols = [0, 2, 4, 10, 11, 12]
+
+    # Last column is "filename" before that there is "target" column
+    features_col_idx = list(range(0, (len(sim.df.columns)-2)))
+    target_col_idx = [-2]
+
+    transformer = ColumnTransformer(
+        transformers=[
+            ('ord_enc_process', OrdinalEncoder(), ord_enc_cols),
+            ('one_hot_process', OneHotEncoder(drop='first'), one_hot_cols),
+            ('standard_scaler_process', StandardScaler(), standard_scaler_cols)
+        ],
+        remainder="passthrough",
+        n_jobs=-1
+    )
+
     sim.load_data()\
-        .init_feature_transformer()\
-        .apply_feature_transformer()\
-        .binarize_target()
+        .init_feature_transformer(transformer=transformer)\
+        .init_feature_cols(features_col_idx)\
+        .init_target_col(target_col_idx)
 
     """
     # Initialize model

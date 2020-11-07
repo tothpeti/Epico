@@ -5,6 +5,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
 
+from metrics import create_metrics, save_prediction_df, save_metrics
 from utils import read_datasets
 
 
@@ -41,6 +42,7 @@ class Simulation:
 
         # Main DataFrame
         self.df = pd.DataFrame()
+        self.file_names = list(self.df["filename"].unique())
 
         # Used for storing simulation metrics results
         self.all_accuracy_list = []
@@ -51,6 +53,9 @@ class Simulation:
         # self.path_to_model_params = ""
         # self.path_to_model_params_col_excluding = ""
 
+    ####################################
+    #     Start of methods section
+    ####################################
     def load_data(self):
         self.df = read_datasets(self.path_to_datasets)
         return self
@@ -92,19 +97,20 @@ class Simulation:
         y_train_idx = self.y_train.index
         y_test_idx = self.y_test.index
 
+        # Transform data into new form
         self.apply_feature_transformer()\
             .binarize_target()
 
         # Convert ndarrays to DataFrames
         features_column_names = features.columns
-        x_train = pd.DataFrame(data=self.x_train, index=y_train_idx, columns=features_column_names)
-        x_test = pd.DataFrame(data=self.y_train, index=y_test_idx, columns=features_column_names)
+        self.x_train = pd.DataFrame(data=self.x_train, index=y_train_idx, columns=features_column_names)
+        self.x_test = pd.DataFrame(data=self.y_train, index=y_test_idx, columns=features_column_names)
 
         # Initialize and train model
-        trained_model = model.fit(x_train, self.y_train)
+        trained_model = model.fit(self.x_train, self.y_train)
 
         # Test model
-        return self.test_model(trained_model, x_test, self.y_test)
+        return self.test_model(trained_model, self.x_test, self.y_test)
 
     def test_model(self,
                    trained_model,
@@ -125,7 +131,34 @@ class Simulation:
             result_df.loc[result_df['y_pred_probs'] >= self.thresholds[idx], self.threshold_col_names[idx]] = 1
             result_df.loc[result_df['y_pred_probs'] < self.thresholds[idx], self.threshold_col_names[idx]] = 0
 
-        return result_df, self.y_test
+        return result_df
+
+    def run_without_column_excluding(self, model):
+        for filename in self.file_names:
+            tmp_df = self.df.loc[self.df["filename"] == filename]
+            features = tmp_df.iloc[:, self.feature_cols_idx]
+            target = tmp_df.iloc[:, self.target_col_idx]
+
+            result_df = self.run_model(model=model,
+                                       features=features,
+                                       target=target)
+
+            accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(result_df,
+                                                                                                      self.y_test,
+                                                                                                      self.threshold_col_names)
+
+            self.all_accuracy_list.append(accuracy_list)
+            self.all_f1_score_list.append(f1_score_list)
+            self.all_precision_list.append(precision_list)
+            self.all_sensitivity_list.append(sensitivity_list)
+            self.all_specificity_list.append(specificity_list)
+
+            save_prediction_df(result_df, filename, self.path_to_predictions)
+
+        save_metrics(self.all_accuracy_list, self.all_f1_score_list,
+                 self.all_precision_list, self.all_sensitivity_list,
+                 self.all_specificity_list, self.threshold_col_names,
+                 self.path_to_metrics)
 
     def show(self):
         print(self.df.head())

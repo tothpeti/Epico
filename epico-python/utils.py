@@ -58,6 +58,21 @@ def read_all_datasets_in_memory(datasets_names_list: list,
     return tmp
 
 
+def read_datasets(path_to_datasets: str) -> pd.DataFrame:
+    os.chdir(path_to_datasets)
+
+    # Create list of all csv files
+    globbed_datasets = glob.glob("*.csv")
+
+    tmp = []
+    for csv in globbed_datasets:
+        frame = pd.read_csv(csv)
+        frame["filename"] = os.path.basename(csv)
+        tmp.append(frame)
+
+    return pd.concat(tmp, ignore_index=True)
+
+
 def put_column_excluded_files_into_folders(path_to_folder: str) -> None:
     os.chdir(path_to_folder)
 

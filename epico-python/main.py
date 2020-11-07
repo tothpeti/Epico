@@ -11,10 +11,12 @@ from processes import run_with_column_excluding, run_without_column_excluding, \
     run_with_hyperparameter_search_and_column_excluding, run_with_hyperparameter_search_and_without_column_excluding
 from utils import get_all_datasets_names, read_all_datasets_in_memory, put_column_excluded_files_into_folders
 
+from simulation import Simulation
+
 
 if __name__ == '__main__':
     # Home PC
-    path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/datasets/'
+    path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/datasets/'
     path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/metrics/'
     path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/metrics/column_excluding/'
     path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/predictions/'
@@ -49,6 +51,13 @@ if __name__ == '__main__':
     # Number of features
     num_of_cols = 10
 
+    sim = Simulation(thresholds=thresholds, threshold_col_names=threshold_col_names,
+                     path_to_datasets=path_to_datasets, path_to_metrics=path_to_metrics,
+                     path_to_metrics_col_excluding= path_to_metrics_col_excluding,
+                     path_to_predictions=path_to_predictions, path_to_predictions_col_excluding=path_to_predictions_col_excluding)
+    sim.load_data()
+
+    """
     # Initialize model
     # model = LogisticRegression(random_state=42, n_jobs=-1)
     model = RandomForestClassifier(random_state=42, n_jobs=-1)
@@ -88,7 +97,7 @@ if __name__ == '__main__':
                                                         path_to_metrics_col_excluding=path_to_metrics_col_excluding,
                                                         path_to_model_params_col_excluding=path_to_model_params_col_excluding)
 
-
+    """
     """
     run_without_column_excluding(model=model,
                                  datasets=datasets,
@@ -110,7 +119,7 @@ if __name__ == '__main__':
     """
     # This step is only needed when we do column excluding runs
     print('Rearranging files finished')
-    put_column_excluded_files_into_folders(path_to_metrics_col_excluding)
-    put_column_excluded_files_into_folders(path_to_predictions_col_excluding)
-    put_column_excluded_files_into_folders(path_to_model_params_col_excluding)
+    # put_column_excluded_files_into_folders(path_to_metrics_col_excluding)
+    # put_column_excluded_files_into_folders(path_to_predictions_col_excluding)
+    # put_column_excluded_files_into_folders(path_to_model_params_col_excluding)
     print("--- %s seconds ---" % (time.time() - start_time))

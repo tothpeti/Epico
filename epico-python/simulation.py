@@ -26,9 +26,9 @@ class Simulation:
         self.path_to_predictions_col_excluding = path_to_predictions_col_excluding
 
         # Used for preprocessing
-        self.feature_transformer: ColumnTransformer = ColumnTransformer()
+        self.feature_transformer = None
         self.feature_cols_idx = []
-        self.target_col_idx = None
+        self.target_col_idx = 0
 
         # Used for model training and testing
         self.x_train = None
@@ -42,7 +42,7 @@ class Simulation:
 
         # Main DataFrame
         self.df = pd.DataFrame()
-        self.file_names = list(self.df["filename"].unique())
+        self.file_names = []
 
         # Used for storing simulation metrics results
         self.all_accuracy_list = []
@@ -58,13 +58,13 @@ class Simulation:
     ####################################
     def load_data(self):
         self.df = read_datasets(self.path_to_datasets)
-        return self
+        self.file_names = list(self.df["filename"].unique())
 
-    def init_feature_cols_indexes(self, indexes):
+    def set_feature_cols_indexes(self, indexes):
         self.feature_cols_idx = indexes
         return self
 
-    def init_target_col_indexes(self, index):
+    def set_target_col_indexes(self, index):
         self.target_col_idx = index
         return self
 
@@ -82,7 +82,6 @@ class Simulation:
         label_bin = LabelBinarizer().fit(self.y_train)
         self.y_train = label_bin.transform(self.y_train)
         self.y_test = label_bin.transform(self.y_test)
-        return self
 
     def preprocess_data(self, drop_duplicates=False):
         if drop_duplicates is True:
@@ -92,7 +91,7 @@ class Simulation:
                   features: pd.DataFrame,
                   target: pd.DataFrame,
                   test_size=0.3):
-        self.x_train, self.y_train, self.x_test, self.y_test = train_test_split(features,
+        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(features,
                                                                                 target,
                                                                                 test_size=test_size,
                                                                                 random_state=42)
@@ -105,8 +104,10 @@ class Simulation:
 
         # Convert ndarrays to DataFrames
         features_column_names = features.columns
+        print(features_column_names)
+        print(self.x_train.columns)
         self.x_train = pd.DataFrame(data=self.x_train, index=y_train_idx, columns=features_column_names)
-        self.x_test = pd.DataFrame(data=self.y_train, index=y_test_idx, columns=features_column_names)
+        self.x_test = pd.DataFrame(data=self.x_test, index=y_test_idx, columns=features_column_names)
 
         # Initialize and train model
         trained_model = model.fit(self.x_train, self.y_train)
@@ -166,9 +167,10 @@ class Simulation:
                                            target=target)
 
             accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(
-                                                                                                      result_df,
-                                                                                                      self.y_test,
-                                                                                                      self.threshold_col_names)
+                result_df,
+                self.y_test,
+                self.threshold_col_names)
+
             self.all_accuracy_list.append(accuracy_list)
             self.all_f1_score_list.append(f1_score_list)
             self.all_precision_list.append(precision_list)
@@ -176,6 +178,7 @@ class Simulation:
             self.all_specificity_list.append(specificity_list)
 
             save_prediction_df(result_df, filename, self.path_to_predictions)
+            print("-- Finished with " + filename)
 
         save_metrics(self.all_accuracy_list, self.all_f1_score_list,
                      self.all_precision_list, self.all_sensitivity_list,
@@ -193,12 +196,53 @@ class Simulation:
         for filename in self.file_names:
 
             tmp_df = self.df.loc[self.df["filename"] == filename]
-
+            curr_col = 0
             for col_to_exclude in self.feature_cols_idx:
+                # used for saving metrics
+                curr_col = col_to_exclude
+
                 tmp_feature_cols_idx = self.feature_cols_idx
 
                 features = tmp_df.iloc[:, tmp_feature_cols_idx.remove(col_to_exclude)]
                 target = tmp_df.iloc[:, self.target_col_idx]
+
+                result_df = pd.DataFrame()
+                if use_hyper_opt is False:
+                    result_df = self.run_model(model=model,
+                                               features=features,
+                                               target=target)
+                else:
+                    clf = RandomizedSearchCV(model,
+                                             model_params,
+                                             cv=5, n_iter=50,
+                                             refit=True,
+                                             verbose=0, n_jobs=-1,
+                                             scoring=scoring)
+
+                    result_df = self.run_model(model=clf,
+                                               features=features,
+                                               target=target)
+
+                accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(
+                    result_df,
+                    self.y_test,
+                    self.threshold_col_names)
+
+                prediction_file_name = filename.split('.')[0]+'_'+str(col_to_exclude)+'.csv'
+                save_prediction_df(result_df, prediction_file_name, self.path_to_predictions_col_excluding)
+
+                self.all_accuracy_list.append(accuracy_list)
+                self.all_f1_score_list.append(f1_score_list)
+                self.all_precision_list.append(precision_list)
+                self.all_sensitivity_list.append(sensitivity_list)
+                self.all_specificity_list.append(specificity_list)
+
+                print('Finished with '+filename+' dataset, column excluded: '+str(col_to_exclude))
+
+            save_metrics(self.all_accuracy_list, self.all_f1_score_list,
+                         self.all_precision_list, self.all_sensitivity_list,
+                         self.all_specificity_list, self.threshold_col_names,
+                         self.path_to_metrics_col_excluding, str(curr_col))
 
     def show(self):
         print(self.df.head())

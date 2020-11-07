@@ -20,13 +20,13 @@ from simulation import Simulation
 
 if __name__ == '__main__':
     # Home PC
-    path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/datasets/'
-    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/metrics/'
-    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/metrics/column_excluding/'
-    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/predictions/'
-    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/predictions/column_excluding/'
-    path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/best_model_parameters/'
-    path_to_model_params_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/tunedROC_randomF_0to1_thresholds/best_model_parameters/column_excluding/'
+    path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/datasets/'
+    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/logreg_0to1_thresholds/metrics/'
+    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/logreg_0to1_thresholds/metrics/column_excluding/'
+    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/logreg_0to1_thresholds/predictions/'
+    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/logreg_0to1_thresholds/predictions/column_excluding/'
+    path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/Scenario4/logreg_0to1_thresholds/best_model_parameters/'
+    path_to_model_params_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/logreg_0to1_thresholds/best_model_parameters/column_excluding/'
     
     # Laptop
     """
@@ -68,9 +68,7 @@ if __name__ == '__main__':
     one_hot_cols = [8, 9]
     standard_scaler_cols = [0, 2, 4, 10, 11, 12]
 
-    # Last column is ALWAYS "filename" before that there is "target" column
-    features_col_idx = list(range(0, (len(sim.df.columns)-2)))
-    target_col_idx = [-2]
+
 
     transformer = ColumnTransformer(
         transformers=[
@@ -82,10 +80,21 @@ if __name__ == '__main__':
         n_jobs=-1
     )
 
-    sim.load_data()\
-        .init_feature_transformer(transformer=transformer)\
-        .init_feature_cols_indexes(features_col_idx)\
-        .init_target_col_indexes(target_col_idx)\
+    sim.load_data()
+
+    # Last column is ALWAYS "filename" before that there is "target" column
+    features_col_idx = list(range(0, (len(sim.df.columns)-2)))
+    target_col_idx = [-2]
+
+    # Rename columns to x_num
+    new_cols_names = ["x_"+str(col) for col in features_col_idx]
+    new_cols_names.append("y")
+    new_cols_names.append("filename")
+    sim.df.columns = new_cols_names
+
+    sim.init_feature_transformer(transformer=transformer)\
+        .set_feature_cols_indexes(features_col_idx)\
+        .set_target_col_indexes(target_col_idx)\
         .run_without_column_excluding(LogisticRegression(n_jobs=-1))
 
     """
@@ -150,7 +159,7 @@ if __name__ == '__main__':
     """
     # This step is only needed when we do column excluding runs
     print('Rearranging files finished')
-    # put_column_excluded_files_into_folders(path_to_metrics_col_excluding)
-    # put_column_excluded_files_into_folders(path_to_predictions_col_excluding)
+    put_column_excluded_files_into_folders(path_to_metrics_col_excluding)
+    put_column_excluded_files_into_folders(path_to_predictions_col_excluding)
     # put_column_excluded_files_into_folders(path_to_model_params_col_excluding)
     print("--- %s seconds ---" % (time.time() - start_time))

@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelBinarizer
 
 from utils import read_datasets
 
@@ -24,7 +25,7 @@ class Simulation:
         self.path_to_predictions_col_excluding = path_to_predictions_col_excluding
 
         # Used for preprocessing
-        self.pipeline = None
+        self.feature_transformer: ColumnTransformer = ColumnTransformer()
 
         # Used for model training and testing
         self.x_train = None
@@ -52,27 +53,34 @@ class Simulation:
         self.df = read_datasets(self.path_to_datasets)
         return self
 
-    def init_pipeline(self, pipeline):
-        self.pipeline = pipeline
+    def init_feature_transformer(self, transformer):
+        self.feature_transformer = transformer
+        return self
+
+    def apply_feature_transformer(self):
+        self.feature_transformer.fit(self.x_train)
+        return self
+
+    def binarize_target(self):
+        label_bin = LabelBinarizer().fit(self.y_train)
+        self.y_train = label_bin.transform(self.y_train)
+        self.y_test = label_bin.transform(self.y_test)
         return self
 
     def preprocess_data(self, drop_duplicates=False):
         if drop_duplicates is True:
             self.df.drop_duplicates(ignore_index=True, inplace=True)
 
-    def transform_data(self, features, target, drop_duplicates=False):
-        self.x_train, self.y_train, self.x_test, self.y_test = train_test_split(features, target, test_size=0.3, random_state=42)
-
     def run_model(self, model,
                   features: pd.DataFrame,
                   target: pd.DataFrame,
                   test_size=0.3):
-
+        self.x_train, self.y_train, self.x_test, self.y_test = train_test_split(features,
+                                                                                target,
+                                                                                test_size=test_size,
+                                                                                random_state=42)
         y_train_idx = self.y_train.index
         y_test_idx = self.y_test.index
-
-        # Preprocess data
-        self.transform_data(features=features, target=target)
 
         # Convert ndarrays to DataFrames
         features_column_names = features.columns
@@ -83,10 +91,28 @@ class Simulation:
         trained_model = model.fit(x_train, self.y_train)
 
         # Test model
-        return test_model(trained_model, x_test, self.y_test)
+        return self.test_model(trained_model, x_test, self.y_test)
 
-    def test_mode(self):
-        pass
+    def test_model(self,
+                   trained_model,
+                   x_test,
+                   y_test):
+
+        # Combine x_test, and y_test into one dataframe
+        result_df = pd.DataFrame()
+        result_df = pd.concat([result_df, x_test, y_test], axis=1)
+        result_df.reset_index(inplace=True, drop=True)
+
+        result_df['y_pred_probs'] = trained_model.predict_proba(x_test)[:, 1]
+        result_df['y_pred_probs'] = result_df['y_pred_probs'].round(decimals=3)
+
+        # Create y_predN columns by using threshold values
+        for idx in range(len(self.thresholds)):
+            result_df[self.threshold_col_names[idx]] = np.nan
+            result_df.loc[result_df['y_pred_probs'] >= self.thresholds[idx], self.threshold_col_names[idx]] = 1
+            result_df.loc[result_df['y_pred_probs'] < self.thresholds[idx], self.threshold_col_names[idx]] = 0
+
+        return result_df, self.y_test
 
     def show(self):
         print(self.df.head())

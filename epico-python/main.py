@@ -55,7 +55,10 @@ if __name__ == '__main__':
                      path_to_datasets=path_to_datasets, path_to_metrics=path_to_metrics,
                      path_to_metrics_col_excluding= path_to_metrics_col_excluding,
                      path_to_predictions=path_to_predictions, path_to_predictions_col_excluding=path_to_predictions_col_excluding)
-    sim.load_data()
+    sim.load_data()\
+        .init_feature_transformer()\
+        .apply_feature_transformer()\
+        .binarize_target()
 
     """
     # Initialize model

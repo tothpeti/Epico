@@ -26,12 +26,18 @@ class Simulation:
         # Used for preprocessing
         self.pipeline = None
 
+        # Used for model training and testing
+        self.x_train = None
+        self.y_train = None
+        self.x_test = None
+        self.y_test = None
+
         # Used for prediction
         self.thresholds = thresholds
         self.threshold_col_names = threshold_col_names
 
         # Main DataFrame
-        self.df = None
+        self.df = pd.DataFrame()
 
         # Used for storing simulation metrics results
         self.all_accuracy_list = []
@@ -50,32 +56,37 @@ class Simulation:
         self.pipeline = pipeline
         return self
 
-    def preprocess_data(self, features, target):
-        x_train, y_train, x_test, y_test = train_test_split(features, target, test_size=0.3, random_state=42)
+    def preprocess_data(self, drop_duplicates=False):
+        if drop_duplicates is True:
+            self.df.drop_duplicates(ignore_index=True, inplace=True)
+
+    def transform_data(self, features, target, drop_duplicates=False):
+        self.x_train, self.y_train, self.x_test, self.y_test = train_test_split(features, target, test_size=0.3, random_state=42)
 
     def run_model(self, model,
                   features: pd.DataFrame,
                   target: pd.DataFrame,
                   test_size=0.3):
-        # Split dataset
-        x_train, x_test, y_train, y_test = train_test_split(features,
-                                                            target,
-                                                            test_size=test_size,
-                                                            random_state=42)
+
+        y_train_idx = self.y_train.index
+        y_test_idx = self.y_test.index
 
         # Preprocess data
-        self.preprocess_data(features=features, target=target)
+        self.transform_data(features=features, target=target)
 
         # Convert ndarrays to DataFrames
         features_column_names = features.columns
-        x_train = pd.DataFrame(data=x_train_norm, index=y_train.index, columns=features_column_names)
-        x_test = pd.DataFrame(data=x_test_norm, index=y_test.index, columns=features_column_names)
+        x_train = pd.DataFrame(data=self.x_train, index=y_train_idx, columns=features_column_names)
+        x_test = pd.DataFrame(data=self.y_train, index=y_test_idx, columns=features_column_names)
 
         # Initialize and train model
-        trained_model = model.fit(x_train, y_train)
+        trained_model = model.fit(x_train, self.y_train)
 
         # Test model
-        return test_model(trained_model, x_test, y_test, thresholds, threshold_col_names)
+        return test_model(trained_model, x_test, self.y_test)
+
+    def test_mode(self):
+        pass
 
     def show(self):
         print(self.df.head())

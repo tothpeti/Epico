@@ -11,8 +11,8 @@ from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder, StandardScaler
 """
 Custom files
 """
-from processes import run_with_column_excluding, run_without_column_excluding, \
-    run_with_hyperparameter_search_and_column_excluding, run_with_hyperparameter_search_and_without_column_excluding
+# from processes import run_with_column_excluding, run_without_column_excluding, \
+#    run_with_hyperparameter_search_and_column_excluding, run_with_hyperparameter_search_and_without_column_excluding
 from utils import get_all_datasets_names, read_all_datasets_in_memory, put_column_excluded_files_into_folders
 
 from simulation import Simulation
@@ -21,12 +21,12 @@ from simulation import Simulation
 if __name__ == '__main__':
     # Home PC
     path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/datasets/'
-    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/logreg_0to1_thresholds/metrics/'
-    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/logreg_0to1_thresholds/metrics/column_excluding/'
-    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/logreg_0to1_thresholds/predictions/'
-    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/logreg_0to1_thresholds/predictions/column_excluding/'
-    path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/Scenario4/logreg_0to1_thresholds/best_model_parameters/'
-    path_to_model_params_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/logreg_0to1_thresholds/best_model_parameters/column_excluding/'
+    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/default_randomF_0to1_thresholds/metrics/'
+    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/default_randomF_0to1_thresholds/metrics/column_excluding/'
+    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/default_randomF_0to1_thresholds/predictions/'
+    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/default_randomF_0to1_thresholds/predictions/column_excluding/'
+    path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/Scenario4/default_randomF_0to1_thresholds/best_model_parameters/'
+    path_to_model_params_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/default_randomF_0to1_thresholds/best_model_parameters/column_excluding/'
     
     # Laptop
     """
@@ -64,20 +64,17 @@ if __name__ == '__main__':
                      path_to_predictions_col_excluding=path_to_predictions_col_excluding)
 
     # Columns to transform
-    ord_enc_cols = [1, 3, 5, 6, 7, 13]
+    ord_enc_cols = [1, 3, 5, 6, 7, 8, 9, 13]
     one_hot_cols = [8, 9]
     standard_scaler_cols = [0, 2, 4, 10, 11, 12]
-
-
 
     transformer = ColumnTransformer(
         transformers=[
             ('ord_enc_process', OrdinalEncoder(), ord_enc_cols),
-            ('one_hot_process', OneHotEncoder(drop='first'), one_hot_cols),
+            #('one_hot_process', OneHotEncoder(drop='first'), one_hot_cols),
             ('standard_scaler_process', StandardScaler(), standard_scaler_cols)
         ],
-        remainder="passthrough",
-        n_jobs=-1
+        remainder="passthrough"
     )
 
     sim.load_data()
@@ -93,9 +90,13 @@ if __name__ == '__main__':
     sim.df.columns = new_cols_names
 
     sim.init_feature_transformer(transformer=transformer)\
-        .set_feature_cols_indexes(features_col_idx)\
-        .set_target_col_indexes(target_col_idx)\
-        .run_without_column_excluding(LogisticRegression(n_jobs=-1))
+       .set_feature_cols_indexes(features_col_idx)\
+       .set_target_col_indexes(target_col_idx)
+
+    print("Start run without col excl.")
+    sim.run_without_column_excluding(RandomForestClassifier(n_jobs=-1, random_state=42))
+    print("Start run with col excl.")
+    sim.run_with_column_excluding(RandomForestClassifier(random_state=42, n_jobs=-1))
 
     """
     # Initialize model

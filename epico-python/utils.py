@@ -11,11 +11,12 @@ def get_all_datasets_names(path: str,
 
     tmp = [file for file in glob.glob("*.csv")]
 
+    """
     if is_prediction_dataset:
         tmp.sort(key=sort_csv_files_by_id)
     else:
         tmp.sort(key=sort_csv_files_by_name)
-
+    """
     return tmp
 
 

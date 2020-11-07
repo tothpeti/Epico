@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.preprocessing import LabelBinarizer
 
 from metrics import create_metrics, save_prediction_df, save_metrics
@@ -62,9 +62,11 @@ class Simulation:
 
     def init_feature_cols_indexes(self, indexes):
         self.feature_cols_idx = indexes
+        return self
 
     def init_target_col_indexes(self, index):
         self.target_col_idx = index
+        return self
 
     def init_feature_transformer(self, transformer):
         self.feature_transformer = transformer
@@ -133,20 +135,40 @@ class Simulation:
 
         return result_df
 
-    def run_without_column_excluding(self, model):
+    def run_without_column_excluding(self,
+                                     model,
+                                     model_params=None,
+                                     use_hyper_opt=False,
+                                     scoring=None):
+        if model_params is None:
+            model_params = {}
+
         for filename in self.file_names:
             tmp_df = self.df.loc[self.df["filename"] == filename]
             features = tmp_df.iloc[:, self.feature_cols_idx]
             target = tmp_df.iloc[:, self.target_col_idx]
 
-            result_df = self.run_model(model=model,
-                                       features=features,
-                                       target=target)
+            result_df = pd.DataFrame()
+            if use_hyper_opt is False:
+                result_df = self.run_model(model=model,
+                                           features=features,
+                                           target=target)
+            else:
+                clf = RandomizedSearchCV(model,
+                                         model_params,
+                                         cv=5, n_iter=50,
+                                         refit=True,
+                                         verbose=0, n_jobs=-1,
+                                         scoring=scoring)
 
-            accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(result_df,
+                result_df = self.run_model(model=clf,
+                                           features=features,
+                                           target=target)
+
+            accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(
+                                                                                                      result_df,
                                                                                                       self.y_test,
                                                                                                       self.threshold_col_names)
-
             self.all_accuracy_list.append(accuracy_list)
             self.all_f1_score_list.append(f1_score_list)
             self.all_precision_list.append(precision_list)
@@ -156,9 +178,27 @@ class Simulation:
             save_prediction_df(result_df, filename, self.path_to_predictions)
 
         save_metrics(self.all_accuracy_list, self.all_f1_score_list,
-                 self.all_precision_list, self.all_sensitivity_list,
-                 self.all_specificity_list, self.threshold_col_names,
-                 self.path_to_metrics)
+                     self.all_precision_list, self.all_sensitivity_list,
+                     self.all_specificity_list, self.threshold_col_names,
+                     self.path_to_metrics)
+
+    def run_with_column_excluding(self,
+                                  model,
+                                  model_params=None,
+                                  use_hyper_opt=False,
+                                  scoring=None):
+        if model_params is None:
+            model_params = {}
+
+        for filename in self.file_names:
+
+            tmp_df = self.df.loc[self.df["filename"] == filename]
+
+            for col_to_exclude in self.feature_cols_idx:
+                tmp_feature_cols_idx = self.feature_cols_idx
+
+                features = tmp_df.iloc[:, tmp_feature_cols_idx.remove(col_to_exclude)]
+                target = tmp_df.iloc[:, self.target_col_idx]
 
     def show(self):
         print(self.df.head())

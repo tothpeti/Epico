@@ -68,7 +68,7 @@ if __name__ == '__main__':
     one_hot_cols = [8, 9]
     standard_scaler_cols = [0, 2, 4, 10, 11, 12]
 
-    # Last column is "filename" before that there is "target" column
+    # Last column is ALWAYS "filename" before that there is "target" column
     features_col_idx = list(range(0, (len(sim.df.columns)-2)))
     target_col_idx = [-2]
 
@@ -84,8 +84,9 @@ if __name__ == '__main__':
 
     sim.load_data()\
         .init_feature_transformer(transformer=transformer)\
-        .init_feature_cols(features_col_idx)\
-        .init_target_col(target_col_idx)
+        .init_feature_cols_indexes(features_col_idx)\
+        .init_target_col_indexes(target_col_idx)\
+        .run_without_column_excluding(LogisticRegression(n_jobs=-1))
 
     """
     # Initialize model

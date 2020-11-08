@@ -141,7 +141,10 @@ class Simulation:
             self.x_test = self.x_test.iloc[:, tmp[0]:tmp[-1]]
 
         # Initialize and train model
-        trained_model = model.fit(self.x_train, self.y_train)
+        trained_model = model.fit(self.x_train, np.ravel(self.y_train))
+
+        if col_to_exclude is not None:
+            print("-- " + str(trained_model.best_estimator_))
 
         # Test model
         return self.test_model(trained_model, self.x_test, self.y_test)
@@ -257,7 +260,6 @@ class Simulation:
                     self.threshold_col_names)
 
                 prediction_file_name = filename.split('.')[0]+'_'+str(col_to_exclude)+'.csv'
-                print(prediction_file_name)
                 save_prediction_df(result_df, prediction_file_name, self.path_to_predictions_col_excluding)
 
                 self.all_accuracy_list.append(accuracy_list)

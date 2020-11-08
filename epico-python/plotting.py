@@ -22,9 +22,9 @@ if __name__ == '__main__':
     path_to_diagrams_col_excluding = "C:/Egyetem_es_munka/Egyetem/MSc/Thesis/DataVisualisations/Scenario2/tuned_ROC_random_forest_0to1_threshold/diagrams/column_excluding/"
     """
     # Ha hyperparameter tuning ---> Tuned for roc_auc Random Forest
-    #  title_name = 'RandomizedSearchCV tuned (for roc_auc) Random Forest'
-    # title_name = 'Default Random Forest'
-    title_name = 'Logistic Regression'
+    # title_name = 'RandomizedSearchCV tuned (for accuracy) Random Forest'
+    title_name = 'Default Random Forest'
+    # title_name = 'Logistic Regression'
     create_plots_for_without_column_excluded_datasets(title_name=title_name,
                                                       path_to_predictions=path_to_predictions,
                                                       path_to_metrics=path_to_metrics,

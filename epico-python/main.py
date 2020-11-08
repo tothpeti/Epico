@@ -21,12 +21,12 @@ from simulation import Simulation
 if __name__ == '__main__':
     # Home PC
     path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/datasets/'
-    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/default_randomF_0to1_thresholds/metrics/'
-    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/default_randomF_0to1_thresholds/metrics/column_excluding/'
-    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/default_randomF_0to1_thresholds/predictions/'
-    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/default_randomF_0to1_thresholds/predictions/column_excluding/'
-    path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/Scenario4/default_randomF_0to1_thresholds/best_model_parameters/'
-    path_to_model_params_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/default_randomF_0to1_thresholds/best_model_parameters/column_excluding/'
+    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedROC_randomF_0to1_thresholds/metrics/'
+    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedROC_randomF_0to1_thresholds/metrics/column_excluding/'
+    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedROC_randomF_0to1_thresholds/predictions/'
+    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedROC_randomF_0to1_thresholds/predictions/column_excluding/'
+    path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/Scenario4/tunedROC_randomF_0to1_thresholds/best_model_parameters/'
+    path_to_model_params_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedROC_randomF_0to1_thresholds/best_model_parameters/column_excluding/'
     
     # Laptop
     """
@@ -93,10 +93,18 @@ if __name__ == '__main__':
        .set_feature_cols_indexes(features_col_idx)\
        .set_target_col_indexes(target_col_idx)
 
+    model = RandomForestClassifier(n_jobs=-1, random_state=42)
+    model_params = {
+        "n_estimators": [100, 150, 200, 250, 300],
+        "max_features": ["sqrt"],
+        "max_depth": [None, 5, 10, 15],
+        "min_samples_leaf": [1, 2, 5, 10]
+    }
+
     print("Start run without col excl.")
-    sim.run_without_column_excluding(RandomForestClassifier(n_jobs=-1, random_state=42))
+    sim.run_without_column_excluding(model=model, model_params=model_params, use_hyper_opt=True, scoring="roc_auc")
     print("Start run with col excl.")
-    sim.run_with_column_excluding(RandomForestClassifier(random_state=42, n_jobs=-1))
+    sim.run_with_column_excluding(model=model, model_params=model_params, use_hyper_opt=True, scoring="roc_auc")
 
     """
     # Initialize model

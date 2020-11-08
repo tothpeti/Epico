@@ -113,12 +113,12 @@ class Simulation:
                   features: pd.DataFrame,
                   target: pd.DataFrame,
                   test_size=0.3,
-                  col_to_exclude=None):
+                  col_to_exclude=None,
+                  use_hyper_opt=False):
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(features,
                                                                                 target,
                                                                                 test_size=test_size,
                                                                                 random_state=42)
-
 
         y_train_idx = self.y_train.index
         y_test_idx = self.y_test.index
@@ -137,13 +137,13 @@ class Simulation:
         if col_to_exclude is not None:
             tmp = self.feature_cols_idx.copy()
             tmp.remove(col_to_exclude)
-            self.x_train = self.x_train.iloc[:, tmp[0]:tmp[-1]]
-            self.x_test = self.x_test.iloc[:, tmp[0]:tmp[-1]]
+            self.x_train = self.x_train[features_column_names[tmp]]
+            self.x_test = self.x_test[features_column_names[tmp]]
 
         # Initialize and train model
         trained_model = model.fit(self.x_train, np.ravel(self.y_train))
 
-        if col_to_exclude is not None:
+        if use_hyper_opt is True:
             print("-- " + str(trained_model.best_estimator_))
 
         # Test model
@@ -175,6 +175,7 @@ class Simulation:
                                      model_params=None,
                                      use_hyper_opt=False,
                                      scoring=None):
+
         if model_params is None:
             model_params = {}
 
@@ -198,7 +199,8 @@ class Simulation:
 
                 result_df = self.run_model(model=clf,
                                            features=features,
-                                           target=target)
+                                           target=target,
+                                           use_hyper_opt=True)
 
             accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(
                 result_df,
@@ -224,6 +226,7 @@ class Simulation:
                                   model_params=None,
                                   use_hyper_opt=False,
                                   scoring=None):
+
         if model_params is None:
             model_params = {}
 
@@ -252,7 +255,8 @@ class Simulation:
                     result_df = self.run_model(model=clf,
                                                features=features,
                                                target=target,
-                                               col_to_exclude=col_to_exclude)
+                                               col_to_exclude=col_to_exclude,
+                                               use_hyper_opt=True)
 
                 accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(
                     result_df,

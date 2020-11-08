@@ -21,12 +21,12 @@ from simulation import Simulation
 if __name__ == '__main__':
     # Home PC
     path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/datasets/'
-    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedROC_randomF_0to1_thresholds/metrics/'
-    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedROC_randomF_0to1_thresholds/metrics/column_excluding/'
-    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedROC_randomF_0to1_thresholds/predictions/'
-    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedROC_randomF_0to1_thresholds/predictions/column_excluding/'
-    path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario3/Scenario4/tunedROC_randomF_0to1_thresholds/best_model_parameters/'
-    path_to_model_params_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedROC_randomF_0to1_thresholds/best_model_parameters/column_excluding/'
+    path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedACC_randomF_0to1_thresholds/metrics/'
+    path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedACC_randomF_0to1_thresholds/metrics/column_excluding/'
+    path_to_predictions = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedACC_randomF_0to1_thresholds/predictions/'
+    path_to_predictions_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedACC_randomF_0to1_thresholds/predictions/column_excluding/'
+    path_to_model_params = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedACC_randomF_0to1_thresholds/best_model_parameters/'
+    path_to_model_params_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario4/tunedACC_randomF_0to1_thresholds/best_model_parameters/column_excluding/'
     
     # Laptop
     """
@@ -65,13 +65,14 @@ if __name__ == '__main__':
 
     # Columns to transform
     ord_enc_cols = [1, 3, 5, 6, 7, 8, 9, 13]
+    #ord_enc_cols = [1, 3, 5, 6, 7, 13]
     one_hot_cols = [8, 9]
     standard_scaler_cols = [0, 2, 4, 10, 11, 12]
 
     transformer = ColumnTransformer(
         transformers=[
             ('ord_enc_process', OrdinalEncoder(), ord_enc_cols),
-            #('one_hot_process', OneHotEncoder(drop='first'), one_hot_cols),
+            # ('one_hot_process', OneHotEncoder(drop='first'), one_hot_cols),
             ('standard_scaler_process', StandardScaler(), standard_scaler_cols)
         ],
         remainder="passthrough"
@@ -83,7 +84,7 @@ if __name__ == '__main__':
     features_col_idx = list(range(0, (len(sim.df.columns)-2)))
     target_col_idx = [-2]
 
-    # Rename columns to x_num
+    # Rename columns to x_number
     new_cols_names = ["x_"+str(col) for col in features_col_idx]
     new_cols_names.append("y")
     new_cols_names.append("filename")
@@ -92,6 +93,8 @@ if __name__ == '__main__':
     sim.init_feature_transformer(transformer=transformer)\
        .set_feature_cols_indexes(features_col_idx)\
        .set_target_col_indexes(target_col_idx)
+
+    # model = LogisticRegression(n_jobs=-1, random_state=42)
 
     model = RandomForestClassifier(n_jobs=-1, random_state=42)
     model_params = {
@@ -102,9 +105,12 @@ if __name__ == '__main__':
     }
 
     print("Start run without col excl.")
-    sim.run_without_column_excluding(model=model, model_params=model_params, use_hyper_opt=True, scoring="roc_auc")
+    # sim.run_without_column_excluding(model=model)
+
+    # sim.run_without_column_excluding(model=model, model_params=model_params, use_hyper_opt=True, scoring="roc_auc")
     print("Start run with col excl.")
-    sim.run_with_column_excluding(model=model, model_params=model_params, use_hyper_opt=True, scoring="roc_auc")
+    # sim.run_with_column_excluding(model=model)
+    # sim.run_with_column_excluding(model=model, model_params=model_params, use_hyper_opt=True, scoring="roc_auc")
 
     """
     # Initialize model

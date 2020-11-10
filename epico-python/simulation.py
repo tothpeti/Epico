@@ -3,8 +3,9 @@ import pandas as pd
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
-from sklearn.preprocessing import LabelBinarizer, OneHotEncoder, StandardScaler, OrdinalEncoder
+from sklearn.preprocessing import LabelBinarizer
 
+# Custom functions
 from metrics import create_metrics, save_prediction_df, save_metrics
 from utils import read_datasets
 
@@ -72,54 +73,38 @@ class Simulation:
         self.feature_transformer = transformer
         return self
 
-    def apply_one_hot_encoding(self, cols):
-        one_hot = OneHotEncoder()
-        one_hot.fit(self.x_train[cols])
-        self.x_train[cols] = one_hot.transform(self.x_train[cols])
-        self.x_test[cols] = one_hot.transform(self.x_test[cols])
-        return self
-
-    def apply_ordinal_encoding(self, cols):
-        ord_enc = OrdinalEncoder()
-        ord_enc.fit(self.x_train[cols])
-        self.x_train[cols] = ord_enc.transform(self.x_train[cols])
-        self.x_test[cols] = ord_enc.transform(self.x_test[cols])
-        return self
-
-    def apply_standard_scaling(self, cols):
-        sclr = StandardScaler()
-        sclr.fit(self.x_train[cols])
-        self.x_train[cols] = sclr.transform(self.x_train[cols])
-        self.x_test[cols] = sclr.transform(self.x_test[cols])
-        return self
-
     def apply_feature_transformer(self):
+        """
+            Applying transformer on features
+        """
         self.feature_transformer.fit(self.x_train)
         self.x_train = self.feature_transformer.transform(self.x_train)
         self.x_test = self.feature_transformer.transform(self.x_test)
         return self
 
     def binarize_target(self):
+        """
+            Binarize labels of the target column
+        """
         label_bin = LabelBinarizer().fit(self.y_train)
         self.y_train = label_bin.transform(self.y_train)
         self.y_test = label_bin.transform(self.y_test)
 
-    def preprocess_data(self, drop_duplicates=False):
-        if drop_duplicates is True:
-            self.df.drop_duplicates(ignore_index=True, inplace=True)
+    def _run_model(self,
+                   model,
+                   features: pd.DataFrame,
+                   target: pd.DataFrame,
+                   test_size=0.3,
+                   col_to_exclude=None,
+                   use_hyper_opt=False):
 
-    def run_model(self,
-                  model,
-                  features: pd.DataFrame,
-                  target: pd.DataFrame,
-                  test_size=0.3,
-                  col_to_exclude=None,
-                  use_hyper_opt=False):
+        # Split DataFrames into training and testing datasets
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(features,
                                                                                 target,
                                                                                 test_size=test_size,
                                                                                 random_state=42)
 
+        # Store indices for later usage
         y_train_idx = self.y_train.index
         y_test_idx = self.y_test.index
 
@@ -134,6 +119,7 @@ class Simulation:
         self.x_test = pd.DataFrame(data=self.x_test, index=y_test_idx, columns=features_column_names)
         self.y_test = pd.DataFrame(data=self.y_test, index=y_test_idx, columns=['y'])
 
+        # Remove the current column which is need to be excluded
         if col_to_exclude is not None:
             tmp = self.feature_cols_idx.copy()
             tmp.remove(col_to_exclude)
@@ -147,18 +133,18 @@ class Simulation:
             print("-- " + str(trained_model.best_estimator_))
 
         # Test model
-        return self.test_model(trained_model, self.x_test, self.y_test)
+        return self._test_model(trained_model, self.x_test, self.y_test)
 
-    def test_model(self,
-                   trained_model,
-                   x_test,
-                   y_test):
+    def _test_model(self,
+                    trained_model,
+                    x_test,
+                    y_test):
 
         # Combine x_test, and y_test into one dataframe result_df,
-        result_df = pd.DataFrame()
         result_df = pd.concat([x_test, y_test], axis=1)
         result_df.reset_index(inplace=True, drop=True)
 
+        # Store the probabilities of predictions
         result_df['y_pred_probs'] = trained_model.predict_proba(x_test)[:, 1]
         result_df['y_pred_probs'] = result_df['y_pred_probs'].round(decimals=3)
 
@@ -180,15 +166,17 @@ class Simulation:
             model_params = {}
 
         for filename in self.file_names:
+
+            # Split dataset into features and target DataFrames
             tmp_df = self.df.loc[self.df["filename"] == filename]
             features = tmp_df.iloc[:, self.feature_cols_idx]
             target = tmp_df.iloc[:, self.target_col_idx]
 
             result_df = pd.DataFrame()
             if use_hyper_opt is False:
-                result_df = self.run_model(model=model,
-                                           features=features,
-                                           target=target)
+                result_df = self._run_model(model=model,
+                                            features=features,
+                                            target=target)
             else:
                 clf = RandomizedSearchCV(model,
                                          model_params,
@@ -197,10 +185,10 @@ class Simulation:
                                          verbose=0, n_jobs=-1,
                                          scoring=scoring)
 
-                result_df = self.run_model(model=clf,
-                                           features=features,
-                                           target=target,
-                                           use_hyper_opt=True)
+                result_df = self._run_model(model=clf,
+                                            features=features,
+                                            target=target,
+                                            use_hyper_opt=True)
 
             accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(
                 result_df,
@@ -213,9 +201,11 @@ class Simulation:
             self.all_sensitivity_list.append(sensitivity_list)
             self.all_specificity_list.append(specificity_list)
 
+            # Save the "generated" prediction DataFrame
             save_prediction_df(result_df, filename, self.path_to_predictions)
             print("-- Finished with " + filename)
 
+        # Save all the stored evaluation metrics to the given path
         save_metrics(self.all_accuracy_list, self.all_f1_score_list,
                      self.all_precision_list, self.all_sensitivity_list,
                      self.all_specificity_list, self.threshold_col_names,
@@ -232,18 +222,17 @@ class Simulation:
 
         for col_to_exclude in self.feature_cols_idx:
             for filename in self.file_names:
-
+                # Split data into features and target DataFrames
                 tmp_df = self.df.loc[self.df["filename"] == filename]
-                col_name_to_exclude = 'x' + str(col_to_exclude + 1)
                 features = tmp_df.iloc[:, self.feature_cols_idx]
                 target = tmp_df.iloc[:, self.target_col_idx]
 
                 result_df = pd.DataFrame()
                 if use_hyper_opt is False:
-                    result_df = self.run_model(model=model,
-                                               features=features,
-                                               target=target,
-                                               col_to_exclude=col_to_exclude)
+                    result_df = self._run_model(model=model,
+                                                features=features,
+                                                target=target,
+                                                col_to_exclude=col_to_exclude)
                 else:
                     clf = RandomizedSearchCV(model,
                                              model_params,
@@ -252,17 +241,18 @@ class Simulation:
                                              verbose=0, n_jobs=-1,
                                              scoring=scoring)
 
-                    result_df = self.run_model(model=clf,
-                                               features=features,
-                                               target=target,
-                                               col_to_exclude=col_to_exclude,
-                                               use_hyper_opt=True)
+                    result_df = self._run_model(model=clf,
+                                                features=features,
+                                                target=target,
+                                                col_to_exclude=col_to_exclude,
+                                                use_hyper_opt=True)
 
                 accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(
                     result_df,
                     self.y_test,
                     self.threshold_col_names)
 
+                # Save the "generated" prediction DataFrame
                 prediction_file_name = filename.split('.')[0]+'_'+str(col_to_exclude)+'.csv'
                 save_prediction_df(result_df, prediction_file_name, self.path_to_predictions_col_excluding)
 
@@ -274,10 +264,8 @@ class Simulation:
 
                 print('Finished with '+filename+' dataset, column excluded: '+str(col_to_exclude))
 
+            # Save all the stored evaluation metrics to the given path
             save_metrics(self.all_accuracy_list, self.all_f1_score_list,
                          self.all_precision_list, self.all_sensitivity_list,
                          self.all_specificity_list, self.threshold_col_names,
                          self.path_to_metrics_col_excluding, str(col_to_exclude))
-
-    def show(self):
-        print(self.df.head())

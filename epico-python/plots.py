@@ -124,7 +124,7 @@ def create_average_auc_roc_curve(title_name: str,
     title = ""
     file_name = ""
     if col_excl_idx is None:
-        title = title_name + ' considering all predictive variables.'
+        title = title_name + ' considering all predictive variables'
         file_name = 'average_roc_curve_all_covariates.png'
     else:
         col_excl_idx = 'x_'+str(col_excl_idx+1)
@@ -216,50 +216,15 @@ def create_min_max_auc_roc_curve(path_to_diagrams: str,
     plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
-def create_3d_plot_for_each_metrics(acc_df: pd.DataFrame,
-                                    thresholds: np.ndarray,
-                                    col_excl_idx: int) -> None:
-    # X axis which column we excluded
-    # Y axis threshold values (0-1)
-    # Z axis average of the given metric
-
-    avg_acc_list = []
-
-    for i in range(0, len(acc_df.columns)):
-        avg_acc_list.append(acc_df.iloc[:, i].mean())
-
-    tmp_all_metrics_df = pd.DataFrame()
-    tmp_all_metrics_df['thresholds'] = pd.to_numeric(pd.Series(thresholds), errors='coerce')
-    tmp_all_metrics_df['acc_mean'] = pd.to_numeric(pd.Series(avg_acc_list), errors='coerce')
-    tmp_all_metrics_df['excluded_col'] = pd.Series(np.repeat(col_excl_idx+1, len(tmp_all_metrics_df['acc_mean'])))
-
-    fig = plt.figure(figsize=(12, 6))
-    ax = fig.add_subplot(111, projection='3d')
-
-    ax.scatter(xs=tmp_all_metrics_df['excluded_col'], ys=tmp_all_metrics_df['thresholds'], zs=tmp_all_metrics_df['acc_mean'])
-    ax.set_xlabel('Excluded pred value')
-    ax.set_ylabel('Thresholds')
-    ax.set_zlabel('Mean')
-    ax.set_xticks([col_excl_idx+1])
-    ax.set_xticklabels([f'{col_excl_idx+1}'])
-    ax.set_yticks(np.arange(0.0, 1.1, 0.2))
-
-    #file_name = name +'_min_max_auc_roc_curve_all_covariates.png'
-    #plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
-
-    #plt.show()
-
-
-def create_boxplot_for_col_excluded_datasets(title_name: str,
-                                             datasets: list,
-                                             path_to_diagrams: str) -> None:
+def create_histogram_for_col_excluded_datasets(title_name: str,
+                                               datasets: list,
+                                               path_to_diagrams: str) -> None:
     # X axis which covariant we excluded
     # Y axis average of AUC
 
     col_excl_indexes = []
     all_avg_auc_list = []
     title = f'{title_name} considering column excluding'
-
     for col_excl_idx, pred_df_list in enumerate(datasets):
         col_excl_indexes.append('x_'+str((col_excl_idx+1)))
         tmp_auc_list = []
@@ -267,18 +232,21 @@ def create_boxplot_for_col_excluded_datasets(title_name: str,
             roc_auc = roc_auc_score(df['y'], df['y_pred_probs'])
             tmp_auc_list.append(roc_auc)
 
-        all_avg_auc_list.append(tmp_auc_list)
+        all_avg_auc_list.append(np.mean(tmp_auc_list))
 
     plt.figure(figsize=(12, 6))
     plt.title(title, fontsize=16)
-    sns.boxplot(col_excl_indexes, all_avg_auc_list, palette='Set2')
+    # sns.lineplot(col_excl_indexes, all_avg_auc_list, palette='Set2', sort=False)
+    # plt.vlines(col_excl_indexes, 0, all_avg_auc_list, linestyles="dashed")
+    sns.barplot(col_excl_indexes, all_avg_auc_list, palette='Set2')
     plt.xlabel('Excluded column', fontsize=14)
     plt.ylabel('AUC value', fontsize=14)
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
+    plt.ylim([np.min(all_avg_auc_list)-0.1, 1.0])
     # plt.show()
 
-    file_name = 'boxplot_auc_col_excluded.png'
+    file_name = 'barplot_auc_col_excluded.png'
     plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
 
 
@@ -440,7 +408,7 @@ def create_plots_for_column_excluded_datasets(title_name: str,
     all_metrics_datasets = read_all_folders_files_in_memory(directories=all_metrics_dirs,
                                                             path_to_datasets=path_to_metrics,
                                                             is_prediction=False)
-
+    """
     for col_excl_idx, pred_df_list in enumerate(all_pred_datasets):
         create_average_auc_roc_curve(title_name=title_name,
                                      path_to_diagrams=path_to_diagrams,
@@ -461,12 +429,13 @@ def create_plots_for_column_excluded_datasets(title_name: str,
                                                                 thresholds=thresholds,
                                                                 col_excl_idx=col_excl_idx)
         # create_3d_plot_for_each_metrics(acc_df=metric_df_list[0], thresholds=thresholds, col_excl_idx=col_excl_idx)
-
-    create_boxplot_for_col_excluded_datasets(title_name=title_name,
-                                             datasets=all_pred_datasets,
-                                             path_to_diagrams=path_to_diagrams)
-
+    """
+    create_histogram_for_col_excluded_datasets(title_name=title_name,
+                                               datasets=all_pred_datasets,
+                                               path_to_diagrams=path_to_diagrams)
+    """
     create_lineplot_for_one_metric_col_excluded_datasets(title_name=title_name,
                                                          metrics=all_metrics_datasets,
                                                          thresholds=thresholds,
                                                          path_to_diagrams=path_to_diagrams)
+    """

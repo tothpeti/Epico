@@ -22,49 +22,58 @@ int main() {
     for (size_t i = 0; i < number_of_simulations; i++) {
 
         //Creating columns for RandomDataset
-        RandomDatasetGenerator::ColumnDataType norm1{
-                RandomDatasetGenerator::DistributionTypes::Normal,                //type
-                {{"mean", 0.5},{"stddev", 1.0} ,{"weight", std::log(0.25)}}        //parameters
+        RandomDatasetGenerator::ColumnDataType bern1{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,                //type
+                {{"prob", 0.5}, {"weight", std::log(0.25)}}        //parameters
         };
 
-        RandomDatasetGenerator::ColumnDataType norm2{
-                RandomDatasetGenerator::DistributionTypes::Normal,                //type
-                {{"mean", 0.5},{"stddev", 1.0} ,{"weight", std::log(0.5)}}        //parameters
+        //Creating columns for RandomDataset
+        RandomDatasetGenerator::ColumnDataType bern2{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,                //type
+                {{"prob", 0.5}, {"weight", std::log(0.5)}}        //parameters
         };
-        RandomDatasetGenerator::ColumnDataType norm3{
-                RandomDatasetGenerator::DistributionTypes::Normal,                //type
-                {{"mean", 0.5},{"stddev", 1.0} ,{"weight", std::log(0.75)}}        //parameters
+        //Creating columns for RandomDataset
+        RandomDatasetGenerator::ColumnDataType bern3{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,                //type
+                {{"prob", 0.5}, {"weight", std::log(0.75)}}        //parameters
         };
-        RandomDatasetGenerator::ColumnDataType norm4{
-                RandomDatasetGenerator::DistributionTypes::Normal,                //type
-                {{"mean", 0.5},{"stddev", 1.0} ,{"weight", std::log(1)}}        //parameters
+        //Creating columns for RandomDataset
+        RandomDatasetGenerator::ColumnDataType bern4{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,                //type
+                {{"prob", 0.5}, {"weight", std::log(1.0)}}        //parameters
         };
-        RandomDatasetGenerator::ColumnDataType norm5{
-                RandomDatasetGenerator::DistributionTypes::Normal,                //type
-                {{"mean", 0.5},{"stddev", 1.0} ,{"weight", std::log(1.5)}}        //parameters
+        //Creating columns for RandomDataset
+        RandomDatasetGenerator::ColumnDataType bern5{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,                //type
+                {{"prob", 0.5}, {"weight", std::log(2.0)}}        //parameters
         };
-        RandomDatasetGenerator::ColumnDataType norm6{
-                RandomDatasetGenerator::DistributionTypes::Normal,                //type
-                {{"mean", 0.5},{"stddev", 1.0} ,{"weight", std::log(2)}}        //parameters
+        //Creating columns for RandomDataset
+        RandomDatasetGenerator::ColumnDataType bern6{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,                //type
+                {{"prob", 0.5}, {"weight", std::log(3.0)}}        //parameters
         };
-        RandomDatasetGenerator::ColumnDataType norm7{
-                RandomDatasetGenerator::DistributionTypes::Normal,                //type
-                {{"mean", 0.5},{"stddev", 1.0} ,{"weight", std::log(2.5)}}        //parameters
+        //Creating columns for RandomDataset
+        RandomDatasetGenerator::ColumnDataType bern7{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,                //type
+                {{"prob", 0.5}, {"weight", std::log(4.0)}}        //parameters
         };
-        RandomDatasetGenerator::ColumnDataType norm8{
-                RandomDatasetGenerator::DistributionTypes::Normal,                //type
-                {{"mean", 0.5},{"stddev", 1.0} ,{"weight", std::log(3)}}        //parameters
+        //Creating columns for RandomDataset
+        RandomDatasetGenerator::ColumnDataType bern8{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,                //type
+                {{"prob", 0.5}, {"weight", std::log(5.0)}}        //parameters
         };
-        RandomDatasetGenerator::ColumnDataType norm9{
-                RandomDatasetGenerator::DistributionTypes::Normal,                //type
-                {{"mean", 0.5},{"stddev", 1.0} ,{"weight", std::log(3.5)}}        //parameters
+        //Creating columns for RandomDataset
+        RandomDatasetGenerator::ColumnDataType bern9{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,                //type
+                {{"prob", 0.5}, {"weight", std::log(6.0)}}        //parameters
         };
-        RandomDatasetGenerator::ColumnDataType norm10{
-                RandomDatasetGenerator::DistributionTypes::Normal,                //type
-                {{"mean", 0.5},{"stddev", 1.0} ,{"weight", std::log(4)}}        //parameters
+        //Creating columns for RandomDataset
+        RandomDatasetGenerator::ColumnDataType bern10{
+                RandomDatasetGenerator::DistributionTypes::Bernoulli,                //type
+                {{"prob", 0.5}, {"weight", std::log(7.0)}}        //parameters
         };
         std::vector<RandomDatasetGenerator::ColumnDataType> cols{
-               norm1, norm2, norm3, norm4, norm5, norm6, norm7, norm8, norm9, norm10
+               bern1, bern2, bern3, bern4, bern5, bern6, bern7, bern8, bern9, bern10
         };
 
         // Create RandomDataLoader from previously created Columns

@@ -3,16 +3,21 @@
 This project was created for my master's independent laboratory work. The aim of the project was to create a tool which helps me run custom simulations on newly created datasets of self-made random dataset generator. Through the results of simulations, I try to conclude how each chosen Machine Learning model behaves in a changed environment/dataset.
 
 ## Table of Contents
+[Why did I create a custom Random Dataset Generator?](#why-did-i-create-a-custom-random-dataset-generator)
+	[How did I create this?](#how-did-i-create-this)
+[Why did I create custom simulations?](#why-did-i-create-custom-simulations)
+	[Types of custom simulations](types-of-custom-simulations)
+[Methodology of research](#methodology-of-research)
+[Results](#results)
+[Structure of the project](#structure-of-the-project)
 ---
-
----
-## 1. Why did I create a custom Random Dataset Generator?
+## Why did I create a custom Random Dataset Generator?
 
 I needed to create the generator because:
   - If I use only one dataset, the simulations will not give unforeseen results.
   - I needed a tool which guarantees randomness in value creation, easily customizable, and can generate large number of datasets for my simulations.
 
-### 1.1. How did I create this?
+### How did I create this?
 
 First of all, to be able to guarantee randomness, I needed to use Monte Carlo sampling, which lets me create values in a random manner. This can be achieved in C++ by using the Mersenne twister engine. Secondly, to be able to customize the dataset structure, I implemented several distributions, which can be seen in the following table.  
 
@@ -30,13 +35,13 @@ Lastly, to be able to use binary-classification on the generated datasets, I nee
 <br>
 <br>
 
-## 3. Why did I create a custom simulations?
+## Why did I create custom simulations?
 Goals of creating custom simulations were 
   - to scale up the number of simulations that were used during my work 
   - to create a plug&play solver that can be easily customized for my needs 
   - to see how each covariates influence the used machine learning models performing ability
 
-### 3.1. Types of custom simulations 
+### Types of custom simulations 
 
 - Without column excluding:
 	- measures the influence of all covariates 
@@ -48,7 +53,7 @@ Goals of creating custom simulations were
 	- fits Machine Learning model on the remaining dataset 
 	- puts back the excluded column at the end 
 
-## 5. Methodology of research
+## Methodology of research
 
 - 5 Scenarios
 - 4 Machine Learning models: 

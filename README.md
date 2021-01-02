@@ -4,9 +4,9 @@ This project was created for my master's independent laboratory work. The aim of
 
 ## Table of Contents
 1. [Why did I create a custom Random Dataset Generator?](#why-did-i-create-a-custom-random-dataset-generator)
-	[How did I create this?](#how-did-i-create-this)
+	- [How did I create this?](#how-did-i-create-this)
 2. [Why did I create custom simulations?](#why-did-i-create-custom-simulations)
-	[Types of custom simulations](types-of-custom-simulations)
+	- [Types of custom simulations](types-of-custom-simulations)
 3. [Methodology of research](#methodology-of-research)
 4. [Results](#results)
 5. [Structure of the project](#structure-of-the-project)

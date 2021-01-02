@@ -109,8 +109,9 @@ class Simulation:
         y_test_idx = self.y_test.index
 
         # Transform data into new form
-        self.apply_feature_transformer()\
-            .binarize_target()
+        if self.feature_transformer is not None:
+            self.apply_feature_transformer()\
+                .binarize_target()
 
         # Convert ndarrays to DataFrames
         features_column_names = features.columns

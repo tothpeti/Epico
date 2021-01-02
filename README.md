@@ -70,6 +70,5 @@ The documentation can be found in the __docs__ folder.
 - __epico-cpp__ folder contains the implementation of the Random Dataset Generator 
 - __epico-python__ folder contains the implementation of custom simulations, and data vizualization files
 
----
 ## License & copyright
 © Péter Csaba Tóth

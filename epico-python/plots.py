@@ -93,9 +93,8 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(title_name: str,
     tmp_all_metrics_df['prec_mean'] = pd.to_numeric(pd.Series(avg_prec_list), errors='coerce')
     tmp_all_metrics_df['f1_mean'] = pd.to_numeric(pd.Series(avg_f1_list), errors='coerce')
 
-    tmp_all_metrics_df.to_csv(os.path.join(path_to_diagrams, "tmp.csv"))
+    # tmp_all_metrics_df.to_csv(os.path.join(path_to_diagrams, "tmp.csv"))
 
-    """
     y_range = np.arange(0.0, 1.1, 0.1)
 
     ax = plt.figure(figsize=(12, 6))
@@ -116,7 +115,6 @@ def create_lineplot_averages_for_all_metrics_and_thresholds(title_name: str,
 
     plt.savefig(os.path.join(path_to_diagrams, file_name), bbox_inches='tight')
     #plt.show()
-    """
 
 
 def create_average_auc_roc_curve(title_name: str,
@@ -143,7 +141,6 @@ def create_average_auc_roc_curve(title_name: str,
     auc_list = []
 
     for df in datasets:
-        # df = pd.read_csv(os.path.join(path_to_predictions, dataset))
         fpr, tpr, _ = roc_curve(df['y'], df['y_pred_probs'])
         roc_auc = roc_auc_score(df['y'], df['y_pred_probs'])
 
@@ -176,8 +173,8 @@ def create_min_max_auc_roc_curve(path_to_diagrams: str,
 
     results_list = []
     auc_list = []
+    
     for i, df in enumerate(datasets):
-        # df = pd.read_csv(os.path.join(path_to_predictions, dataset))
         fpr, tpr, threshold = roc_curve(df['y'], df['y_pred_probs'])
         roc_auc = roc_auc_score(df['y'], df['y_pred_probs'])
         auc_list.append(roc_auc)
@@ -229,6 +226,7 @@ def create_histogram_for_col_excluded_datasets(title_name: str,
     col_excl_indexes = []
     all_avg_auc_list = []
     title = f'{title_name} considering column excluding'
+    
     for col_excl_idx, pred_df_list in enumerate(datasets):
         col_excl_indexes.append('x_'+str((col_excl_idx+1)))
         tmp_auc_list = []
@@ -372,14 +370,13 @@ def create_plots_for_without_column_excluded_datasets(title_name: str,
     metrics = read_all_datasets_in_memory(datasets_names_list=metrics_names,
                                           path_to_datasets=path_to_metrics)
 
-    """
     create_boxplot_for_all_metrics_and_thresholds(path_to_diagrams=path_to_diagrams,
                                                   acc_df=metrics[0],
                                                   f1_df=metrics[1],
                                                   prec_df=metrics[2],
                                                   sens_df=metrics[3],
                                                   spec_df=metrics[4])
-    """
+
     thresholds = np.arange(0.0, 1.05, 0.05)
     create_lineplot_averages_for_all_metrics_and_thresholds(title_name=title_name,
                                                             path_to_diagrams=path_to_diagrams,
@@ -389,7 +386,7 @@ def create_plots_for_without_column_excluded_datasets(title_name: str,
                                                             sens_df=metrics[3],
                                                             spec_df=metrics[4],
                                                             thresholds=thresholds)
-    """
+
     create_min_max_auc_roc_curve(path_to_diagrams=path_to_diagrams,
                                  datasets=datasets)
 
@@ -398,7 +395,7 @@ def create_plots_for_without_column_excluded_datasets(title_name: str,
                                  path_to_diagrams=path_to_diagrams,
                                  datasets=datasets,
                                  len_of_test_datasets=len_of_dataset)
-    """
+
 
 def create_plots_for_column_excluded_datasets(title_name: str,
                                               path_to_predictions: str,
@@ -436,8 +433,7 @@ def create_plots_for_column_excluded_datasets(title_name: str,
                                                                 spec_df=metric_df_list[4],
                                                                 thresholds=thresholds,
                                                                 col_excl_idx=col_excl_idx)
-        # create_3d_plot_for_each_metrics(acc_df=metric_df_list[0], thresholds=thresholds, col_excl_idx=col_excl_idx)
-
+ 
     create_histogram_for_col_excluded_datasets(title_name=title_name,
                                                datasets=all_pred_datasets,
                                                path_to_diagrams=path_to_diagrams)

@@ -3,14 +3,15 @@
 This project was created for my master's independent laboratory work. The aim of the project was to create a tool which helps me run custom simulations on newly created datasets of self-made random dataset generator. Through the results of simulations, I try to conclude how each chosen Machine Learning model behaves in a changed environment/dataset.
 
 ## Table of Contents
-[Why did I create a custom Random Dataset Generator?](#why-did-i-create-a-custom-random-dataset-generator)
+1. [Why did I create a custom Random Dataset Generator?](#why-did-i-create-a-custom-random-dataset-generator)
 	[How did I create this?](#how-did-i-create-this)
-[Why did I create custom simulations?](#why-did-i-create-custom-simulations)
+2. [Why did I create custom simulations?](#why-did-i-create-custom-simulations)
 	[Types of custom simulations](types-of-custom-simulations)
-[Methodology of research](#methodology-of-research)
-[Results](#results)
-[Structure of the project](#structure-of-the-project)
----
+3. [Methodology of research](#methodology-of-research)
+4. [Results](#results)
+5. [Structure of the project](#structure-of-the-project)
+
+
 ## Why did I create a custom Random Dataset Generator?
 
 I needed to create the generator because:

@@ -18,9 +18,10 @@ I needed to create the generator because:
   - If I use only one dataset, the simulations will not give unforeseen results.
   - I needed a tool which guarantees randomness in value creation, easily customizable, and can generate large number of datasets for my simulations.
 
-### How did I create this?
+### How did I create the Random Dataset Generator?
 
-First of all, to be able to guarantee randomness, I needed to use Monte Carlo sampling, which lets me create values in a random manner. This can be achieved in C++ by using the Mersenne twister engine. Secondly, to be able to customize the dataset structure, I implemented several distributions, which can be seen in the following table.  
+First of all, to be able to guarantee randomness, I needed to use Monte Carlo sampling, which lets me create values in a random manner. This can be achieved in C++ by using the Mersenne twister engine. 
+Secondly, to be able to customize the dataset structure, I implemented several distributions, which can be seen in the following table.  
 
 
 | Name of distribution | Parameters                            |

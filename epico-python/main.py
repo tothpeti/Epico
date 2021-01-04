@@ -17,7 +17,7 @@ from simulation import Simulation
 
 
 if __name__ == '__main__':
-    # Home PC
+
     path_to_datasets = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario5/datasets/'
     path_to_metrics = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario5/tunedROC_randomF_0to1_thresholds/metrics/'
     path_to_metrics_col_excluding = 'D:/Egyetem/MSc/TDK_Diploma_dolgozat/MasterThesis/DataVisualisations/Scenario5/tunedROC_randomF_0to1_thresholds/metrics/column_excluding/'

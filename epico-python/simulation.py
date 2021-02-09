@@ -165,52 +165,53 @@ class Simulation:
 
         if model_params is None:
             model_params = {}
+            
+        for col_to_exclude in self.feature_cols_idx:
+            for filename in self.file_names:
 
-        for filename in self.file_names:
+                # Split dataset into features and target DataFrames
+                tmp_df = self.df.loc[self.df["filename"] == filename]
+                features = tmp_df.iloc[:, self.feature_cols_idx]
+                target = tmp_df.iloc[:, self.target_col_idx]
 
-            # Split dataset into features and target DataFrames
-            tmp_df = self.df.loc[self.df["filename"] == filename]
-            features = tmp_df.iloc[:, self.feature_cols_idx]
-            target = tmp_df.iloc[:, self.target_col_idx]
-
-            result_df = pd.DataFrame()
-            if use_hyper_opt is False:
-                result_df = self._run_model(model=model,
+                result_df = pd.DataFrame()
+                if use_hyper_opt is False:
+                    result_df = self._run_model(model=model,
                                             features=features,
                                             target=target)
-            else:
-                clf = RandomizedSearchCV(model,
+                else:
+                    clf = RandomizedSearchCV(model,
                                          model_params,
                                          cv=5, n_iter=50,
                                          refit=True,
                                          verbose=0, n_jobs=-1,
                                          scoring=scoring)
 
-                result_df = self._run_model(model=clf,
+                    result_df = self._run_model(model=clf,
                                             features=features,
                                             target=target,
                                             use_hyper_opt=True)
 
-            accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(
-                result_df,
-                self.y_test,
-                self.threshold_col_names)
+                accuracy_list, f1_score_list, precision_list, sensitivity_list, specificity_list = create_metrics(
+                    result_df,
+                    self.y_test,
+                    self.threshold_col_names)
 
-            self.all_accuracy_list.append(accuracy_list)
-            self.all_f1_score_list.append(f1_score_list)
-            self.all_precision_list.append(precision_list)
-            self.all_sensitivity_list.append(sensitivity_list)
-            self.all_specificity_list.append(specificity_list)
+                self.all_accuracy_list.append(accuracy_list)
+                self.all_f1_score_list.append(f1_score_list)
+                self.all_precision_list.append(precision_list)
+                self.all_sensitivity_list.append(sensitivity_list)
+                self.all_specificity_list.append(specificity_list)
 
-            # Save the "generated" prediction DataFrame
-            save_prediction_df(result_df, filename, self.path_to_predictions)
-            print("-- Finished with " + filename)
+                # Save the "generated" prediction DataFrame
+                save_prediction_df(result_df, filename, self.path_to_predictions)
+                print("-- Finished with " + filename)
 
-        # Save all the stored evaluation metrics to the given path
-        save_metrics(self.all_accuracy_list, self.all_f1_score_list,
-                     self.all_precision_list, self.all_sensitivity_list,
-                     self.all_specificity_list, self.threshold_col_names,
-                     self.path_to_metrics)
+            # Save all the stored evaluation metrics to the given path
+            save_metrics(self.all_accuracy_list, self.all_f1_score_list,
+                    self.all_precision_list, self.all_sensitivity_list,
+                    self.all_specificity_list, self.threshold_col_names,
+                    self.path_to_metrics)
 
     def run_with_column_excluding(self,
                                   model,
